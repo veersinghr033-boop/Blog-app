@@ -9,21 +9,18 @@ export async function middleware(request: NextRequest) {
 
     const path = request.nextUrl.pathname;
 
-    console.log("PATH:", path);
-    console.log("TOKEN:", token);
+    // console.log("PATH:", path);
+    // console.log("TOKEN:", token);
 
-    // protected routes
     const isProtected =
         path.startsWith("/admin") ||
         path.startsWith("/author") ||
         path.startsWith("/reader");
 
-    // auth pages
     const isAuthPage =
         path === "/login" ||
         path === "/signup";
 
-    // no token + protected route
     if (!token && isProtected) {
 
         return NextResponse.redirect(
@@ -31,7 +28,6 @@ export async function middleware(request: NextRequest) {
         );
     }
 
-    // token exists
     if (token) {
 
         try {
@@ -47,11 +43,9 @@ export async function middleware(request: NextRequest) {
 
             const role = payload.role as string;
 
-            console.log("ROLE:", role);
+            // console.log("ROLE:", role);
 
-            // =========================
-            // HOME PAGE REDIRECT
-            // =========================
+
 
             if (path === "/") {
 
@@ -74,9 +68,6 @@ export async function middleware(request: NextRequest) {
                 }
             }
 
-            // =========================
-            // BLOCK LOGIN/SIGNUP
-            // =========================
 
             if (isAuthPage) {
 
@@ -99,10 +90,6 @@ export async function middleware(request: NextRequest) {
                 }
             }
 
-            // =========================
-            // ADMIN ACCESS
-            // =========================
-
             if (
                 path.startsWith("/admin") &&
                 role !== "admin"
@@ -112,11 +99,6 @@ export async function middleware(request: NextRequest) {
                     new URL("/unauthorized", request.url)
                 );
             }
-
-            // =========================
-            // AUTHOR ACCESS
-            // =========================
-
             if (
                 path.startsWith("/author") &&
                 role !== "author"
@@ -126,10 +108,6 @@ export async function middleware(request: NextRequest) {
                     new URL("/unauthorized", request.url)
                 );
             }
-
-            // =========================
-            // READER ACCESS
-            // =========================
 
             if (
                 path.startsWith("/reader") &&

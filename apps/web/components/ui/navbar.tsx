@@ -1,10 +1,15 @@
 "use client"
 
 import { Layout, Avatar } from "antd"
+import { useAppSelector } from "@/lib/store/hooks"
 
 const { Header } = Layout
 
-function Navbar({ role }: { role: string }) {
+function Navbar( ) {
+    const userName = useAppSelector((state) => state.auth.user?.userName)
+
+    // console.log(userName)
+    
     return (
         <Header className="bg-white! sticky top-0 z-10  border-b border-gray-200 px-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -19,11 +24,11 @@ function Navbar({ role }: { role: string }) {
 
             <div className="flex items-center gap-3">
                 <span className="capitalize font-medium">
-                    {role}
+                    {userName}
                 </span>
 
                 <Avatar className="bg-black">
-                    {role[0].toUpperCase()}
+                    {userName[0].toUpperCase()}
                 </Avatar>
             </div>
         </Header>

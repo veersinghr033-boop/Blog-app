@@ -3,18 +3,20 @@ import { Card, Tag, Typography, Space, Button } from "antd"
 import { EllipsisOutlined } from "@ant-design/icons"
 import api from "@/utills/axios"
 import { useState } from "react"
+import { useAppSelector } from "@/lib/store/hooks"
 import CommentModal from "@/components/ui/comment"
 import BlogModal from "@/components/ui/blogModal"
 
 
 const { Title, Paragraph, Text } = Typography
 
-function Blog({ data, user }: { data: any[], user: any }) {
+function Blog({ data}: { data: any[]}) {
     const [open, setOpen] = useState(false)
     const [blogOpen, setBlogOpen] = useState(false)
-
+    const [expandedBlogs, setExpandedBlogs] = useState<Record<string, boolean>>({})
     const [selectedBlogData, setSelectedBlogData] = useState<any>(null)
     const [selectedBlog, setSelectedBlog] = useState("")
+    const user = useAppSelector((state) => state.auth.user?.id)
 
     const handleLike = async (blogId: string) => {
         try {
@@ -34,7 +36,7 @@ function Blog({ data, user }: { data: any[], user: any }) {
     // console.log(data)
     return (
         <>
-            <div className="flex flex-col gap-2 p-6 sm:p-8 ">
+            <div className="flex flex-col gap-5  pt-5 ">
 
                 {data.map((post, index) => (
                     <Card
@@ -51,25 +53,42 @@ function Blog({ data, user }: { data: any[], user: any }) {
                                         {post.title}
                                     </Title>
 
-                                    <Tag color={post.saveAs === "draft" ? "orange" : "green"}>
+                                    {/* <Tag color={post.saveAs === "draft" ? "orange" : "green"}>
                                         {post.saveAs}
-                                    </Tag>
+                                    </Tag> */}
                                 </div>
                             }
                             description={
                                 <div className="flex justify-between items-start gap-4 mt-3">
-
-                                    {/* LEFT */}
                                     <div className=" max-w-3/4 flex flex-col gap-3">
-                                        <Paragraph className="text-gray-600  ">
-                                            {post.content?.length > 200
-                                                ? `${post.content.slice(0, 200)}...`
-                                                : post.content}
+                                        <Paragraph
+                                            ellipsis={{
+                                                rows: 3,
+                                                onEllipsis: (ellipsis) => {
+                                                    setExpandedBlogs((prev) => ({
+                                                        ...prev,
+                                                        [post._id]: ellipsis,
+                                                    }))
+                                                },
+                                            }}
+                                        >
+                                            {post.content}
                                         </Paragraph>
+
+                                        {expandedBlogs[post._id] && (
+                                            <Text
+                                                className="text-blue-500! hover:text-blue-700! cursor-pointer"
+                                                onClick={() => {
+                                                    setSelectedBlogData(post)
+                                                    setBlogOpen(true)
+                                                }}
+                                            >
+                                                Read more
+                                            </Text>
+                                        )}
 
                                         <div className="flex items-center gap-4">
 
-                                            {/* AUTHOR */}
                                             <div className="flex items-center gap-2">
 
                                                 <div className="bg-gray-700 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs uppercase">
@@ -126,15 +145,14 @@ function Blog({ data, user }: { data: any[], user: any }) {
 
 
             </div>
-            {/* COMMENT MODAL */}
             <CommentModal
                 open={open}
                 setOpen={setOpen}
                 blogId={selectedBlog}
-                user={user}
             />
             <BlogModal
                 open={blogOpen}
+                userId={user}
                 setOpen={setBlogOpen}
                 blog={selectedBlogData}
             />

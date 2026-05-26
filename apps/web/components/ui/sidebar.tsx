@@ -12,6 +12,7 @@ import {
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useAppSelector } from "@/lib/store/hooks"
 
 const { Sider } = Layout
 interface MenuItem {
@@ -20,7 +21,7 @@ interface MenuItem {
     icon: React.ReactNode
 }
 
-const menuByRole = {
+const menuByRole: { [key: string]: MenuItem[] } = {
     admin: [
         {
             label: "Dashboard",
@@ -68,21 +69,22 @@ const menuByRole = {
             href: "/reader",
             icon: <HomeOutlined />,
         },
-        {
-            label: "Read Blogs",
-            href: "/reader/blogs",
-            icon: <ReadOutlined />,
-        },
+        // {
+        //     label: "Read Blogs",
+        //     href: "/reader/blogs",
+        //     icon: <ReadOutlined />,
+        // },
         {
             label: "Saved Blogs",
-            href: "/reader/saved",
+            href: "/reader/save",
             icon: <BookOutlined />,
         },
     ],
 }
 
-function Sidebar({ role }: { role: string }) {
+function Sidebar() {
     const pathname = usePathname()
+    const role = useAppSelector((state: any) => state.auth.user?.role)
 
     return (
         <Sider className="bg-white! fixed! left-0! top-15 border-r border-gray-200! min-h-11/12">

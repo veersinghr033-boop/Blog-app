@@ -6,15 +6,15 @@ import Sidebar from "./sidebar"
 
 const { Content } = Layout
 
-function MainLayout({ children, role }: { children: React.ReactNode, role: string }) {
+function MainLayout({ children }: { children: React.ReactNode }) {
     return (
         <Layout className="min-h-screen relative">
-            <Navbar role={role} />
+            <Navbar  />
 
             <Layout>
-                <Sidebar role={role}  />
+                <Sidebar/>
 
-                <Content className="bg-gray-50 h-full md:ml-50 ">
+                <Content className=" h-full md:ml-50 p-5 ">
                     {children}
                 </Content>
             </Layout>

@@ -13,3 +13,18 @@ export const fetchComments = createAsyncThunk(
         }
     }
 )
+export const addComment = createAsyncThunk(
+    'comments/addComment',
+    async ({ blog , comment, userId }: { blog: string, comment: string, userId: string }, thunkAPI) => {
+        try {
+            const res  = await api.post(`/comments/${blog}`, {
+                comment,
+                userId
+            })
+            return res.data;
+            
+        } catch (error) {
+            return thunkAPI.rejectWithValue('Failed to add comment');
+        }
+    }
+)

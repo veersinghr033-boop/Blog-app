@@ -1,7 +1,7 @@
 "use client"
 
 import { Modal, Form, Input, Button, message } from "antd"
-import { useAppDispatch ,useAppSelector } from "@/lib/store/hooks"
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
 import { fetchComments } from "@/lib/store/features/commentThunk"
 import { useEffect } from "react"
 import api from "@/utills/axios"
@@ -10,14 +10,12 @@ interface CommentModalProps {
     open: boolean
     setOpen: (open: boolean) => void
     blogId: string
-    user: any
 }
 
 function CommentModal({
     open,
     setOpen,
     blogId,
-    user
 }: CommentModalProps) {
 
     const [form] = Form.useForm()
@@ -35,7 +33,6 @@ function CommentModal({
 
             await api.post(`/comments/${blogId}`, {
                 comment: values.comment,
-                userId: user
             })
 
             message.success("Comment added successfully")
@@ -54,18 +51,24 @@ function CommentModal({
     return (
 
         <Modal
-            title="Add Comment"
+            title="Comments"
             open={open}
             onCancel={() => setOpen(false)}
             footer={null}
         >
 
-           {comments.map((comment) => (
-                <div key={comment._id} className="mb-4 p-3 border border-gray-300 rounded">
-                    <p className="text-sm text-gray-600">
-                        {comment.user.name} - {new Date(comment.createdAt).toLocaleString()}
-                    </p>
-                    <p>{comment.comment}</p>
+            {comments.map((comment) => (
+                <div key={comment._id} className="mb-4 p-3 space-y-2 border border-gray-300 rounded">
+                    <div className="text-sm flex items-center gap-2 text-gray-600">
+
+                        <div className="bg-gray-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs uppercase">
+                            {comment.user.name.charAt(0)}
+                        </div>
+
+
+                        {comment.user.name} - {new Date(comment.createdAt).toLocaleDateString()}
+                    </div>
+                    <p className="text-gray-600 pl-4 ">{comment.comment}</p>
                 </div>
             ))}
 
@@ -76,7 +79,7 @@ function CommentModal({
             >
 
                 <Form.Item
-                    label="Comment"
+                    label="Add Comment"
                     name="comment"
                     rules={[
                         {

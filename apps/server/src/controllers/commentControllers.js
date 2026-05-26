@@ -4,7 +4,8 @@ import mongoose from "mongoose";
 export const createComment = async (req, res) => {
   try {
     const { blogId } = req.params;
-    const { comment, userId } = req.body;
+    const { comment } = req.body;
+    const userId = req.user.id;
     const newComment = new Comment({
       comment,
       user: userId,

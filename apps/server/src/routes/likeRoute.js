@@ -1,8 +1,11 @@
 import e from "express";
-import { likeBlog  } from "../controllers/likeControllers.js";
+
+import { likeBlog } from "../controllers/likeControllers.js";
+
+import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = e.Router();
 
-router.post("/:blogId", likeBlog);
+router.post("/:blogId", verifyToken, likeBlog);
 
 export default router;

@@ -1,9 +1,21 @@
 import e from "express";
-import { createComment , getCommentsByBlogId } from "../controllers/commentControllers.js";
+
+import {
+  createComment,
+  getCommentsByBlogId,
+} from "../controllers/commentControllers.js";
+
+import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = e.Router();
 
-router.post("/:blogId", createComment);
-router.get("/:blogId", getCommentsByBlogId);
+router.post(
+  "/:blogId",
+  verifyToken,
+  // authorizeRoles("reader", "admin"),
+  createComment,
+);
+
+router.get("/:blogId",verifyToken, getCommentsByBlogId);
 
 export default router;

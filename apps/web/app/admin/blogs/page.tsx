@@ -2,31 +2,22 @@
 
 import { Layout, Table, Input, Button, Select } from "antd"
 import Blog from "@/components/ui/blog";
-import api from "@/utills/axios";
-import { useState, useEffect } from "react";
-import { useAppSelector } from "@/lib/store/hooks";
+import { useEffect } from "react";
+import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
+import { fetchAllBlogs } from "@/lib/store/features/blogThunk";
 const { Search } = Input
 
 function Blogs() {
-    const [blogs, setBlogs] = useState([]);
+    const blogs = useAppSelector((state) => state.blog.blogs);
     const userId = useAppSelector((state) => state.auth.user?.id);
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
-        const fetchBlogs = async () => {
-            try {
-                const response = await api.get("/blogs/all");
-                setBlogs(response.data.blogs);
-            } catch (error) {
-                console.error("Error fetching blogs:", error);
-            }
-        };
-
-        fetchBlogs();
-    }, []);
-    console.log(blogs)
+        dispatch(fetchAllBlogs() as any);
+    }, [dispatch]);
 
     return (
-        <Layout>
+        <Layout className="min-h-screen bg-white">
             <header className="flex flex-col w-full  gap-4 border-b border-gray-200 px-6 py-4">
                 <div >
                     <h2 className="text-2xl">Blogs Management</h2>
@@ -42,7 +33,7 @@ function Blogs() {
 
                 </div>
             </header>
-            <Blog data={blogs} user={userId} />
+            <Blog data={blogs}  />
         </Layout>
     )
 }

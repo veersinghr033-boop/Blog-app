@@ -6,7 +6,7 @@ const { Search } = Input
 
 function Users() {
     return (
-        <Layout >
+        <Layout className="min-h-screen bg-white" >
             <header className="flex flex-col  gap-4 border-b border-gray-200 px-6 py-4">
                 <div >
                     <h2 className="text-2xl">Users Management</h2>

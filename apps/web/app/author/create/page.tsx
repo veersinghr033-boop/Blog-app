@@ -48,40 +48,28 @@ function CreateBlog() {
 
       setAiLoading(true);
       const prompt = `
-Act as an expert SEO content writer and professional blogger.
+Write a simple, human-like blog post about the given topic.
 
-Write a detailed, high-quality, SEO-friendly blog post about: "${title}"
-
-Instructions:
-- Use modern SEO best practices
-- Include primary and secondary keywords naturally
-- Create an attention-grabbing introduction
-- Use clear and structured headings/subheadings
-- Make the content informative, engaging, and easy to read
-- Add statistics, examples, or trends if relevant
-- Optimize for readability and Google ranking
-- Include a short FAQ section with schema-style questions
-- End with a strong conclusion and CTA
-
-Content Style:
-- Human-like writing
-- Professional tone
-- Conversational and engaging
-- Avoid keyword stuffing
-- Use short paragraphs and readable formatting
-
-Generate:
-1. SEO Title
-2. Meta Description
-3. Slug URL
-4. Focus Keywords
-5. Full Blog Article in Markdown
-6. FAQs
-7. Conclusion
+Requirements:
+- Around 500 words only
+- Use simple and clear language
+- Conversational and natural tone
+- Do NOT use markdown headings like # or ##
+- Use plain text headings only
+- Include:
+  - Title
+  - Introduction
+  - 2 to 3 section headings
+  - Conclusion
+- Keep paragraphs short
+- Make the article informative and engaging
+- No SEO optimization
+- No FAQs
+- No meta description or slug
+- Return clean text only
 
 Topic: ${title}
 `;
-
       const response = await api.post("/openai/generate", {
         prompt,
       });
@@ -102,7 +90,7 @@ Topic: ${title}
 
   return (
     <Layout className="min-h-screen bg-white">
-      <header className="flex flex-col w-full gap-4 border-b border-gray-200 px-6 py-4">
+      <header className="flex flex-col w-full gap-4 border-b border-gray-200 ">
         <div>
           <h2 className="text-2xl font-semibold">Create Blog</h2>
 
@@ -116,7 +104,6 @@ Topic: ${title}
         onFinish={handleSubmit}
         className="p-6!"
       >
-        {/* TITLE */}
         <Form.Item
           label="Title"
           name="title"
@@ -130,7 +117,6 @@ Topic: ${title}
           <Input placeholder="Enter blog title" />
         </Form.Item>
 
-        {/* CONTENT */}
         <Form.Item
           label="Content"
           name="content"
@@ -149,15 +135,12 @@ Topic: ${title}
 
         <Form.Item>
           <div className="flex gap-4 flex-wrap">
-            {/* AI GENERATE */}
             <Button loading={aiLoading} onClick={generateAIContent}>
               Generate AI Content
             </Button>
 
-            {/* SAVE DRAFT */}
-            <Button>Save Draft</Button>
+            {/* <Button>Save Draft</Button> */}
 
-            {/* PUBLISH */}
             <Button
               type="primary"
               htmlType="submit"

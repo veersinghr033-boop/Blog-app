@@ -3,7 +3,7 @@ import Like from "../models/LikeModel.js";
 export const likeBlog = async (req, res) => {
   try {
     const { blogId } = req.params;
-    const { userId } = req.body;
+    const { userId } = req.user.id;
     const existingLike = await Like.findOne({ user: userId, blog: blogId });
     console.log(existingLike);
     if (existingLike) {

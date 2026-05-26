@@ -49,3 +49,17 @@ export const fetchBlogById = createAsyncThunk(
         }
     }
 )
+
+export const deleteBlog = createAsyncThunk(
+    "blog/delete",
+    async (blogId: string, { rejectWithValue }) => {
+        try {
+            const response = await api.delete(`/blogs/delete/${blogId}`);
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(
+                error?.response?.data?.message || "Error in deleting blog",
+            );
+        }
+    }
+)

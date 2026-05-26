@@ -49,8 +49,8 @@ function Blogs() {
     ];
 
     return (
-        <Layout>
-            <header className="flex flex-col w-full gap-4 border-b border-gray-200 px-6 py-4">
+        <Layout className="min-h-screen bg-white" >
+            <header className="flex flex-col w-full gap-4 border-b border-gray-200 ">
                 <div>
                     <h2 className="text-2xl">My Blogs</h2>
                     <p className="text-gray-500">
@@ -80,7 +80,7 @@ function Blogs() {
                 </div>
             </header>
 
-            <Blog data={blog} user={userId} />
+            <Blog data={blog}/>
         </Layout>
     );
 }

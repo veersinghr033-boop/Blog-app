@@ -1,4 +1,6 @@
 import Blog from "../models/BlogModel.js";
+import Like from "../models/LikeModel.js";
+import Comment from "../models/CommentModel.js";
 import mongoose from "mongoose";
 
 export const getAllBlogs = async (req, res) => {
@@ -16,7 +18,6 @@ export const getAllBlogs = async (req, res) => {
         $unwind: "$authorDetails",
       },
 
-      // Get all likes for each blog
       {
         $lookup: {
           from: "likes",
@@ -26,7 +27,6 @@ export const getAllBlogs = async (req, res) => {
         },
       },
 
-      // Optional comments lookup
       {
         $lookup: {
           from: "comments",
@@ -139,7 +139,6 @@ export const getBlogById = async (req, res) => {
       },
     ];
     const blog = await Blog.aggregate(pipelines);
-    console.log(blog);
     res.status(200).json({
       message: "Blog retrieved successfully",
       blog: blog,
@@ -155,7 +154,6 @@ export const createBlog = async (req, res) => {
   try {
     const { title, content, authorId } = req.body;
     const newBlog = new Blog({ title, content, author: authorId });
-    console.log(newBlog);
     await newBlog.save();
     res.status(201).json({
       message: "Blog created successfully",
@@ -164,5 +162,23 @@ export const createBlog = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Failed to create blog" });
+  }
+};
+
+export const deleteBlog = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(id)
+    const deletedBlog = await Blog.findByIdAndDelete(id);
+    if (deletedBlog) {
+      await Promise.all([
+        Like.deleteMany({ blog: id }),
+        Comment.deleteMany({ blog: id }),
+      ]);
+    }
+    res.status(200).json({ message: "Blog deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to delete blog" });
   }
 };
