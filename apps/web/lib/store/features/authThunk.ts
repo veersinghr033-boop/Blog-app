@@ -32,10 +32,10 @@ export const signup = createAsyncThunk(
     }
   },
 );
-// export const logout = createAsyncThunk("auth/logout", async () => {
-//   try {
-//     await api.post("/logout");
-//   } catch (error) {
-//     console.error("Logout failed", error);
-//   }
-// });
+export const logout = createAsyncThunk("auth/logout", async () => {
+  try {
+    await api.post("/auth/logout");
+  } catch (error) {
+    console.error("Logout failed", error);
+  }
+});

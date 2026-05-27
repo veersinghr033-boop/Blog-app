@@ -90,3 +90,21 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const logoutUser = async (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+
+    return res.status(200).send({
+      success: true,
+      message: "Logged out successfully",
+    });
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send({ success: false, message: "Server error" });
+  }
+};

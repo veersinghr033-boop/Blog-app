@@ -3,50 +3,46 @@
 import { Layout, Form, Input, Button, message } from "antd";
 import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
-import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 
 function CreateBlog() {
   const [form] = Form.useForm();
+
   const userId = useAppSelector((state) => state.auth.user?.id);
 
-  const [aiLoading, setAiLoading] = useState(false);
-  const [publishLoading, setPublishLoading] = useState(false);
-
-  // CREATE BLOG
-  const handleSubmit = async (values: { title: string; content: string }) => {
-    try {
-      setPublishLoading(true);
-
+  const publishMutation = useMutation({
+    mutationFn: async (values: {
+      title: string;
+      content: string;
+    }) => {
       const response = await api.post("/blogs/create", {
         title: values.title,
         content: values.content,
         authorId: userId,
       });
 
-      console.log("Blog created successfully:", response.data);
+      return response.data;
+    },
 
+    onSuccess: () => {
       message.success("Blog published successfully");
-
       form.resetFields();
-    } catch (error) {
-      console.error("Error creating blog:", error);
+    },
 
+    onError: (error) => {
+      console.log(error);
       message.error("Failed to publish blog");
-    } finally {
-      setPublishLoading(false);
-    }
-  };
+    },
+  });
 
-  // GENERATE AI CONTENT
-  const generateAIContent = async () => {
-    try {
+  const aiMutation = useMutation({
+    mutationFn: async () => {
       const title = form.getFieldValue("title");
 
       if (!title) {
-        return message.warning("Please enter title first");
+        throw new Error("Please enter title first");
       }
 
-      setAiLoading(true);
       const prompt = `
 Write a simple, human-like blog post about the given topic.
 
@@ -70,31 +66,51 @@ Requirements:
 
 Topic: ${title}
 `;
+
       const response = await api.post("/openai/generate", {
         prompt,
       });
 
+      return response.data;
+    },
+
+    onSuccess: (data) => {
       form.setFieldsValue({
-        content: response.data.content,
+        content: data.content,
       });
 
       message.success("AI content generated");
-    } catch (error) {
+    },
+
+    onError: (error: any) => {
       console.log(error);
 
-      message.error("Failed to generate AI content");
-    } finally {
-      setAiLoading(false);
-    }
+      if (error.message === "Please enter title first") {
+        message.warning(error.message);
+      } else {
+        message.error("Failed to generate AI content");
+      }
+    },
+  });
+
+  const handleSubmit = (values: {
+    title: string;
+    content: string;
+  }) => {
+    publishMutation.mutate(values);
   };
 
   return (
     <Layout className="min-h-screen bg-white">
-      <header className="flex flex-col w-full gap-4 border-b border-gray-200 ">
+      <header className="flex flex-col w-full gap-4 border-b border-gray-200">
         <div>
-          <h2 className="text-2xl font-semibold">Create Blog</h2>
+          <h2 className="text-2xl font-semibold">
+            Create Blog
+          </h2>
 
-          <p className="text-gray-500">Write and publish your blog posts</p>
+          <p className="text-gray-500">
+            Write and publish your blog posts
+          </p>
         </div>
       </header>
 
@@ -135,17 +151,18 @@ Topic: ${title}
 
         <Form.Item>
           <div className="flex gap-4 flex-wrap">
-            <Button loading={aiLoading} onClick={generateAIContent}>
+            <Button
+              loading={aiMutation.isPending}
+              onClick={() => aiMutation.mutate()}
+            >
               Generate AI Content
             </Button>
-
-            {/* <Button>Save Draft</Button> */}
 
             <Button
               type="primary"
               htmlType="submit"
-              loading={publishLoading}
-              className="bg-gray-800"
+              loading={publishMutation.isPending}
+              className="bg-black!"
             >
               Publish
             </Button>

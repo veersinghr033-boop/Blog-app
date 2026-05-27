@@ -1,18 +1,21 @@
 "use client"
 
-import { Layout } from "antd"
+import { Button, Layout, message } from "antd"
 import {
     HomeOutlined,
     UsergroupAddOutlined,
     BookOutlined,
-    AppstoreOutlined,
     EditOutlined,
-    ReadOutlined,
+    LoginOutlined,
+    AppstoreOutlined,
 } from "@ant-design/icons"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useAppSelector } from "@/lib/store/hooks"
+import { useAppSelector, useAppDispatch } from "@/lib/store/hooks"
+import { logout } from "@/lib/store/features/authThunk"
+import { persistor } from "@/lib/store/store"
+import { useRouter } from "next/navigation"
 
 const { Sider } = Layout
 interface MenuItem {
@@ -40,7 +43,7 @@ const menuByRole: { [key: string]: MenuItem[] } = {
         },
         {
             label: "Categories",
-            href: "/admin/categories",
+            href: "/admin/profile",
             icon: <AppstoreOutlined />,
         },
     ],
@@ -84,34 +87,64 @@ const menuByRole: { [key: string]: MenuItem[] } = {
 
 function Sidebar() {
     const pathname = usePathname()
+    const dispatch = useAppDispatch()
+    const router = useRouter();
+
     const role = useAppSelector((state: any) => state.auth.user?.role)
 
-    return (
-        <Sider className="bg-white! fixed! left-0! top-15 border-r border-gray-200! min-h-11/12">
-            <div className="p-4 flex flex-col gap-2">
-                {menuByRole[role]?.map((item: MenuItem) => {
-                    const active = pathname === item.href
+    const handleLogout = async () => {
+        try {
+            const resultAction: any = await dispatch(logout() as any);
+            if (logout.fulfilled.match(resultAction)) {
+                message.success("Logout successful");
+                await persistor.purge();
 
-                    return (
-                        <Link
-                            href={item.href}
-                            key={item.href}
-                            className="no-underline"
-                        >
-                            <div
-                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition
+                router.push("/login");
+            } else {
+                message.error(resultAction.payload || "Logout failed");
+            }
+        } catch (error) {
+            message.error("An error occurred during logout");
+        }
+    };
+
+    return (
+        <Sider className="bg-white! fixed! left-0! top-15  border-r p-4 border-gray-200! min-h-11/12">
+
+            {menuByRole[role]?.map((item: MenuItem) => {
+                const active = pathname === item.href
+
+                return (
+                    <Link
+                        href={item.href}
+                        key={item.href}
+                        className="no-underline mb-2 block"
+                    >
+                        <div
+                            className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition
                                 ${active
-                                        ? "bg-gray-700 text-white"
-                                        : "text-gray-700 hover:bg-gray-100"
-                                    }`}
-                            >
-                                {item.icon}
-                                <span>{item.label}</span>
-                            </div>
-                        </Link>
-                    )
-                })}
-            </div>
+                                    ? "bg-gray-700 text-white"
+                                    : "text-gray-700 hover:bg-gray-100"
+                                }`}
+                        >
+                            {item.icon}
+                            <span>{item.label}</span>
+                        </div>
+                    </Link>
+                )
+            })}
+            <Button
+                type="text"
+                onClick={handleLogout}
+                className="flex items-center gap-3 px-4! py-3! rounded-2xl! transition!
+                        text-gray-700! bg-gray-100! absolute! bottom-4! left-4! w-[calc(100%-32px)] hover:bg-gray-200!"
+            >
+
+                < LoginOutlined />
+                <span>Logout</span>
+            </Button>
+
+
         </Sider>
     )
 }

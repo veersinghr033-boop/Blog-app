@@ -8,6 +8,7 @@ import { getSavedBlogs } from "@/lib/store/features/saveThunk"
 import CommentModal from "@/components/ui/comment"
 import BlogModal from "@/components/ui/blogModal"
 import { SaveOutlined } from "@ant-design/icons"
+import { useMutation } from "@tanstack/react-query"
 
 const { Title, Paragraph, Text } = Typography
 
@@ -24,20 +25,42 @@ function ReaderBlog({ data }: { data?: any[] }) {
 
     const user = useAppSelector((state) => state.auth.user?.id)
 
+    const LikeMutation = useMutation({
+        mutationFn: async (blogId: string) => {
+            const res = await api.post(`/likes/${blogId}`, {
+                userId: user,
+            })
+            return res.data
+        },
+        onSuccess: () => {
+            message.success("Blog liked")
+        },
+        onError: (error) => {
+            console.error("Error liking blog:", error)
+            message.error("Failed to like blog")
+        },
+    })
 
+    const SaveMutation = useMutation({
+        mutationFn: async (blogId: string) => {
+            const response = await api.post(`/blogsave`, {
+                blogId,
+            })
+            return response.data
+        },
+        onSuccess: () => {
+            message.success("Blog saved")
+            dispatch(getSavedBlogs() as any)
+        },
+        onError: (error) => {
+            console.error("Error saving blog:", error)
+            message.error("Failed to save blog")
+        },
+    })
 
 
     const handleLike = async (blogId: string) => {
-        try {
-            await api.post(`/likes/${blogId}`, {
-                userId: user,
-            })
-
-            message.success("Blog liked")
-        } catch (error) {
-            console.error("Error liking blog:", error)
-            message.error("Failed to like blog")
-        }
+        LikeMutation.mutate(blogId)
     }
 
     const handleComment = (blogId: string) => {
@@ -50,25 +73,12 @@ function ReaderBlog({ data }: { data?: any[] }) {
         setBlogOpen(true)
     }
     const handleSave = async (blogId: string) => {
-        try {
-            const response = await api.post(`/blogsave`, {
-                blogId,
-            })
-            if (response.status === 201) {
-                message.success("Blog unsaved")
-            } else {
-                message.success("Blog saved")
-            }
-            dispatch(getSavedBlogs() as any)
-        } catch (error) {
-            console.error("Error saving blog:", error)
-            message.error("Failed to save blog")
-        }
+        SaveMutation.mutate(blogId)
     }
     const savedBlogs = useAppSelector(
         (state) => state.save.savedBlogs
     )
-    const savedIds = savedBlogs.flatMap(
+    const savedIds = savedBlogs?.flatMap(
         (save) => save.blogDetails?._id || []
 
     )
@@ -81,7 +91,7 @@ function ReaderBlog({ data }: { data?: any[] }) {
                     <Card
                         key={blog._id}
                         hoverable
-                        className="rounded-2xl border border-gray-200 shadow-sm h-full"
+                        className="rounded-2xl border border-gray-200 shadow-sm h-full "
                     >
                         <div className="flex justify-between items-start mb-4">
                             <Title
@@ -117,7 +127,7 @@ function ReaderBlog({ data }: { data?: any[] }) {
                             </Text>
                         )}
 
-                        <div className="flex justify-between items-end mt-5">
+                        <div className="flex justify-between items-end mt-5 bottom-0">
                             <div className="flex flex-col gap-3">
                                 <div className="flex items-center gap-2">
                                     <div className="bg-gray-700 text-white rounded-full w-8 h-8 flex items-center justify-center text-xs uppercase">

@@ -4,6 +4,7 @@ import { Modal, Form, Input, Button, message } from "antd"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
 import { fetchComments } from "@/lib/store/features/commentThunk"
 import { useEffect } from "react"
+import { useMutation } from "@tanstack/react-query"
 import api from "@/utills/axios"
 
 interface CommentModalProps {
@@ -26,27 +27,25 @@ function CommentModal({
             dispatch(fetchComments(blogId) as any)
         }
     }, [dispatch, blogId])
-
-    const handleSubmit = async (values: any) => {
-
-        try {
-
+    const CommentMutation = useMutation({
+        mutationFn: async (values: any) => {
             await api.post(`/comments/${blogId}`, {
                 comment: values.comment,
             })
-
+        },
+        onSuccess: () => {
             message.success("Comment added successfully")
-
             form.resetFields()
-
             setOpen(false)
-
-        } catch (error) {
-
+        },
+        onError: (error) => {
             console.error("Error adding comment:", error)
-
             message.error("Failed to add comment")
         }
+    })
+
+    const handleSubmit = async (values: any) => {
+        CommentMutation.mutate(values)
     }
     return (
 

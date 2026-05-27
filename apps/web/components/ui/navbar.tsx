@@ -6,7 +6,7 @@ import { useAppSelector } from "@/lib/store/hooks"
 const { Header } = Layout
 
 function Navbar( ) {
-    const userName = useAppSelector((state) => state.auth.user?.userName)
+    const userName = useAppSelector((state) => state.auth.user?.userName || "User")
 
     // console.log(userName)
     
@@ -27,7 +27,7 @@ function Navbar( ) {
                     {userName}
                 </span>
 
-                <Avatar className="bg-black">
+                <Avatar className="bg-black!">
                     {userName[0].toUpperCase()}
                 </Avatar>
             </div>

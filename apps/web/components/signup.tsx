@@ -41,7 +41,7 @@ export default function RegisterPage() {
             role: formData.role
         }
         try {
-            const resultAction: any = await dispatch(signup(data));
+            const resultAction: any = await dispatch(signup(data)as any);
             if (signup.fulfilled.match(resultAction)) {
                 message.success("Signup successful");
                 if (resultAction.payload.user.role === "admin") {

@@ -1,11 +1,12 @@
 "use client"
-import { Card, Tag, Typography, Space, Button } from "antd"
+import { Card, Tag, Typography, message, Button } from "antd"
 import { EllipsisOutlined } from "@ant-design/icons"
 import api from "@/utills/axios"
 import { useState } from "react"
 import { useAppSelector } from "@/lib/store/hooks"
 import CommentModal from "@/components/ui/comment"
 import BlogModal from "@/components/ui/blogModal"
+import { useMutation } from "@tanstack/react-query"
 
 
 const { Title, Paragraph, Text } = Typography
@@ -17,13 +18,23 @@ function Blog({ data}: { data: any[]}) {
     const [selectedBlogData, setSelectedBlogData] = useState<any>(null)
     const [selectedBlog, setSelectedBlog] = useState("")
     const user = useAppSelector((state) => state.auth.user?.id)
-
+ const LikeMutation = useMutation({
+        mutationFn: async (blogId: string) => {
+            const res = await api.post(`/likes/${blogId}`, {
+                userId: user,
+            })
+            return res.data
+        },
+        onSuccess: () => {
+            message.success("Blog liked")
+        },
+        onError: (error) => {
+            console.error("Error liking blog:", error)
+            message.error("Failed to like blog")
+        },
+    })
     const handleLike = async (blogId: string) => {
-        try {
-            await api.post(`/likes/${blogId}`, { userId: user });
-        } catch (error) {
-            console.error("Error liking blog:", error);
-        }
+        LikeMutation.mutate(blogId)
 
     }
     const handleComment = (blogId: string) => {
@@ -53,9 +64,7 @@ function Blog({ data}: { data: any[]}) {
                                         {post.title}
                                     </Title>
 
-                                    {/* <Tag color={post.saveAs === "draft" ? "orange" : "green"}>
-                                        {post.saveAs}
-                                    </Tag> */}
+                                    
                                 </div>
                             }
                             description={

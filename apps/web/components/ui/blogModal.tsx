@@ -3,6 +3,8 @@
 import { Modal, Typography, Button, Popconfirm } from "antd";
 import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
 import { deleteBlog } from "@/lib/store/features/blogThunk";
+import ReportModal from "./Repot";
+import { useState } from "react";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -14,6 +16,7 @@ interface BlogModalProps {
 }
 
 function BlogModal({ open, setOpen, blog, userId }: BlogModalProps) {
+    const [ openReport, setOpenReport ] = useState(false);
     const dispatch = useAppDispatch();
 
     const handleDelete = () => {
@@ -46,7 +49,7 @@ function BlogModal({ open, setOpen, blog, userId }: BlogModalProps) {
                     <Text className="text-gray-500">
                         {blog?.createdAt && new Date(blog.createdAt).toLocaleDateString()}
                     </Text>
-                    {userId === blog?.author?.id && (
+                    {userId === blog?.author?.id ? (
                         <Popconfirm
                             title="Are you sure you want to delete this blog?"
                             onConfirm={handleDelete}
@@ -57,10 +60,19 @@ function BlogModal({ open, setOpen, blog, userId }: BlogModalProps) {
                                 Delete
                             </Button>
                         </Popconfirm>
-                    )}
+                    ) :
+
+                        <Button type="primary" danger
+                            onClick={() => setOpenReport(true)}
+                        >
+                            Report
+                        </Button>
+                    }
                 </div>
             </div>
+            <ReportModal blogId={blog?._id}  open={openReport} setOpen={setOpenReport} />
         </Modal>
+
     );
 }
 
