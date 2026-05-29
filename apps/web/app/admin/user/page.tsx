@@ -1,7 +1,7 @@
 "use client"
 
-import { Layout, Table, Input, Button, message } from "antd"
-import { useQuery } from "@tanstack/react-query"
+import { Layout, Table, Input, Button, message ,Popconfirm  } from "antd"
+import { useQuery, useMutation ,useQueryClient } from "@tanstack/react-query"
 import api from "@/utills/axios"
 import { useMemo, useState, useEffect } from "react"
 
@@ -18,6 +18,7 @@ interface UserType {
 
 function Users() {
     const [searchText, setSearchText] = useState("")
+    const queryClient = useQueryClient();
 
     const {
         data: users = [],
@@ -34,13 +35,11 @@ function Users() {
                 name: user.userName,
                 email: user.email,
                 role: user.role,
-                status: "Active",
                 joined: new Date(user.createdAt).toLocaleDateString(),
             }))
         },
     })
 
-    // Show error message only once
     useEffect(() => {
         if (isError) {
             console.error("Error fetching users:", error)
@@ -48,7 +47,6 @@ function Users() {
         }
     }, [isError, error])
 
-    // Filter users
     const filteredUsers = useMemo(() => {
         return users.filter((user) =>
             user.name.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -56,8 +54,25 @@ function Users() {
         )
     }, [users, searchText])
 
+    const deleteMutation = useMutation({
+        mutationFn: async (userId: string) => {
+            await api.delete(`/users/${userId}`)
+        },
+
+        onSuccess: () => {
+            message.success("User deleted successfully")
+            queryClient.invalidateQueries({
+                queryKey: ["users"],
+            })
+        },
+        onError: (error) => {
+            console.error("Error deleting user:", error)
+            message.error("Failed to delete user")
+        },
+    })
+
     const handleDelete = (id: string) => {
-        console.log("Delete user:", id)
+        deleteMutation.mutate(id)
     }
 
     const handleEdit = (id: string) => {
@@ -91,6 +106,7 @@ function Users() {
                 loading={isLoading}
                 dataSource={filteredUsers}
                 rowKey="key"
+                scroll={{ x: 800 }}
                 pagination={{ pageSize: 5 }}
                 columns={[
                     {
@@ -108,11 +124,7 @@ function Users() {
                         dataIndex: "role",
                         key: "role",
                     },
-                    {
-                        title: "Status",
-                        dataIndex: "status",
-                        key: "status",
-                    },
+               
                     {
                         title: "Joined At",
                         dataIndex: "joined",
@@ -123,21 +135,18 @@ function Users() {
                         key: "actions",
                         render: (_: any, record: UserType) => (
                             <div className="flex gap-2">
-                                <Button
-                                    type="primary"
-                                    size="small"
-                                    onClick={() => handleEdit(record.key)}
-                                >
-                                    Edit
-                                </Button>
+                               
 
-                                <Button
-                                    danger
-                                    size="small"
-                                    onClick={() => handleDelete(record.key)}
+                                <Popconfirm
+                                    title="Are you sure you want to delete this user?"
+                                    onConfirm={() => handleDelete(record.key)}
+                                    okText="Yes"
+                                    cancelText="No"
                                 >
-                                    Delete
-                                </Button>
+                                    <Button type="primary" danger size="small">
+                                        Delete
+                                    </Button>
+                                </Popconfirm>
                             </div>
                         ),
                     },

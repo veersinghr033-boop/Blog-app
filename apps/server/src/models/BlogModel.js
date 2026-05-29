@@ -14,11 +14,11 @@ const blogSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    saveAs: {
-      type: String,
-      enum: ["draft", "published"],
-      default: "draft",
-    },
+    // saveAs: {
+    //   type: String,
+    //   enum: ["draft", "published"],
+    //   default: "draft",
+    // },
     Likes: [
       {
         type: mongoose.Schema.Types.ObjectId,

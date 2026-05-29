@@ -5,15 +5,22 @@ import { useEffect } from "react"
 import ReaderBlog from "@/components/ui/readerBlog"
 import { useAppDispatch  ,useAppSelector } from "@/lib/store/hooks"
 import { fetchAllBlogs } from "@/lib/store/features/blogThunk"
+import api from "@/utills/axios"
+import { useQuery } from "@tanstack/react-query"
 
 function Page() {
   const dispatch = useAppDispatch()
   
 
-  useEffect(() => {
-    dispatch(fetchAllBlogs() as any)
-  }, [dispatch])
-  const blogs = useAppSelector((state) => state.blog.blogs)
+  const { data: blogs = [], isLoading } = useQuery({
+    queryKey: ["blogs"],
+    queryFn: async () => {
+      const response = await api.get("/blogs/all")
+      return response.data.blogs
+    }
+  })
+  
+  // const blogs = useAppSelector((state) => state.blog.blogs)
 
  
   return (

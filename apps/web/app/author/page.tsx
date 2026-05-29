@@ -39,8 +39,7 @@ function page() {
 
           <p className="text-gray-500">Track your content performance</p>
         </div>
-        <div className="flex justify-between gap-4">
-          {cardData.map((card, index) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">          {cardData.map((card, index) => (
             <div
               key={index}
               className={`p-4 rounded-lg flex-1 ${card.bg} flex items-center gap-4`}

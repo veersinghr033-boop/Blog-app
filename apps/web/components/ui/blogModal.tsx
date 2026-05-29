@@ -39,10 +39,10 @@ function BlogModal({ open, setOpen, blog, userId }: BlogModalProps) {
 
                 <div className="flex items-center gap-3">
                     <div className="bg-gray-700 text-white rounded-full w-8 h-8 flex items-center justify-center text-xs uppercase">
-                        {blog?.author?.name?.charAt(0)}
+                        {blog?.author?.userName?.charAt(0)}
                     </div>
 
-                    <Text>{blog?.author?.name}</Text>
+                    <Text>{blog?.author?.userName}</Text>
                 </div>
 
                 <div className="flex items-center justify-between gap-4">

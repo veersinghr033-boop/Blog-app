@@ -43,7 +43,7 @@ export const getAllBlogs = async (req, res) => {
 
           author: {
             id: "$authorDetails._id",
-            name: "$authorDetails.userName",
+            userName: "$authorDetails.userName",
           },
 
           likes: {
@@ -80,7 +80,6 @@ export const getAllBlogs = async (req, res) => {
 export const getBlogById = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(id)
     const pipelines = [
       {
         $match: { author: new mongoose.Types.ObjectId(id) },
@@ -119,12 +118,18 @@ export const getBlogById = async (req, res) => {
 
           author: {
             id: "$authorDetails._id",
-            name: "$authorDetails.userName",
+            userName: "$authorDetails.userName",
           },
 
           likes: {
             count: { $size: "$likesDetails" },
-            users: "$likesDetails.user",
+            users:{
+              $map: {
+                input: "$likesDetails",
+                as: "like",
+                in: "$$like.user"
+              }
+            }
           },
 
           comments: {
@@ -168,7 +173,6 @@ export const createBlog = async (req, res) => {
 export const deleteBlog = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(id)
     const deletedBlog = await Blog.findByIdAndDelete(id);
     if (deletedBlog) {
       await Promise.all([

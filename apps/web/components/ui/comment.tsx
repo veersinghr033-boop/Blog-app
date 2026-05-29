@@ -2,10 +2,10 @@
 
 import { Modal, Form, Input, Button, message } from "antd"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
-import { fetchComments } from "@/lib/store/features/commentThunk"
 import { useEffect } from "react"
 import { useMutation } from "@tanstack/react-query"
 import api from "@/utills/axios"
+import { useQuery , useQueryClient } from "@tanstack/react-query"
 
 interface CommentModalProps {
     open: boolean
@@ -21,12 +21,25 @@ function CommentModal({
 
     const [form] = Form.useForm()
     const dispatch = useAppDispatch()
-    const comments = useAppSelector((state) => state.comment.comments)
-    useEffect(() => {
-        if (blogId) {
-            dispatch(fetchComments(blogId) as any)
+    const queryClient = useQueryClient();
+    // const comments = useAppSelector((state) => state.comment.comments)
+    // useEffect(() => {
+    //     if (blogId) {
+    //         dispatch(fetchComments(blogId) as any)
+    //     }
+    // }, [dispatch, blogId])
+
+    const { data: comments = [], isLoading } = useQuery({
+        queryKey: ["comments", blogId],
+        enabled: !!blogId,
+        queryFn: async () => {
+            const response = await api.get(`/comments/${blogId}`)
+            return response.data.comments
         }
-    }, [dispatch, blogId])
+    })
+     
+    // console.log(comments)
+
     const CommentMutation = useMutation({
         mutationFn: async (values: any) => {
             await api.post(`/comments/${blogId}`, {
@@ -37,6 +50,16 @@ function CommentModal({
             message.success("Comment added successfully")
             form.resetFields()
             setOpen(false)
+            queryClient.invalidateQueries({
+                queryKey: ["comments", blogId],
+            })
+            queryClient.invalidateQueries({
+                queryKey: ["blogData"],
+            })
+            queryClient.invalidateQueries({
+                queryKey: ["blogs"],
+            })
+            
         },
         onError: (error) => {
             console.error("Error adding comment:", error)
@@ -56,7 +79,7 @@ function CommentModal({
             footer={null}
         >
 
-            {comments.map((comment) => (
+            {comments.map((comment :any) => (
                 <div key={comment._id} className="mb-4 p-3 space-y-2 border border-gray-300 rounded">
                     <div className="text-sm flex items-center gap-2 text-gray-600">
 

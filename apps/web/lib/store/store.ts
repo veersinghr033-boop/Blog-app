@@ -1,16 +1,12 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import auths from "./features/auth";
 import blog from "./features/blog";
-import comment from "./features/comment";
-import save from "./features/save";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
 const rootReducer = combineReducers({
   auth: auths,
   blog: blog,
-  comment: comment,
-  save: save,
 });
  
 

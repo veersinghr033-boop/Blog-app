@@ -5,11 +5,13 @@ import Blog from "@/components/ui/blog"
 import { useEffect, useMemo, useState } from "react"
 import { useAppSelector, useAppDispatch } from "@/lib/store/hooks"
 import { fetchAllBlogs } from "@/lib/store/features/blogThunk"
+import api from "@/utills/axios"
+import { useQuery } from "@tanstack/react-query"
 
 const { Search } = Input
 
 function Blogs() {
-    const blogs = useAppSelector((state) => state.blog.blogs)
+    // const blogs = useAppSelector((state) => state.blog.blogs)
     const loading = useAppSelector((state) => state.blog.loading)
 
     const dispatch = useAppDispatch()
@@ -17,9 +19,14 @@ function Blogs() {
     const [searchText, setSearchText] = useState("")
     const [statusFilter, setStatusFilter] = useState("")
 
-    useEffect(() => {
-        dispatch(fetchAllBlogs() as any)
-    }, [dispatch])
+
+    const { data: blogs = [], isLoading } = useQuery({
+        queryKey: ["blogs"],
+        queryFn: async () => {
+            const response = await api.get("/blogs/all")
+            return response.data.blogs
+        }
+    })
 
     const filteredBlogs = useMemo(() => {
         return blogs.filter((blog: any) => {
@@ -41,7 +48,7 @@ function Blogs() {
 
     return (
         <Layout className="min-h-screen bg-white">
-            <header className="flex flex-col w-full gap-4 border-b border-gray-200 px-3 py-4">
+            <header className="w-full border-b border-gray-200 px-4 py-4">
                 <div>
                     <h2 className="text-2xl font-semibold">
                         Blogs Management
@@ -52,13 +59,12 @@ function Blogs() {
                     </p>
                 </div>
 
-                <div className="flex w-full gap-3">
-                    <Search
-                        className="w-3/4"
-                        placeholder="Search blogs..."
-                        allowClear
-                        onChange={(e) => setSearchText(e.target.value)}
-                    />
+                <div className="flex flex-col sm:flex-row w-full gap-3">                    <Search
+                    className="w-full sm:flex-1"
+                    placeholder="Search blogs..."
+                    allowClear
+                    onChange={(e) => setSearchText(e.target.value)}
+                />
 
                     {/* <Select
                         className="w-1/4"
@@ -82,7 +88,7 @@ function Blogs() {
             </header>
 
             <div className="p-3">
-                <Blog data={filteredBlogs}  />
+                <Blog data={filteredBlogs} />
             </div>
         </Layout>
     )
