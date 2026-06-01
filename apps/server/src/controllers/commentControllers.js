@@ -58,3 +58,24 @@ export const getCommentsByBlogId = async (req, res) => {
       .json({ message: "Failed to fetch comments", error: error.message });
   }
 };
+
+export const deleteComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const userId = req.user.id;
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+    if (comment.user.toString() !== userId) {
+      return res.status(403).json({ message: "Unauthorized to delete this comment" });
+    }
+    await Comment.findByIdAndDelete(commentId);
+    res.status(200).json({ message: "Comment deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Failed to delete comment", error: error.message });
+  }
+};

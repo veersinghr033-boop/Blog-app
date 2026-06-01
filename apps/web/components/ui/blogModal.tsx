@@ -2,9 +2,10 @@
 
 import { Modal, Typography, Button, Popconfirm } from "antd";
 import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
-import { deleteBlog } from "@/lib/store/features/blogThunk";
 import ReportModal from "./Repot";
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "@/utills/axios";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -18,10 +19,26 @@ interface BlogModalProps {
 function BlogModal({ open, setOpen, blog, userId }: BlogModalProps) {
     const [ openReport, setOpenReport ] = useState(false);
     const dispatch = useAppDispatch();
+    const queryClient = useQueryClient();
+        const deleteMutation = useMutation({
+        mutationFn: async (blogId: string) => {
+                await api.delete(`/blogs/delete/${blogId}`);
+           
+        },
+        onSuccess: () => {
+           
+            queryClient.invalidateQueries({
+                queryKey: ["blogData", userId],
+            });
+            setOpen(false);
+        },
+        onError: (error) => {
+            console.error("Error deleting blog:", error);
+        },
+    });
 
     const handleDelete = () => {
-        dispatch(deleteBlog(blog._id) as any);
-        setOpen(false);
+        deleteMutation.mutate(blog._id);
     }
 
     return (

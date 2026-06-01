@@ -9,7 +9,8 @@ import commentRoutes from "./src/routes/commentRoutes.js";
 import openAiRoute from "./src/routes/openAiRoute.js";
 import blogSaveRoute from "./src/routes/BlogSaveRoute.js";
 import userRoute from "./src/routes/userRoute.js";
-import reportRoute from "./src/routes/RepotRoute.js"
+import reportRoute from "./src/routes/RepotRoute.js";
+import { apiLimiter } from "./src/middleware/rateLimiter.js";
 import cookieParser from "cookie-parser";
 
 dotenv.config();
@@ -20,6 +21,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(apiLimiter);
 app.use(
   cors({
     origin: "http://localhost:3000",

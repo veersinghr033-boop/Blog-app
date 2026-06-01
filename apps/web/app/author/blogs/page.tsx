@@ -91,7 +91,7 @@ function Blogs() {
                 </div>
             </header>
 
-            <Blog data={blog}/>
+            <Blog data={blog} />
         </Layout>
     );
 }

@@ -67,7 +67,7 @@ function ReportCard({ data }: ReportCardProps) {
     };
 
     return (
-        <Layout className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
+        <Layout className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-3">
             <div className="mb-10 rounded-3xl bg-white p-6 shadow-sm border border-gray-200">
                 <div className=" flex items-center justify-between flex-wrap gap-4">
                     <div>

@@ -30,7 +30,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
         menuByRole[userRole]?.href || "/reader/profile"
 
     return (
-        <Header className="!bg-white sticky top-0 z-50 border-b border-gray-200 px-2! md:px-6 flex items-center justify-between">
+        <Header className="bg-white! sticky top-0 z-50 border-b border-gray-200 px-2! md:px-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
                 <Button
                     type="text"
@@ -51,12 +51,13 @@ function Navbar({ onMenuClick }: NavbarProps) {
             <Link
                 href={profilePath}
                 className="flex items-center gap-2 md:gap-3"
+                title="Profile"
             >
                 <span className="hidden sm:block capitalize font-medium">
                     {userName}
                 </span>
 
-                <Avatar className="!bg-black">
+                <Avatar className="bg-black! ">
                     {userName[0]?.toUpperCase()}
                 </Avatar>
             </Link>

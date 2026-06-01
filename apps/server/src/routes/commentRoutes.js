@@ -3,6 +3,7 @@ import e from "express";
 import {
   createComment,
   getCommentsByBlogId,
+  deleteComment
 } from "../controllers/commentControllers.js";
 
 import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
@@ -17,5 +18,6 @@ router.post(
 );
 
 router.get("/:blogId",verifyToken, getCommentsByBlogId);
+router.delete("/:commentId", verifyToken, deleteComment);
 
 export default router;

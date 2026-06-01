@@ -8,6 +8,7 @@ import {
     EditOutlined,
     LoginOutlined,
     AppstoreOutlined,
+    WechatOutlined ,
 } from "@ant-design/icons"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -35,16 +36,21 @@ const menuByRole: Record<string, MenuItem[]> = {
         { label: "Users", href: "/admin/user", icon: <UsergroupAddOutlined /> },
         { label: "Blogs", href: "/admin/blogs", icon: <BookOutlined /> },
         { label: "Reports", href: "/admin/reports", icon: <AppstoreOutlined /> },
+        { label: "Messages", href: "/admin/messages", icon: <WechatOutlined /> },
     ],
     author: [
         { label: "Dashboard", href: "/author", icon: <HomeOutlined /> },
         { label: "My Blogs", href: "/author/blogs", icon: <BookOutlined /> },
         { label: "Create Blog", href: "/author/create", icon: <EditOutlined /> },
         { label: "Reports", href: "/author/reports", icon: <AppstoreOutlined /> },
+        { label: "Messages", href: "/author/messages", icon: <WechatOutlined /> },
+
     ],
     reader: [
         { label: "Home", href: "/reader", icon: <HomeOutlined /> },
         { label: "Saved Blogs", href: "/reader/save", icon: <BookOutlined /> },
+        { label: "Messages", href: "/reader/messages", icon: <WechatOutlined /> },
+
     ],
 }
 
@@ -125,7 +131,7 @@ export default function Sidebar({
     return (
         <Sider
             width={250}
-            className="  !bg-white fixed! left-0 top-16 h-[calc(100vh-64px)] border-r border-gray-200"
+            className="  bg-white! fixed! left-0 top-16 h-[calc(100vh-64px)] border-r border-gray-200"
         >
             <div className="p-4 h-full">{SidebarContent}</div>
         </Sider>

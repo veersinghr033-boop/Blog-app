@@ -54,8 +54,7 @@ function Profile() {
         setBio(initialValues.bio)
     }
 
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault()
+    const handleSubmit = () => {
 
         console.log({
             fullName,
@@ -97,58 +96,55 @@ function Profile() {
                         </div>
                     </div>
 
-                    <form
-                        onSubmit={handleSubmit}
-                        className="mt-6"
-                    >
-                        <Form layout="vertical">
-                            <Form.Item label="Full Name">
-                                <Input
-                                    value={fullName}
-                                    onChange={(e) =>
-                                        setFullName(e.target.value)
-                                    }
-                                    placeholder="Enter your full name"
-                                />
-                            </Form.Item>
 
-                            <Form.Item label="Email">
-                                <Input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) =>
-                                        setEmail(e.target.value)
-                                    }
-                                    placeholder="Enter your email"
-                                />
-                            </Form.Item>
+                    <Form layout="vertical" className="mt-6" onFinish={handleSubmit}>
+                        <Form.Item label="Full Name">
+                            <Input
+                                value={fullName}
+                                onChange={(e) =>
+                                    setFullName(e.target.value)
+                                }
+                                placeholder="Enter your full name"
+                            />
+                        </Form.Item>
 
-                            <Form.Item label="Bio">
-                                <TextArea
-                                    value={bio}
-                                    onChange={(e) =>
-                                        setBio(e.target.value)
-                                    }
-                                    placeholder="Enter your bio"
-                                    rows={4}
-                                />
-                            </Form.Item>
+                        <Form.Item label="Email">
+                            <Input
+                                type="email"
+                                value={email}
+                                onChange={(e) =>
+                                    setEmail(e.target.value)
+                                }
+                                placeholder="Enter your email"
+                            />
+                        </Form.Item>
 
-                            <div className="flex gap-4">
-                                <Button
-                                    type="primary"
-                                    htmlType="submit"
-                                    className="bg-black!"
-                                >
-                                    Save Changes
-                                </Button>
+                        <Form.Item label="Bio">
+                            <TextArea
+                                value={bio}
+                                onChange={(e) =>
+                                    setBio(e.target.value)
+                                }
+                                placeholder="Enter your bio"
+                                rows={4}
+                            />
+                        </Form.Item>
 
-                                <Button onClick={handleCancel}>
-                                    Cancel
-                                </Button>
-                            </div>
-                        </Form>
-                    </form>
+                        <div className="flex gap-4">
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                className="bg-black!"
+                            >
+                                Save Changes
+                            </Button>
+
+                            <Button onClick={handleCancel}>
+                                Cancel
+                            </Button>
+                        </div>
+                    </Form>
+
                 </Card>
                 <Card className="mx-auto w-full md:max-w-1/2">
                     <h2 className="text-xl font-semibold">
@@ -175,7 +171,7 @@ function Profile() {
                             />
                         </Form.Item>
                         <div className="flex gap-4">
-                            <Button
+                            <Button 
                                 type="primary"
                                 htmlType="submit"
                                 className="bg-black!"

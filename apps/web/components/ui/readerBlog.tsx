@@ -193,6 +193,7 @@ function ReaderBlog({ data }: { data?: any[] }) {
                                                 className={`text-sm cursor-pointer hover:text-blue-500 ${isLiked ? "text-blue-500!" : "text-gray-500!"
                                                     }`}
                                                 onClick={() => handleLike(blog._id)}
+                                                title="Like"
                                             >
                                                 {blog.likes?.count || 0} <LikeOutlined />
                                             </Text>
@@ -202,6 +203,7 @@ function ReaderBlog({ data }: { data?: any[] }) {
                                                 onClick={() =>
                                                     handleComment(blog._id)
                                                 }
+                                                title="Comment"
                                             >
                                                 {blog.comments?.count || 0} <CommentOutlined />
                                             </Text>
