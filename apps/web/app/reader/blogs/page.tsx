@@ -1,7 +1,7 @@
 "use client"
 
 import { Layout } from "antd"
-import Blog from "@/components/ui/blog";
+import Blog from "@/components/ui/blog/Blog";
 import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
 import { fetchBlogById } from "@/lib/store/features/blogThunk";
 import { useEffect, useMemo } from "react";
@@ -37,6 +37,11 @@ function Blogs() {
             return total + (b.likes?.count || 0) + (b.comments?.count || 0);
         }, 0);
     }, [blog]);
+    const totalViews = useMemo(() => {
+        return blog.reduce((total: number, b: any) => {
+            return total + (b.views && b.views.length > 0 ? b.views[0].count : 0);
+        }, 0);
+    }, [blog]);
 
     const cardData = [
         {
@@ -47,7 +52,7 @@ function Blogs() {
         },
         {
             title: "Total Views",
-            value: 1200,
+            value: totalViews,
             desc: "All time",
             bg: "bg-green-100",
         },
@@ -91,7 +96,7 @@ function Blogs() {
                 </div>
             </header>
 
-            <Blog data={blog} />
+            <Blog data={blog}  />
         </Layout>
     );
 }

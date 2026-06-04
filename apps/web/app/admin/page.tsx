@@ -1,6 +1,6 @@
 "use client"
 
-import { Layout , Table , Popconfirm} from "antd";
+import { Layout, Table, Popconfirm } from "antd";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -16,14 +16,25 @@ interface UserType {
 }
 
 function page() {
-  const blogs = useAppSelector((state) => state.blog.blogs)
+  const { data: blogs = [] } = useQuery({
+    queryKey: ["blogs"],
+    queryFn: async () => {
+      const response = await api.get("/blogs/all")
+      return response.data.blogs
+    }
+  })
+  console.log(blogs)
 
   const totalEngagement = useMemo(() => {
     return blogs.reduce((total: number, b: any) => {
-      return total + (b.likes?.count || 0) + (b.comments?.count || 0);
+      return total + (b.likes?.count || 0) + (b.comments?.count || 0)
     }, 0);
   }, [blogs]);
-
+  const totalViews = useMemo(() => {
+    return blogs.reduce((total: number, b: any) => {
+      return total + (b.views && b.views.length > 0 ? b.views[0].count : 0);
+    }, 0);
+  }, [blogs]);
 
   const {
     data: users = [],
@@ -54,7 +65,7 @@ function page() {
     },
     {
       title: "Total Views",
-      value: 1200,
+      value: totalViews,
       desc: "All time",
       bg: "bg-green-100",
     },
@@ -153,7 +164,7 @@ function page() {
           ]}
         />
 
-     </div>
+      </div>
 
 
 

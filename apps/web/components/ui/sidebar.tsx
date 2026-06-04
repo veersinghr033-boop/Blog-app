@@ -8,7 +8,8 @@ import {
     EditOutlined,
     LoginOutlined,
     AppstoreOutlined,
-    WechatOutlined ,
+     
+    MessageOutlined 
 } from "@ant-design/icons"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -36,20 +37,19 @@ const menuByRole: Record<string, MenuItem[]> = {
         { label: "Users", href: "/admin/user", icon: <UsergroupAddOutlined /> },
         { label: "Blogs", href: "/admin/blogs", icon: <BookOutlined /> },
         { label: "Reports", href: "/admin/reports", icon: <AppstoreOutlined /> },
-        { label: "Messages", href: "/admin/messages", icon: <WechatOutlined /> },
+        { label: "Messages", href: "/admin/messages", icon: <MessageOutlined /> },
     ],
-    author: [
-        { label: "Dashboard", href: "/author", icon: <HomeOutlined /> },
-        { label: "My Blogs", href: "/author/blogs", icon: <BookOutlined /> },
-        { label: "Create Blog", href: "/author/create", icon: <EditOutlined /> },
-        { label: "Reports", href: "/author/reports", icon: <AppstoreOutlined /> },
-        { label: "Messages", href: "/author/messages", icon: <WechatOutlined /> },
-
-    ],
+   
     reader: [
         { label: "Home", href: "/reader", icon: <HomeOutlined /> },
         { label: "Saved Blogs", href: "/reader/save", icon: <BookOutlined /> },
-        { label: "Messages", href: "/reader/messages", icon: <WechatOutlined /> },
+        { label: "Reports", href: "/reader/reports", icon: <AppstoreOutlined /> },
+        { label: "Create Blog", href: "/reader/create", icon: <EditOutlined /> },
+        { label: "My Blogs", href: "/reader/blogs", icon: <BookOutlined /> },
+        { label: "Messages", href: "/reader/messages", icon: <MessageOutlined /> },
+        
+
+
 
     ],
 }

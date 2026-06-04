@@ -157,7 +157,6 @@ export const getReportById = async (req, res) => {
   }
 };
 
-// DELETE REPORT
 export const deleteReport = async (req, res) => {
   try {
     const { id } = req.params;
@@ -176,6 +175,35 @@ export const deleteReport = async (req, res) => {
   } catch (error) {
     console.log(error);
 
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getByUserId = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { blogId } = req.params;
+    const reports = await Report.find({ blogId, userId })
+      .populate({
+        path: "blogId",
+        select: "title content author",
+        populate: {
+          path: "author",
+          select: "userName role",
+        },
+      })
+      .populate({
+        path: "userId",
+        select: "userName role",
+      });
+    res.status(200).json({
+      reports,
+      message: "Reports fetched successfully",
+    });
+  } catch (error) {
+    console.log(error);
     res.status(500).json({
       message: "Internal server error",
     });

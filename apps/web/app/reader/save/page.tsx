@@ -2,7 +2,7 @@
 
 import { Layout } from "antd"
 import { useEffect } from "react"
-import ReaderBlog from "@/components/ui/readerBlog"
+import ReaderBlog from "@/components/ui/ReaderBlog/ReaderBlog"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
 import { fetchAllBlogs } from "@/lib/store/features/blogThunk"
 import { useQuery } from "@tanstack/react-query"

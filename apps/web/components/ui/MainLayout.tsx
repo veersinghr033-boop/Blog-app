@@ -34,6 +34,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                         md:ml-[250px]
                         min-h-screen
                         overflow-auto
+                        
                     "
                 >
                     {children}

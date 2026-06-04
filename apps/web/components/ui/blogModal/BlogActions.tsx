@@ -1,0 +1,149 @@
+import { Button, Popconfirm, Typography, message } from "antd";
+import { LikeOutlined, CommentOutlined } from "@ant-design/icons";
+import { useAppSelector } from "@/lib/store/hooks";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import api from "@/utills/axios";
+
+const { Text } = Typography;
+
+interface Props {
+    blog: any;
+    onReport: () => void;
+    onOpen: (blog: any) => void;
+}
+
+export default function BlogActions({
+    blog,
+    onReport,
+    onOpen
+}: Props) {
+    const queryClient = useQueryClient();
+
+    const userId = useAppSelector((state) => state.auth.user?.id);
+
+    const isAuthor = blog.author?.id === userId;
+    const { data: report = [] } = useQuery({
+        queryKey: ["reportUser", blog?._id],
+        enabled: !!blog?._id,
+        queryFn: async () => {
+            const res = await api.get(
+                `/reports/user/${blog._id}`
+            );
+            return res.data.reports;
+
+        }
+    })
+
+    const alreadyReported =
+        report && report.some((r: any) => r.userId._id === userId && r.blogId._id === blog._id);
+
+    const isLiked =
+        blog.likes?.users?.includes(userId);
+
+    const isCommented =
+        blog.comments?.details?.some(
+            (comment: any) =>
+                comment.user ===    userId
+        );
+    const LikeMutation = useMutation({
+        mutationFn: async (blogId: string) => {
+            const res = await api.post(`/likes/${blogId}`, {
+                userId: userId,
+            });
+
+            return res.data;
+        },
+
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["blogs"],
+            });
+
+            queryClient.invalidateQueries({
+                queryKey: ["blogData", userId],
+            });
+        },
+
+        onError: () => {
+            message.error("Failed to like blog");
+        },
+    });
+
+    const handleLike = (blogId: string) => {
+        LikeMutation.mutate(blogId);
+    };
+
+
+    const deleteMutation = useMutation({
+        mutationFn: async (blogId: string) => {
+            await api.delete(`/blogs/delete/${blogId}`);
+        },
+
+        onSuccess: () => {
+            message.success("Blog deleted");
+
+            queryClient.invalidateQueries({
+                queryKey: ["blogs"],
+            });
+
+        },
+    });
+
+    const handleDelete = () => {
+        deleteMutation.mutate(blog._id);
+    };
+
+
+    return (
+        <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+                <Text type="secondary" title={blog?.createdAt ? new Date(blog.createdAt).toLocaleString() : ""}>
+                    {blog?.createdAt &&
+                        new Date(blog.createdAt).toLocaleDateString()}
+                </Text>
+                <Text
+                    className={`text-sm cursor-pointer hover:text-blue-500  ${isLiked ? "text-blue-500!" : "text-gray-500!"
+                        }`}
+                    onClick={() => handleLike(blog._id)}
+                >
+                    {blog.likes?.count || 0} <LikeOutlined />
+                </Text>
+
+                <Text
+                    className={`text-sm cursor-pointer hover:text-blue-500 ${isCommented ? "text-green-500!" : "text-gray-500!"
+                        }`}
+                    onClick={() => onOpen(blog)}
+                >
+                    {blog.comments?.count || 0}
+                    <CommentOutlined />
+                </Text>
+                <Text
+                    className="text-sm cursor-pointer hover:text-blue-500 text-gray-500"
+                >
+                    {blog.views && blog.views.length > 0 ? blog.views[0].count : 0} Views
+                </Text>
+            </div>
+
+            {isAuthor ? (
+                <Popconfirm
+                    title="Delete Blog"
+                    onConfirm={handleDelete}
+                >
+                    <Button danger type="primary">
+                        Delete
+                    </Button>
+                </Popconfirm>
+            ) : (
+                <Button
+                    danger
+                    type="primary"
+                    onClick={() => onReport()}
+                    disabled={alreadyReported}
+                >
+                    {alreadyReported ? "Reported" : "Report"}
+
+                </Button>
+            )}
+        </div>
+    );
+}

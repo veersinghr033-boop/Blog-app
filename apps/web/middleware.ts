@@ -14,7 +14,6 @@ export async function middleware(request: NextRequest) {
 
     const isProtected =
         path.startsWith("/admin") ||
-        path.startsWith("/author") ||
         path.startsWith("/reader");
 
     const isAuthPage =
@@ -55,12 +54,6 @@ export async function middleware(request: NextRequest) {
                     );
                 }
 
-                if (role === "author") {
-                    return NextResponse.redirect(
-                        new URL("/author", request.url)
-                    );
-                }
-
                 if (role === "reader") {
                     return NextResponse.redirect(
                         new URL("/reader", request.url)
@@ -77,12 +70,7 @@ export async function middleware(request: NextRequest) {
                     );
                 }
 
-                if (role === "author") {
-                    return NextResponse.redirect(
-                        new URL("/author", request.url)
-                    );
-                }
-
+               
                 if (role === "reader") {
                     return NextResponse.redirect(
                         new URL("/reader", request.url)
@@ -99,16 +87,7 @@ export async function middleware(request: NextRequest) {
                     new URL("/unauthorized", request.url)
                 );
             }
-            if (
-                path.startsWith("/author") &&
-                role !== "author"
-            ) {
-
-                return NextResponse.redirect(
-                    new URL("/unauthorized", request.url)
-                );
-            }
-
+            
             if (
                 path.startsWith("/reader") &&
                 role !== "reader"
@@ -142,7 +121,6 @@ export const config = {
         "/login",
         "/signup",
         "/admin/:path*",
-        "/author/:path*",
         "/reader/:path*",
     ],
 };

@@ -1,7 +1,7 @@
 "use client"
 
 import { Modal, Form, Button, Input, message } from "antd"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation , useQueryClient} from "@tanstack/react-query"
 import api from "@/utills/axios"
 
 interface ReportModalProps {
@@ -16,6 +16,7 @@ function ReportModal({
     blogId,
 }: ReportModalProps) {
     const [form] = Form.useForm()
+    const queryClient = useQueryClient();
 
     const reportMutation = useMutation({
         mutationFn: async (reason: string) => {
@@ -27,6 +28,16 @@ function ReportModal({
 
         onSuccess: () => {
             message.success("Blog reported successfully")
+
+            queryClient.invalidateQueries({
+                queryKey: ["reportUser", blogId],
+            })
+            queryClient.invalidateQueries({
+                queryKey: ["report"],
+            })
+            queryClient.invalidateQueries({
+                queryKey: ["reports"],
+            })
 
             form.resetFields()
             setOpen(false)

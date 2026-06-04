@@ -1,7 +1,7 @@
 "use client"
 
 import { Layout, Input, Select } from "antd"
-import Blog from "@/components/ui/blog"
+import Blog from "@/components/ui/blog/Blog"
 import { useEffect, useMemo, useState } from "react"
 import { useAppSelector, useAppDispatch } from "@/lib/store/hooks"
 import { fetchAllBlogs } from "@/lib/store/features/blogThunk"
@@ -13,6 +13,7 @@ const { Search } = Input
 function Blogs() {
     // const blogs = useAppSelector((state) => state.blog.blogs)
     const loading = useAppSelector((state) => state.blog.loading)
+    const user = useAppSelector((state) => state.auth.user)
 
     const dispatch = useAppDispatch()
 

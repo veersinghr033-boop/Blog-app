@@ -10,14 +10,24 @@ import openAiRoute from "./src/routes/openAiRoute.js";
 import blogSaveRoute from "./src/routes/BlogSaveRoute.js";
 import userRoute from "./src/routes/userRoute.js";
 import reportRoute from "./src/routes/RepotRoute.js";
+import chatRoute from "./src/routes/chatRoute.js";
+import viewRoute from "./src/routes/viewRoute.js";
+import replyRoute from "./src/routes/replyRoute.js";
 import { apiLimiter } from "./src/middleware/rateLimiter.js";
 import cookieParser from "cookie-parser";
+import http from "http";
+import { initSocket } from "./src/socket/socket.js";
 
 dotenv.config();
 
 connectDB();
 
 const app = express();
+const server = http.createServer(app);
+
+const io = initSocket(server);
+
+app.set("io", io);
 
 app.use(express.json());
 app.use(cookieParser());
@@ -39,8 +49,10 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/openai", openAiRoute);
 app.use("/api/blogsave", blogSaveRoute);
 app.use("/api/users", userRoute);
-app.use("/api/reports", reportRoute)
-
-app.listen(process.env.PORT, () => {
+app.use("/api/reports", reportRoute);
+app.use("/api", chatRoute);
+app.use("/api/views", viewRoute);
+app.use("/api/replies", replyRoute);
+server.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
 });

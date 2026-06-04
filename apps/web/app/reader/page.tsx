@@ -2,7 +2,7 @@
 
 import { Layout} from "antd"
 import { useEffect } from "react"
-import ReaderBlog from "@/components/ui/readerBlog"
+import ReaderBlog from "@/components/ui/ReaderBlog/ReaderBlog"
 import { useAppDispatch  ,useAppSelector } from "@/lib/store/hooks"
 import { fetchAllBlogs } from "@/lib/store/features/blogThunk"
 import api from "@/utills/axios"
@@ -22,7 +22,7 @@ function Page() {
   
   // const blogs = useAppSelector((state) => state.blog.blogs)
 
- 
+//  console.log(blogs)
   return (
     <Layout className="min-h-screen">
       <header className="mb-6">

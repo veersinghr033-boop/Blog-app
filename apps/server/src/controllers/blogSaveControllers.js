@@ -75,6 +75,14 @@ export const getSavedBlogs = async (req, res) => {
           as: "commentDetails",
         },
       },
+      {
+        $lookup: {
+          from: "views",
+          localField: "_id",
+          foreignField: "blogId",
+          as: "viewsDetails",
+        },
+      },
 
       {
         $project: {
@@ -88,12 +96,16 @@ export const getSavedBlogs = async (req, res) => {
 
             author: {
               _id: "$authorDetails._id",
-              name: "$authorDetails.userName",
+              userName: "$authorDetails.userName",
             },
 
             likes: {
               count: { $size: "$likeDetails" },
               users: "$likeDetails.user",
+            },
+            views: {
+              count: { $size: "$viewsDetails" },
+              users: "$viewsDetails.userId",
             },
 
             comments: {

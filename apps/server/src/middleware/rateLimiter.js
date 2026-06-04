@@ -7,7 +7,7 @@ export const authLimiter = rateLimit({
   legacyHeaders: false,
   message: {
     message:
-      "Too many authentication requests from this IP, please try again after 15 minutes.",
+      "Too many authentication requests from this IP, please try again after 1 minutes",
   },
 });
 

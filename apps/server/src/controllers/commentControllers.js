@@ -1,4 +1,5 @@
 import Comment from "../models/CommentModel.js";
+import Blog from "../models/BlogModel.js";
 import mongoose from "mongoose";
 
 export const createComment = async (req, res) => {
@@ -11,7 +12,15 @@ export const createComment = async (req, res) => {
       user: userId,
       blog: blogId,
     });
+
     await newComment.save();
+    await Blog.findByIdAndUpdate(
+      blogId,
+      {
+        $push: { Comments: newComment._id },
+      },
+    );
+    // console.log(blog)
     res
       .status(201)
       .json({ message: "Comment created successfully", comment: newComment });
@@ -38,6 +47,14 @@ export const getCommentsByBlogId = async (req, res) => {
       },
       { $unwind: "$userDetails" },
       {
+        $lookup: {
+          from: "replies",
+          localField: "_id",
+          foreignField: "commentId",
+          as: "replies",
+        },
+      },
+      {
         $project: {
           comment: 1,
           user: {
@@ -45,6 +62,7 @@ export const getCommentsByBlogId = async (req, res) => {
             name: "$userDetails.userName",
             email: "$userDetails.email",
           },
+          replies: 1,
           createdAt: 1,
         },
       },
@@ -71,6 +89,10 @@ export const deleteComment = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized to delete this comment" });
     }
     await Comment.findByIdAndDelete(commentId);
+    // Update the blog's comment count
+    await Blog.findByIdAndUpdate(comment.blog, {
+      $pull: { Comments: comment._id },
+    });
     res.status(200).json({ message: "Comment deleted successfully" });
   } catch (error) {
     console.log(error);

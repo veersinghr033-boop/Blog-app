@@ -10,7 +10,7 @@ import {
     message,
     Empty,
 } from "antd";
-import BlogModal from "@/components/ui/blogModal";
+import ReadBlog from "@/components/ui/blogModal/BlogModal";
 import {
     DeleteOutlined,
     UserOutlined,
@@ -21,6 +21,7 @@ import { useState } from "react";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
+import { useRouter } from "next/navigation";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -32,8 +33,9 @@ function ReportCard({ data }: ReportCardProps) {
     const [blogOpen, setBlogOpen] = useState(false)
     const [selectedBlogData, setSelectedBlogData] = useState<any>(null)
     const [expandedBlogs, setExpandedBlogs] = useState<Record<string, boolean>>({})
-
+   const router = useRouter();
     const user = useAppSelector((state) => state.auth.user?.id)
+    const userRole = useAppSelector((state) => state.auth.user?.role)
 
 
     const queryClient = useQueryClient();
@@ -42,7 +44,6 @@ function ReportCard({ data }: ReportCardProps) {
         mutationFn: async (reportId: string) => {
             await api.delete(`/reports/${reportId}`);
         },
-
         onSuccess: () => {
             message.success("Report deleted");
 
@@ -51,6 +52,9 @@ function ReportCard({ data }: ReportCardProps) {
             });
             queryClient.invalidateQueries({
                 queryKey: ["report"],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["reportUser", selectedBlogData?._id],
             });
         },
 
@@ -71,7 +75,7 @@ function ReportCard({ data }: ReportCardProps) {
             <div className="mb-10 rounded-3xl bg-white p-6 shadow-sm border border-gray-200">
                 <div className=" flex items-center justify-between flex-wrap gap-4">
                     <div>
-                        <Title  className="mb-1! text-lg! md:text-2xl! font-bold text-gray-800!">
+                        <Title className="mb-1! text-lg! md:text-2xl! font-bold text-gray-800!">
                             Reports Management
                         </Title>
 
@@ -180,8 +184,11 @@ function ReportCard({ data }: ReportCardProps) {
                                     <Text
                                         className="text-blue-500! hover:text-blue-700! cursor-pointer"
                                         onClick={() => {
-                                            setSelectedBlogData(report.blogDetails)
-                                            setBlogOpen(true)
+                                            setSelectedBlogData(report.blogDetails);
+                                            router.push(
+                                                `/${userRole}/blogs/${report.blogDetails._id}`
+                                            );
+                                            
                                         }}
                                     >
                                         Read more
@@ -230,12 +237,12 @@ function ReportCard({ data }: ReportCardProps) {
                     ))}
                 </div>
             )}
-            <BlogModal
+            {/* <ReadBlog
                 open={blogOpen}
                 userId={user}
                 setOpen={setBlogOpen}
                 blog={selectedBlogData}
-            />
+            /> */}
         </Layout>
     );
 }
