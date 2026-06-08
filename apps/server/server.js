@@ -13,6 +13,7 @@ import reportRoute from "./src/routes/RepotRoute.js";
 import chatRoute from "./src/routes/chatRoute.js";
 import viewRoute from "./src/routes/viewRoute.js";
 import replyRoute from "./src/routes/replyRoute.js";
+import groupRoute from "./src/routes/groupRoute.js";
 import { apiLimiter } from "./src/middleware/rateLimiter.js";
 import cookieParser from "cookie-parser";
 import http from "http";
@@ -53,6 +54,7 @@ app.use("/api/reports", reportRoute);
 app.use("/api", chatRoute);
 app.use("/api/views", viewRoute);
 app.use("/api/replies", replyRoute);
+app.use("/api/groups", groupRoute);
 server.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
 });

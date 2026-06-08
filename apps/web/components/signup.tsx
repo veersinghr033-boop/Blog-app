@@ -122,26 +122,7 @@ export default function RegisterPage() {
                         />
                     </div>
 
-                    <div>
-                        <label className="block mb-2 font-medium">
-                            Role
-                        </label>
-
-                        <select
-                            name="role"
-                            value={formData.role}
-                            onChange={handleChange}
-                            className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-black"
-                        >
-                            <option value="reader">
-                                Reader
-                            </option>
-
-                            <option value="author">
-                                Author
-                            </option>
-                        </select>
-                    </div>
+                    
 
                     <button
                         type="submit"

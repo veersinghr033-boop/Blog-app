@@ -1,15 +1,14 @@
 "use client";
 
-import { Layout, message } from "antd";
-import { useEffect, useState ,useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { Layout, message, Button } from "antd";
+import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
-import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
 import useUserStatus from "./useUserStatus";
+import AddGroup from "./addGroup";
 
 interface UserType {
-    id: string;
+    id: number;
     name: string;
     role: string;
 }
@@ -18,13 +17,12 @@ export default function UserSidebar({ selectedUser, setSelectedUser }: any) {
     const [search, setSearch] = useState("");
     const socketRef = useRef<any>(null);
     const [sortedUsers, setSortedUsers] = useState<UserType[]>([]);
+    const [openAddGroup, setOpenAddGroup] = useState(false);
     const userName = useAppSelector((state) => state.auth.user?.userName);
-
     const userId = useAppSelector((state) => state.auth.user?.id);
 
     const { statuses: userStatuses } = useUserStatus(userId);
 
-    
     useEffect(() => {
         if (!userId) return;
 
@@ -35,40 +33,12 @@ export default function UserSidebar({ selectedUser, setSelectedUser }: any) {
         socket.emit("userOnline", userId);
 
         socket.on("sortedUsers", (users) => {
-
             setSortedUsers(users);
         });
         return () => {
             socket.disconnect();
         };
-    }, [ userId ]);
-    // console.log("Sorted", sortedUsers)
-
-    const {
-        data: users = [],
-        isError,
-        error,
-    } = useQuery<UserType[]>({
-        queryKey: ["users"],
-
-        queryFn: async () => {
-            const res = await api.get("/users");
-
-            return res.data.map((user: any) => ({
-                id: user._id,
-                name: user.userName,
-                role: user.role,
-            }));
-        },
-    });
-
-    useEffect(() => {
-        if (isError) {
-            console.error(error);
-
-            message.error("Failed to load users");
-        }
-    }, [isError, error]);
+    }, [userId]);
 
     const filteredUsers = sortedUsers.filter((user) =>
         user.name.toLowerCase().includes(search.toLowerCase()),
@@ -76,25 +46,29 @@ export default function UserSidebar({ selectedUser, setSelectedUser }: any) {
 
     return (
         <Layout.Sider
-            className=" min-h-[calc(100vh-125px)]! rounded bg-white!  shadow-sm border border-gray-200 "
-            width={"256px"}
+            className=" min-h-[calc(100vh-125px)]!  bg-white!  shadow-sm border border-gray-200 border-r-0! p-0!"
+            width={250}
         >
-            <div className="px-6 py-5 border-b border-gray-300">
+            <div className="px-4 flex gap-2 justify-between items-center py-4 border-b border-gray-300">
                 <div className="text-base font-semibold capitalize">
                     {`Welcome, ${userName || "User"}`}
                 </div>
+                <Button
+                    type="primary"
+                    className="max-w-2/5 py-4! bg-black!"
+                    onClick={() => setOpenAddGroup(true)}
+                >
+                    Add Group
+                </Button>
             </div>
 
-            <div className="p-4 space-y-4">
+            <div className="p-4  space-y-4">
                 <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search user..."
                     className="w-full border rounded px-3 py-2 border-gray-200"
                 />
-
-                
-                
             </div>
             <div className="overflow-y-auto">
                 {filteredUsers.map((user) => {
@@ -135,6 +109,11 @@ export default function UserSidebar({ selectedUser, setSelectedUser }: any) {
                     );
                 })}
             </div>
+            <AddGroup
+                open={openAddGroup}
+                onClose={() => setOpenAddGroup(false)}
+                user={sortedUsers}
+            />
         </Layout.Sider>
     );
 }

@@ -8,7 +8,6 @@ dotenv.config();
 export const registerUser = async (req, res) => {
   try {
     const { userName, email, password, role } = req.body;
-    console.log("kkkkkk");
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {

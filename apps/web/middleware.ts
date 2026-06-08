@@ -6,11 +6,13 @@ export async function middleware(request: NextRequest) {
     console.log("MIDDLEWARE RUNNING");
 
     const token = request.cookies.get("token")?.value;
+    console.log(token)
 
     const path = request.nextUrl.pathname;
 
-    // console.log("PATH:", path);
-    // console.log("TOKEN:", token);
+    console.log("PATH:", request.nextUrl.pathname);
+console.log("TOKEN:", request.cookies.get("token")?.value);
+console.log("SECRET:", process.env.JWT_SECRET);
 
     const isProtected =
         path.startsWith("/admin") ||

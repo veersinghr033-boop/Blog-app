@@ -104,11 +104,11 @@ export default function MessageChat({ selectedUser }: any) {
     };
 
     return (
-          <Layout className=" p-4 md:p-0">
-                    <div className=" h-[calc(100vh-115px)] rounded bg-white shadow-sm border border-gray-200">
-                        <header className="flex items-center border-b border-gray-300 bg-white px-6 py-3">
+        <Layout className="  md:p-0 shadow-lg! border! border-gray-200">
+                    <div className=" h-[calc(100vh-115px)] rounded bg-white ">
+                        <header className="flex items-center border-b border-gray-300 bg-white px-6 py-4">
                             <div className="flex items-center gap-4">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black text-white font-semibold uppercase relative">
+                                <div className="flex h-8.5 w-8.5 items-center justify-center rounded-full bg-black text-white font-semibold uppercase relative">
                                     {selectedUser?.name?.[0] || "U"}
                                     <span
                                         className={`w-3 h-3 rounded-full absolute bottom-0 right-0 ${userStatuses[selectedUser?.id || ""] === "online"
@@ -124,7 +124,7 @@ export default function MessageChat({ selectedUser }: any) {
                                 </div>
                             </div>
                         </header>
-                        <section className="flex flex-col justify-between">
+                        <section className="flex flex-col justify-between ">
                             {selectedUser ? (
                                 <div className="flex flex-col h-[calc(100vh-180px)]">
                                     <Virtuoso

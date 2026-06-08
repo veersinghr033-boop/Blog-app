@@ -13,7 +13,7 @@ export const initSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    console.log("User connected:", socket.id);
+    // console.log("User connected:", socket.id);
 
     const setUserOffline = (userId) => {
       if (!userId) return;
@@ -28,14 +28,14 @@ export const initSocket = (server) => {
     };
 
     socket.on("userOnline", async (userId) => {
-      console.log("userOnline:", userId);
+      // console.log("userOnline:", userId);
 
       userStatus.set(userId, "online");
       socketToUser.set(socket.id, userId);
 
       socket.join(userId);
 
-      console.log(`Socket ${socket.id} joined room ${userId}`);
+      // console.log(`Socket ${socket.id} joined room ${userId}`);
 
       io.emit("userStatus", {
         userId,
@@ -63,7 +63,7 @@ export const initSocket = (server) => {
 
       socket.join(room);
 
-      console.log(`Joined room ${room}`);
+      // console.log(`Joined room ${room}`);
     });
 
     socket.on("leaveRoom", ({ user1, user2 }) => {
@@ -71,7 +71,7 @@ export const initSocket = (server) => {
 
       socket.leave(room);
 
-      console.log(`Left room ${room}`);
+      // console.log(`Left room ${room}`);
     });
 
     socket.on("disconnect", () => {

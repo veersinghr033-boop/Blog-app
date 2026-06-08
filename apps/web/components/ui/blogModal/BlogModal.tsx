@@ -54,7 +54,7 @@ function ReadBlog({ blog }: ReadBlogProps) {
     if (!blog) return null;
     
     return (
-        <div className="bg-white rounded-3xl shadow-xl border border-gray-200 p-6 max-w-5xl mx-auto ">
+        <div className="bg-white rounded-3xl shadow-xl border border-gray-200 p-6 max-w-full mx-auto ">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
                 <div>
                     <Title level={3}>
