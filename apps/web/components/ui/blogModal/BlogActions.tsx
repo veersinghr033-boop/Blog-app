@@ -3,6 +3,7 @@ import { LikeOutlined, CommentOutlined } from "@ant-design/icons";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
+import { useRouter } from "next/navigation";
 
 const { Text } = Typography;
 
@@ -18,7 +19,7 @@ export default function BlogActions({
     onOpen
 }: Props) {
     const queryClient = useQueryClient();
-
+    const router = useRouter();
     const userId = useAppSelector((state) => state.auth.user?.id);
 
     const isAuthor = blog.author?.id === userId;
@@ -43,7 +44,7 @@ export default function BlogActions({
     const isCommented =
         blog.comments?.details?.some(
             (comment: any) =>
-                comment.user ===    userId
+                comment.user === userId
         );
     const LikeMutation = useMutation({
         mutationFn: async (blogId: string) => {
@@ -61,6 +62,12 @@ export default function BlogActions({
 
             queryClient.invalidateQueries({
                 queryKey: ["blogData", userId],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["save"],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["blog"],
             });
         },
 
@@ -91,6 +98,9 @@ export default function BlogActions({
 
     const handleDelete = () => {
         deleteMutation.mutate(blog._id);
+
+        router.back()
+
     };
 
 
@@ -110,7 +120,7 @@ export default function BlogActions({
                 </Text>
 
                 <Text
-                    className={`text-sm cursor-pointer hover:text-blue-500 ${isCommented ? "text-green-500!" : "text-gray-500!"
+                    className={`flex items-center gap-1 text-sm cursor-pointer hover:text-blue-500 ${isCommented ? "text-green-500!" : "text-gray-500!"
                         }`}
                     onClick={() => onOpen(blog)}
                 >
@@ -118,7 +128,7 @@ export default function BlogActions({
                     <CommentOutlined />
                 </Text>
                 <Text
-                    className="text-sm cursor-pointer hover:text-blue-500 text-gray-500"
+                    className="text-sm text-gray-500"
                 >
                     {blog.views && blog.views.length > 0 ? blog.views[0].count : 0} Views
                 </Text>
@@ -128,8 +138,11 @@ export default function BlogActions({
                 <Popconfirm
                     title="Delete Blog"
                     onConfirm={handleDelete}
+                    okText="Yes"
+                    cancelText="No"
+
                 >
-                    <Button danger type="primary">
+                    <Button danger type="primary" loading={deleteMutation.isPending}>
                         Delete
                     </Button>
                 </Popconfirm>
@@ -139,6 +152,8 @@ export default function BlogActions({
                     type="primary"
                     onClick={() => onReport()}
                     disabled={alreadyReported}
+                    title={alreadyReported ? "You have already reported this blog" : "Report this blog"}
+
                 >
                     {alreadyReported ? "Reported" : "Report"}
 

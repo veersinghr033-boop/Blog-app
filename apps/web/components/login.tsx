@@ -33,7 +33,7 @@ export default function LoginPage() {
         e.preventDefault();
 
         try {
-            const resultAction: any = await dispatch(login(formData));
+            const resultAction: any = await dispatch(login(formData)as any);
             if (login.fulfilled.match(resultAction)) {
                 message.success("Login successful");
                 if (resultAction.payload.user.role === "admin") {

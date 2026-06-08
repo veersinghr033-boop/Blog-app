@@ -1,4 +1,4 @@
-import { Button, Input, Typography, message } from "antd";
+import { Button, Form, Input, Typography, message } from "antd";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useState, } from "react";
@@ -75,7 +75,17 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
                 </Text>
             </div>
             {openReply === comment._id && (
-                <div className="pl-8 mt-3 flex gap-2">
+                <Form className="pl-8! mt-3! flex gap-2" onFinish={() => {
+                    if (!replyText[comment._id]?.trim()) {
+                        message.warning("Reply cannot be empty");
+                        return;
+                    }
+
+                    replyMutation.mutate({
+                        commentId: comment._id,
+                        text: replyText[comment._id],
+                    });
+                }}>
                     <Input
                         placeholder="Write a reply..."
                         value={
@@ -90,23 +100,14 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
 
                     <Button
                         type="primary"
-                        onClick={() =>
-                            replyMutation.mutate({
-                                commentId:
-                                    comment._id,
-                                text:
-                                    replyText[
-                                    comment._id
-                                    ],
-                            })
-                        }
+                        htmlType="submit"
                         loading={
                             replyMutation.isPending
                         }
                     >
                         Send
                     </Button>
-                </div>
+                </Form>
             )}
             {openReplyData === comment._id && (
                 <div className="pl-8 mt-3 flex flex-col gap-2">

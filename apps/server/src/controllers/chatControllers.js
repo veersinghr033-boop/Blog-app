@@ -1,6 +1,6 @@
 import Chat from "../models/chatModel.js";
 import Message from "../models/message.js";
-// import { emitSortedUsers } from "./userControllers.js";
+import { emitSortedUsers } from "./userConlrollers.js";
 
 export const getMessages = async (req, res) => {
   try {
@@ -58,6 +58,8 @@ export const createChat = async (req, res) => {
 
     const io = req.app.get("io");
     io.to(room).emit("receiveMessage", formattedMsg);
+    await emitSortedUsers(io, senderId);
+    await emitSortedUsers(io, receiverId);
 
     res.status(201).json({
       message: "Message sent",

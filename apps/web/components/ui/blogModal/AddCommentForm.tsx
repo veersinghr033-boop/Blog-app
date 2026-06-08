@@ -1,4 +1,4 @@
-import { Form, Input, Button , message } from "antd";
+import { Form, Input, Button, message } from "antd";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 
@@ -30,6 +30,12 @@ export default function AddCommentForm({ blogId }: { blogId: string }) {
             queryClient.invalidateQueries({
                 queryKey: ["saved"],
             });
+            queryClient.invalidateQueries({
+                queryKey: ["savedBlogs"],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["blog"],
+            });
 
             message.success("Comment added");
         },
@@ -56,15 +62,16 @@ export default function AddCommentForm({ blogId }: { blogId: string }) {
                     },
                 ]}
             >
-                <Input.TextArea
-                    rows={3}
+                <Input
                     placeholder="Write your comment..."
+                    required
                 />
             </Form.Item>
 
             <Button
                 type="primary"
                 htmlType="submit"
+                key="submit"
                 loading={commentMutation.isPending}
             >
                 Add Comment

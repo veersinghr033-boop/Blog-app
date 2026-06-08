@@ -188,6 +188,12 @@ export const getBlogById = async (req, res) => {
       },
     ];
     const blog = await Blog.aggregate(pipelines);
+
+    if(blog.length === 0) {
+      return res.status(404).json({
+        message: "Blog not found",
+      });
+    }
     res.status(200).json({
       message: "Blog retrieved successfully",
       blog: blog,

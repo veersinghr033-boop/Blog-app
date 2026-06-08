@@ -63,7 +63,7 @@ export default function BlogActions({
             </Text>
 
             <Text
-                className={`text-sm cursor-pointer hover:text-blue-500 ${isCommented ? "text-green-500!" : "text-gray-500!"
+                className={`flex items-center gap-1 text-sm cursor-pointer hover:text-blue-500 ${isCommented ? "text-green-500!" : "text-gray-500!"
                     }`}
                 onClick={() => onOpen(post)}
             >

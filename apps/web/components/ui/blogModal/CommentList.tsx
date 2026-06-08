@@ -45,6 +45,9 @@ export default function CommentList({
             queryClient.invalidateQueries({
                 queryKey: ["saved"],
             });
+            queryClient.invalidateQueries({
+                queryKey: ["blog"],
+            });
 
             message.success("Comment deleted");
         },

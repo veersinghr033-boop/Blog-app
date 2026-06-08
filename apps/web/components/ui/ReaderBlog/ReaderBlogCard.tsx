@@ -149,7 +149,7 @@ const { data: savedBlogs = [] } = useQuery({
                                 {post.likes?.count || 0} <LikeOutlined />
                             </Text>
                             <Text
-                                className={`cursor-pointer transition-colors ${isCommented ? "text-green-500!" : "text-gray-500 hover:text-blue-500"}`}
+                                className={`flex items-center gap-1 cursor-pointer transition-colors ${isCommented ? "text-green-500!" : "text-gray-500 hover:text-blue-500"}`}
                                 onClick={() => onOpen(post)}
                             >
                                 {post.comments?.count || 0} <CommentOutlined />

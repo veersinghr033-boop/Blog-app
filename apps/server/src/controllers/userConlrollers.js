@@ -1,4 +1,5 @@
 import User from "../models/UsersModel.js";
+import Chat from "../models/chatModel.js";
 
 export const getAllUsers = async (req, res) => {
   const userId = req.user.id;
@@ -36,7 +37,59 @@ export const deleteUser = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Failed to delete user" });
-
   }
-}
+};
 
+export const emitSortedUsers = async (io, currentUserId) => {
+  const users = await User.find({
+    _id: { $ne: currentUserId },
+  });
+
+  const chats = await Chat.find({
+    participants: currentUserId,
+  });
+
+  const result = users.map((user) => {
+    const chat = chats.find((c) =>
+      c.participants.some((id) => id.toString() === user._id.toString()),
+    );
+
+    return {
+      id: user._id,
+      name: user.userName,
+      role: user.role,
+      updatedAt: chat?.updatedAt || null,
+    };
+  });
+
+  result.sort((a, b) => {
+    if (a.updatedAt && b.updatedAt) {
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    }
+
+    if (a.updatedAt) return -1;
+    if (b.updatedAt) return 1;
+
+    return a.name.localeCompare(b.name);
+  });
+
+  // console.log("Emitting sortedUsers");
+  // console.log(result);
+
+  io.to(currentUserId.toString()).emit("sortedUsers", result);
+
+  return result;
+};
+export const getUsersSorted = async (req, res) => {
+  try {
+    const currentUserId = req.user.id;
+    const io = req.app.get("io");
+
+    const result = await emitSortedUsers(io, currentUserId);
+    // console.log("Sorted users sent to client:", result);
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
