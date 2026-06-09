@@ -14,7 +14,7 @@ export default function BlogDetailsPage() {
             const res = await api.get(
                 `/blogs/find/${params.id}`
             );
-           console.log(res.data);
+        //    console.log(res.data);
             return res.data.blog;
         },
     });

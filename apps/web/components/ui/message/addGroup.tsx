@@ -1,6 +1,7 @@
 import { Modal, Checkbox, Form, Button, message, Input } from "antd";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
+import { useEffect } from "react";
 
 type User = {
     id: number;
@@ -10,14 +11,39 @@ type User = {
 function AddGroup({
     open,
     onClose,
-    user,
 }: {
     open: boolean;
     onClose: () => void;
-    user: User[];
 }) {
     const [form] = Form.useForm();
+    const queryClient = useQueryClient();
 
+    const {
+        data: users = [],
+        isLoading,
+        isError,
+        error,
+    } = useQuery<User[]>({
+        queryKey: ["users"],
+        queryFn: async () => {
+            const response = await api.get("/users")
+
+            return response.data.map((user: any) => ({
+                key: user._id,
+                name: user.userName,
+                email: user.email,
+                role: user.role,
+                joined: new Date(user.createdAt).toLocaleDateString(),
+            }))
+        },
+    })
+
+    useEffect(() => {
+        if (isError) {
+            console.error("Error fetching users:", error)
+            message.error("Failed to fetch users")
+        }
+    }, [isError, error])
     const createGroupMutation = useMutation({
         mutationFn: async (values: any) => {
             const res = await api.post("/groups/create", {
@@ -30,6 +56,9 @@ function AddGroup({
         onSuccess: () => {
             form.resetFields();
             onClose();
+            queryClient.invalidateQueries({
+                queryKey: ["groups"]
+            });
             message.success("Group created successfully");
         },
         onError: (error: any) => {
@@ -52,7 +81,7 @@ function AddGroup({
 
                 <Form.Item label="Select Members" name="members" rules={[{ required: true, message: "Please select at least one member" }]}>
                     <Checkbox.Group style={{ width: "100%" }}>
-                        {user.map((u) => (
+                        {users.map((u) => (
                             <Checkbox key={u.id} value={u.id} style={{ marginBottom: 8 }}>
                                 {u.name}
                             </Checkbox>
@@ -64,7 +93,7 @@ function AddGroup({
                     type="primary"
                     htmlType="submit"
                     loading={createGroupMutation.isPending}
-                    className="w-full"
+                    className="w-full bg-black!"
                 >
                     Create Group
                 </Button>

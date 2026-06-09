@@ -11,15 +11,11 @@ const groupSchema = new mongoose.Schema({
         ref: "User",
         required: true,
     },
-    members: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: "User",
-        required: true,
-    },
-    lastMessage: {
+    chatId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Message",
-    },
+        ref: "Chat"
+    }
+
 }, { timestamps: true }, );
 
 const Group = mongoose.model("Group", groupSchema);
