@@ -29,11 +29,8 @@ function AddGroup({
             const response = await api.get("/users")
 
             return response.data.map((user: any) => ({
-                key: user._id,
+                id: user._id,
                 name: user.userName,
-                email: user.email,
-                role: user.role,
-                joined: new Date(user.createdAt).toLocaleDateString(),
             }))
         },
     })

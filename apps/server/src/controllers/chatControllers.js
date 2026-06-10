@@ -141,7 +141,7 @@ export const createChat = async(req, res) => {
 };
 export const getGroupMessages = async(req, res) => {
     try {
-        const userId = req.user.id;
+        // const userId = req.user.id;
         const { groupId } = req.params;
         // console.log("groupID", groupId);
         const group = await Group.findById(groupId);

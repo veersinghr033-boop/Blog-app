@@ -17,7 +17,7 @@ export default function Message() {
       />
 
       <Layout.Content>
-        <MessageChat selectedUser={selectedUser} />
+        <MessageChat selectedUser={selectedUser} setSelectedUser={setSelectedUser} />
       </Layout.Content>
     </Layout>
   );

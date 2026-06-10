@@ -5,24 +5,26 @@ import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { Virtuoso } from "react-virtuoso";
 import { useMutation, useQuery } from "@tanstack/react-query";
-
+import { UserOutlined, TeamOutlined } from '@ant-design/icons';
 import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
-
+import ViewGroup from "./ViewGroup";
 interface MessageType {
-    senderId: { _id: string; name: string };
+    senderId: { _id: string; userName: string };
     receiverId?: string;
     groupId?: string;
     message: string;
     timestamp: string;
 }
 
-export default function MessageChat({ selectedUser }: any) {
+export default function MessageChat({ selectedUser, setSelectedUser }: any) {
     const [messageText, setMessageText] = useState("");
     const [messages, setMessages] = useState<MessageType[]>([]);
     const [userStatuses, setUserStatuses] = useState<Record<string, string>>({});
     const socketRef = useRef<any>(null);
     const currentRoomRef = useRef<string | null>(null);
+    const [open, setOpen] = useState(false)
+    const [ selectGroup , setSelectGroup] = useState<String>("")
     const userId = useAppSelector((state) => state.auth.user?.id);
     const { data } = useQuery<MessageType[]>({
         queryKey: ["chatMessages", selectedUser?._id || selectedUser?.id],
@@ -67,7 +69,7 @@ export default function MessageChat({ selectedUser }: any) {
             socketRef.current.emit("joinGroup", selectedUser.id);
 
             const groupHandler = (msg: MessageType) => {
-                console.log("Message",msg)
+                console.log("Message", msg)
                 if (msg.groupId === selectedUser.id) {
                     setMessages((prev) => [...prev, msg]);
                 }
@@ -139,15 +141,23 @@ export default function MessageChat({ selectedUser }: any) {
             timestamp: new Date().toISOString(),
         });
     };
+   const handleView = () =>{
+       if (selectedUser?.type === "group"){
+           console.log("assas")
+        setOpen(true)
+        setSelectGroup(selectedUser.id)
+       }
+
+   }
 
     return (
         <Layout className="md:p-0 shadow-lg border border-gray-200">
             <div className="h-[calc(100vh-115px)] rounded bg-white">
-                <header className="flex items-center border-b border-gray-300 bg-white px-6 py-4">
+                <header className="flex items-center border-b border-gray-300 bg-white px-6 py-3">
                     <div className="flex items-center gap-4">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-black text-white font-semibold uppercase relative">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-black text-white font-semibold uppercase relative" onClick={handleView}>
                             {selectedUser?.type === "group"
-                                ? "👥"
+                                ? <TeamOutlined />
                                 : selectedUser?.name?.[0] || "U"}
 
                             {selectedUser?.type !== "group" && (
@@ -160,9 +170,9 @@ export default function MessageChat({ selectedUser }: any) {
                                 {selectedUser ? selectedUser.name : "Open a chat"}
                             </div>
 
-                            {selectedUser?.type !== "group" && (
+                            {(
                                 <div className="text-xs text-gray-500">
-                                    {userStatuses[selectedUser?.id || ""] || "offline"}
+                                    {userStatuses[selectedUser?.id || ""] || selectedUser?.type == "group" ? "Group" : "offline"}
                                 </div>
                             )}
                         </div>
@@ -181,6 +191,9 @@ export default function MessageChat({ selectedUser }: any) {
 
                                     return (
                                         <div className={`flex flex-col gap-1 mx-4 py-1.5 ${isMine ? "items-end" : "items-start"}`}>
+                                            <div className="text-xs text-gray-400 px-1">
+                                                {item.senderId.userName}  {new Date(item.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", })}
+                                            </div>
                                             <div
                                                 className={`max-w-[70%] break-words rounded-2xl px-5 py-2 ${isMine
                                                     ? "bg-blue-500 text-white"
@@ -190,9 +203,7 @@ export default function MessageChat({ selectedUser }: any) {
                                                 {item.message}
                                             </div>
 
-                                            <div className="text-xs text-gray-400 px-1">
-                                                {new Date(item.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", })}
-                                            </div>
+
                                         </div>
                                     );
                                 }}
@@ -230,6 +241,7 @@ export default function MessageChat({ selectedUser }: any) {
                     )}
                 </section>
             </div>
+            <ViewGroup open={open} onClose={() => setOpen(false)} Groups={selectGroup} SelectedUser={setSelectedUser}  />
         </Layout>
     );
 }

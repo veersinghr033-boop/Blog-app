@@ -6,6 +6,7 @@ import { io } from "socket.io-client";
 import { useAppSelector } from "@/lib/store/hooks";
 import useUserStatus from "./useUserStatus";
 import AddGroup from "./addGroup";
+import { UserOutlined, TeamOutlined } from '@ant-design/icons';
 import { useQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
 
@@ -45,13 +46,7 @@ export default function UserSidebar({ selectedUser, setSelectedUser }: any) {
         };
     }, [userId]);
 
-    const { data: groups = [] } = useQuery({
-        queryKey: ["groups"],
-        queryFn: async () => {
-            const res = await api.get("/groups");
-            return res.data;
-        },
-    });
+
 
     const filteredUsers = sortedUsers
         .filter((user) => user.name.toLowerCase().includes(search.toLowerCase()))
@@ -59,22 +54,8 @@ export default function UserSidebar({ selectedUser, setSelectedUser }: any) {
             ...user,
             //   type: "user",
         }));
-    // console.log(filteredUsers)
-    const filteredGroups = groups
-        .filter((group: any) =>
-            group.name.toLowerCase().includes(search.toLowerCase()),
-        )
-        .map((group: any) => ({
-            ...group,
-            type: "group",
-        }));
 
-    const chatList = [...filteredUsers, ...filteredGroups];
-    const user = sortedUsers.filter((group: any) =>
-        group.name.toLowerCase().includes(search.toLowerCase()),
-    )
-        .map((group: any) => ({
-        }));
+
     return (
         <Layout.Sider
             width={250}
@@ -113,14 +94,13 @@ export default function UserSidebar({ selectedUser, setSelectedUser }: any) {
                             key={isGroup ? item._id : item.id}
                             onClick={() => setSelectedUser(item)}
                             className={`w-full px-6 py-4 flex items-center gap-3 border-y border-gray-200 hover:bg-slate-50
-                ${(isGroup && selectedUser?._id === item._id) ||
-                                    (!isGroup && selectedUser?.id === item.id)
+                ${(selectedUser?.id === item.id)
                                     ? "bg-slate-100"
                                     : ""
                                 }`}
                         >
                             <div className="relative h-12 w-12 rounded-full bg-black text-white flex items-center justify-center capitalize font-semibold">
-                                {isGroup ? "👥" : item.name?.[0]}
+                                {isGroup ? <TeamOutlined /> : item.name?.[0]}
 
                                 {!isGroup && (
                                     <span
@@ -140,7 +120,7 @@ export default function UserSidebar({ selectedUser, setSelectedUser }: any) {
 
                                 <div className="text-sm text-gray-500">
                                     {isGroup
-                                        ? `${item.members?.length || 0} members`
+                                        ? `Group`
                                         : `(${item.role})`}
                                 </div>
                             </div>
