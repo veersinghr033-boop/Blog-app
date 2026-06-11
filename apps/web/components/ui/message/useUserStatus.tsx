@@ -35,7 +35,6 @@ export default function useUserStatus(userId?: string) {
             userId: string;
             status: string;
         }) => {
-            console.log(status)
             setStatuses((prev) => ({
                 ...prev,
                 [statusUserId]: status,
@@ -105,7 +104,6 @@ export default function useUserStatus(userId?: string) {
         window.addEventListener("pagehide", handleUnload);
 
         resetTimer();
-
         return () => {
             clearTimeout(awayTimeout);
             clearTimeout(offlineTimeout);
@@ -125,11 +123,13 @@ export default function useUserStatus(userId?: string) {
         };
     }, [userId]);
     const clearNotification = (id: string) => {
+        console.log(id)
         setNotifications((prev) => ({
             ...prev,
-            [id]: 0,
+            [id]:0,
         }));
     };
+    // console.log(notifications)
 
     return {
         statuses,
