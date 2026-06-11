@@ -57,6 +57,7 @@ export const createChat = async(req, res) => {
             const chat = await Chat.findById({
                 _id: group.chatId,
             });
+
             const newMsg = await Message.create({
                 senderId,
                 chatId: chat._id,
@@ -76,6 +77,12 @@ export const createChat = async(req, res) => {
                 chatId: chat._id,
                 groupId,
                 message,
+                timestamp: newMsg.timestamp,
+            });
+            io.to(groupId).emit("newNotification", {
+                groupId,
+                message,
+                type: "group",
                 timestamp: newMsg.timestamp,
             });
 
@@ -122,6 +129,13 @@ export const createChat = async(req, res) => {
             message,
             timestamp: newMsg.timestamp,
         });
+        io.to(receiverId).emit("newNotification", {
+            senderId,
+            receiverId,
+            message,
+            type: "private",
+            timestamp: newMsg.timestamp,
+        });
 
         await emitSortedUsers(io, senderId);
         await emitSortedUsers(io, receiverId);
@@ -141,11 +155,8 @@ export const createChat = async(req, res) => {
 };
 export const getGroupMessages = async(req, res) => {
     try {
-        // const userId = req.user.id;
         const { groupId } = req.params;
-        // console.log("groupID", groupId);
         const group = await Group.findById(groupId);
-        // console.log("group", group);
 
         if (!group) {
             return res.status(404).json({ message: "Group not found" });
@@ -153,7 +164,6 @@ export const getGroupMessages = async(req, res) => {
         const chat = await Chat.findById({
             _id: group.chatId,
         });
-        // console.log("chat", chat._id);
         if (!chat) {
             return res.json([]);
         }
@@ -162,7 +172,6 @@ export const getGroupMessages = async(req, res) => {
             })
             .populate("senderId", "userName")
             .sort({ timestamp: 1 });
-        // console.log("mmmmmm ", messages);
         res.status(200).json(messages);
     } catch (error) {
         console.log(error);

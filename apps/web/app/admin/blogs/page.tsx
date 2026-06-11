@@ -60,12 +60,13 @@ function Blogs() {
                     </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row w-full gap-3">                    <Search
-                    className="w-full sm:flex-1"
-                    placeholder="Search blogs..."
-                    allowClear
-                    onChange={(e) => setSearchText(e.target.value)}
-                />
+                <div className="flex flex-col sm:flex-row w-full gap-3">
+                    <Search
+                        className="w-full sm:flex-1"
+                        placeholder="Search blogs..."
+                        allowClear
+                        onChange={(e) => setSearchText(e.target.value)}
+                    />
 
                     {/* <Select
                         className="w-1/4"

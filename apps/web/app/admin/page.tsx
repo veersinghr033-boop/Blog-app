@@ -23,7 +23,6 @@ function page() {
       return response.data.blogs
     }
   })
-  console.log(blogs)
 
   const totalEngagement = useMemo(() => {
     return blogs.reduce((total: number, b: any) => {
@@ -53,7 +52,6 @@ function page() {
       }))
     },
   })
-  console.log(users)
 
   const cardData = [
     {

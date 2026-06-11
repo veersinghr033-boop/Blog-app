@@ -114,10 +114,68 @@ export const groupDelete = async(req, res) => {
         const chat = await Chat.findByIdAndDelete(group.chatId);
 
         const message = await Message.deleteMany({
-            chatId: chat._id
-        })
+            chatId: chat._id,
+        });
         return res.status(200).json({
             message: "Member removed successfully",
+        });
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).json({
+            message: "Server error",
+        });
+    }
+};
+export const updateGroupMembers = async(req, res) => {
+    try {
+        const { groupId } = req.params;
+        const { members } = req.body;
+
+        const group = await Group.findById(groupId);
+        if (!group) {
+            return res.status(404).json({
+                message: "Group not found",
+            });
+        }
+        const chat = await Chat.findByIdAndUpdate(
+            group.chatId, {
+                $push: {
+                    participants: members,
+                },
+            }, { new: true },
+        ).populate({
+            path: "participants",
+            select: "userName role",
+        });
+
+        return res.status(200).json({
+            message: "Group members updated successfully",
+            chat,
+        });
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).json({
+            message: "Server error",
+        });
+    }
+};
+export const changeAdmin = async(req, res) => {
+    try {
+        const { groupId } = req.params;
+        const { adminId } = req.body;
+
+        console.log(groupId, adminId);
+        const group = await Group.findByIdAndUpdate(
+            groupId, { admin: adminId }, { new: true },
+        ).populate({
+            path: "admin",
+            select: "userName role",
+        });
+
+        return res.status(200).json({
+            message: "Group admin updated successfully",
         });
     } catch (error) {
         console.log(error);
