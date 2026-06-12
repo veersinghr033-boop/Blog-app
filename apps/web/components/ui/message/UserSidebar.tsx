@@ -1,6 +1,6 @@
 "use client";
 
-import { Layout, Button } from "antd";
+import { Layout, Button, Badge } from "antd";
 import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import { useAppSelector } from "@/lib/store/hooks";
@@ -16,7 +16,12 @@ interface UserType {
   role: string;
 }
 
-export default function UserSidebar({ selectedUser, setSelectedUser }: any) {
+export default function UserSidebar({
+  selectedUser,
+  setSelectedUser,
+  notifications,
+  statuses,
+}: any) {
   const [search, setSearch] = useState("");
   const socketRef = useRef<any>(null);
   const [sortedUsers, setSortedUsers] = useState<UserType[]>([]);
@@ -26,10 +31,7 @@ export default function UserSidebar({ selectedUser, setSelectedUser }: any) {
 
   const userId = useAppSelector((state) => state.auth.user?.id);
 
-  const {
-    statuses,
-    notifications,
-  } = useUserStatus(userId);
+
   useEffect(() => {
     if (!userId) return;
 
@@ -47,7 +49,6 @@ export default function UserSidebar({ selectedUser, setSelectedUser }: any) {
       socket.disconnect();
     };
   }, [userId, openAddGroup]);
-
   const filteredUsers = sortedUsers
     .filter((user) => user.name.toLowerCase().includes(search.toLowerCase()))
     .map((user) => ({
@@ -55,7 +56,6 @@ export default function UserSidebar({ selectedUser, setSelectedUser }: any) {
       //   type: "user",
     }));
 
-  // console.log(filteredUsers)
 
   return (
     <Layout.Sider
@@ -88,22 +88,21 @@ export default function UserSidebar({ selectedUser, setSelectedUser }: any) {
       <div className="overflow-y-auto">
         {filteredUsers.map((item: any) => {
           const isGroup = item.type === "group";
+          const chatKey = item.id || item._id;
           const status = !isGroup ? statuses[item.id] || "offline" : null;
+          const isSelected = selectedUser?.id === item.id || selectedUser?._id === item._id;
 
           return (
             <button
-              key={isGroup ? item._id : item.id}
+              key={chatKey}
               onClick={() => setSelectedUser(item)}
               className={`w-full px-6 py-4 flex items-center gap-3 border-y border-gray-200 hover:bg-slate-50
-                ${selectedUser?.id === item.id ? "bg-slate-100" : ""}`}
+                ${isSelected ? "bg-slate-100" : ""}`}
             >
-              <div className="relative h-12 w-12 rounded-full bg-black text-white flex items-center justify-center capitalize font-semibold">
-                {isGroup ? <TeamOutlined /> : item.name?.[0]}
-                {notifications[item.id] > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center px-1">
-                    {notifications[item.id]}
-                  </span>
-                )}
+              <Badge count={notifications[chatKey] || 0} overflowCount={99}>
+                <div className="relative h-12 w-12 rounded-full bg-black text-white flex items-center justify-center capitalize font-semibold">
+                  {isGroup ? <TeamOutlined /> : item.name?.[0]}
+                </div>
                 {!isGroup && (
                   <span
                     className={`absolute bottom-0 right-0 w-3 h-3 rounded-full
@@ -115,7 +114,9 @@ export default function UserSidebar({ selectedUser, setSelectedUser }: any) {
                       }`}
                   />
                 )}
-              </div>
+              </Badge>
+
+
 
               <div className="text-left">
                 <div className="font-medium capitalize">{item.name}</div>
@@ -127,9 +128,9 @@ export default function UserSidebar({ selectedUser, setSelectedUser }: any) {
             </button>
           );
         })}
-      </div>
+      </div >
 
       <AddGroup open={openAddGroup} onClose={() => setOpenAddGroup(false)} />
-    </Layout.Sider>
+    </Layout.Sider >
   );
 }

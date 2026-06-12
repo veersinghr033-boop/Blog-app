@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { getSocket } from "@/utills/socket";
 
@@ -10,13 +10,15 @@ interface SortedUser {
     updatedAt?: string | null;
 }
 
+
+
 export default function useUserStatus(userId?: string) {
     const socketRef = useRef<any>(null);
 
     const [statuses, setStatuses] = useState<Record<string, string>>({});
-    const [notifications, setNotifications] = useState<
-        Record<string, number>
-    >({});
+    const [notifications, setNotifications] = useState<Record<string, number>>({});
+
+
 
     useEffect(() => {
         if (!userId) return;
@@ -42,10 +44,11 @@ export default function useUserStatus(userId?: string) {
         };
 
         const handleNotification = (data: any) => {
-            const key = data?.groupId || data?.senderId || data?.receiverId;
-            console.log("Received notification for key:", key, "with data:", data);
+            const senderKey = typeof data?.senderId === "string" ? data.senderId : data?.senderId?._id;
+            const key = data?.groupId || (data?.type === "private" ? senderKey : data?.receiverId);
 
             if (!key) return;
+
             setNotifications((prev) => ({
                 ...prev,
                 [key]: (prev[key] || 0) + 1,
@@ -122,13 +125,18 @@ export default function useUserStatus(userId?: string) {
             socket.off("newNotification", handleNotification);
         };
     }, [userId]);
-    const clearNotification = (id: string) => {
-        console.log(id)
-        setNotifications((prev) => ({
-            ...prev,
-            [id]:0,
-        }));
-    };
+    const clearNotification = useCallback((id?: string) => {
+        if (!id) return;
+
+        setNotifications((prev) => {
+            if (!prev[id]) return prev;
+
+            const next = { ...prev };
+            delete next[id];
+            return next;
+        });
+    }, []);
+
     // console.log(notifications)
 
     return {

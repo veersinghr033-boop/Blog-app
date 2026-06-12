@@ -13,7 +13,7 @@ export const getMessages = async(req, res) => {
         const chat = await Chat.findOne({
             participants,
         });
-        console.log(chat);
+        // console.log(chat);
 
         if (!chat) {
             return res.json([]);
@@ -68,7 +68,10 @@ export const createChat = async(req, res) => {
                 lastMessage: newMsg._id,
                 updatedAt: new Date(),
             });
-
+            const allMembers = await Chat.findById(chat._id).populate(
+                "participants",
+                "_id",
+            );
             io.to(groupId).emit("receiveGroupMessage", {
                 _id: newMsg._id,
                 senderId: {
@@ -79,11 +82,23 @@ export const createChat = async(req, res) => {
                 message,
                 timestamp: newMsg.timestamp,
             });
-            io.to(groupId).emit("newNotification", {
-                groupId,
-                message,
-                type: "group",
-                timestamp: newMsg.timestamp,
+
+            const receiverIds = (allMembers.participants || [])
+                .map((participant) => participant._id.toString())
+                .filter(
+                    (participantId) =>
+                    participantId && participantId !== senderId.toString(),
+                );
+
+            receiverIds.forEach((receiverId) => {
+                io.to(receiverId).emit("newNotification", {
+                    senderId,
+                    groupId,
+                    receiverId,
+                    message,
+                    type: "group",
+                    timestamp: newMsg.timestamp,
+                });
             });
 
             return res.status(201).json({
@@ -173,6 +188,25 @@ export const getGroupMessages = async(req, res) => {
             .populate("senderId", "userName")
             .sort({ timestamp: 1 });
         res.status(200).json(messages);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "server error" });
+    }
+};
+const markMessagesAsRead = async(req, res) => {
+    try {
+        const { chatId } = req.params;
+
+        // const UserId = req.user.id;
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "server error" });
+    }
+};
+const notifications = async(req, res) => {
+    try {
+
+
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "server error" });

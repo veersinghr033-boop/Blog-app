@@ -20,7 +20,11 @@ interface MessageType {
   timestamp: string;
 }
 
-export default function MessageChat({ selectedUser, setSelectedUser }: any) {
+export default function MessageChat({
+  selectedUser,
+  setSelectedUser,
+  clearNotification,
+}: any) {
   const [messageText, setMessageText] = useState("");
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [userStatuses, setUserStatuses] = useState<Record<string, string>>({});
@@ -29,9 +33,7 @@ export default function MessageChat({ selectedUser, setSelectedUser }: any) {
   const [open, setOpen] = useState(false);
   const [selectGroup, setSelectGroup] = useState<String>("");
   const userId = useAppSelector((state) => state.auth.user?.id);
-  const {
-    clearNotification,
-  } = useUserStatus(userId);
+
   const { data } = useQuery<MessageType[]>({
     queryKey: ["chatMessages", selectedUser?._id || selectedUser?.id],
     queryFn: async () => {
@@ -47,11 +49,7 @@ export default function MessageChat({ selectedUser, setSelectedUser }: any) {
     },
     enabled: !!selectedUser,
   });
-  useEffect(() => {
-    if (!selectedUser) return;
 
-    clearNotification(selectedUser.id);
-  }, [selectedUser]);
   useEffect(() => {
     if (data) {
       setMessages(data);
@@ -79,7 +77,7 @@ export default function MessageChat({ selectedUser, setSelectedUser }: any) {
       socketRef.current.emit("joinGroup", selectedUser.id);
 
       const groupHandler = (msg: MessageType) => {
-        console.log("Message", msg);
+        // console.log("Message", msg);
         if (msg.groupId === selectedUser.id) {
 
           setMessages((prev) => [...prev, msg]);
@@ -124,6 +122,13 @@ export default function MessageChat({ selectedUser, setSelectedUser }: any) {
       socketRef.current.off("receiveMessage", privateHandler);
     };
   }, [selectedUser, userId]);
+
+  const selectedChatId = selectedUser?.id || selectedUser?._id;
+
+  useEffect(() => {
+    if (!selectedChatId) return;
+    clearNotification(selectedChatId);
+  }, [selectedChatId, messages]);
   const sendMutation = useMutation({
     mutationFn: async (payload: any) => {
       return api.post("/chat", payload);
@@ -219,7 +224,7 @@ export default function MessageChat({ selectedUser, setSelectedUser }: any) {
                       className={`flex flex-col gap-1 mx-4 py-1.5 ${isMine ? "items-end" : "items-start"}`}
                     >
                       <div className="text-xs text-gray-400 px-1">
-                        {item.senderId.userName}{" "}
+                        {isMine ? "You " : item.senderId.userName}{" "}
                         {new Date(item.timestamp).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
