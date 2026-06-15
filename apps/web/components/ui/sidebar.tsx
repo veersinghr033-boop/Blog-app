@@ -46,11 +46,7 @@ const menuByRole: Record<string, MenuItem[]> = {
         { label: "Reports", href: "/reader/reports", icon: <AppstoreOutlined /> },
         { label: "Create Blog", href: "/reader/create", icon: <EditOutlined /> },
         { label: "My Blogs", href: "/reader/blogs", icon: <BookOutlined /> },
-        { label: "Messages", href: "/reader/messages", icon: <MessageOutlined /> },
-        
-
-
-
+        { label: "Messages", href: "/reader/messages", icon: <MessageOutlined /> }
     ],
 }
 

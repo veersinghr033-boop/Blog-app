@@ -1,14 +1,49 @@
 "use client"
 
-import { Layout, Drawer } from "antd"
+import { Layout, Drawer, notification } from "antd"
 import Navbar from "./navbar"
 import Sidebar from "./sidebar"
-import { useState } from "react"
+import { useState ,useEffect } from "react"
+import useUserStatus from "../ui/message/useUserStatus"
+import { useAppSelector } from "@/lib/store/hooks"
 
 const { Content } = Layout
 
 function MainLayout({ children }: { children: React.ReactNode }) {
     const [open, setOpen] = useState(false)
+
+      const userId = useAppSelector((state) => state.auth.user?.id);
+    
+  const userStatus = useUserStatus(userId);
+
+    useEffect(() => {
+        if (!userStatus.latestNotification) return;
+
+        const senderName =
+            userStatus.latestNotification?.senderName ||
+            userStatus.latestNotification?.sender?.username ||
+            userStatus.latestNotification?.sender?.name ||
+            "Someone";
+        const senderId = userStatus.latestNotification?.senderId
+
+        console.log(senderId, userStatus.latestNotification)
+        if (userStatus.latestNotification.groupId) {
+            notification.info({
+                message: "New Group Message",
+                description: `${senderName} sent a message in ${userStatus.latestNotification.groupName || "Group"}`,
+                placement: "topRight",
+                duration: 3,
+            });
+        } else {
+            notification.info({
+                message: "New Message",
+                description: `${senderName} sent you a message`,
+                placement: "topRight",
+                duration: 3,
+            });
+        }
+    }, [userStatus.latestNotification]);
+
     return (
         <Layout className="min-h-screen">
             <Navbar onMenuClick={() => setOpen(true)} />
@@ -31,7 +66,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                     className="
                         p-2
                         md:p-6
-                        md:ml-[250px]
+                        md:ml-62.5
                         min-h-screen
                         overflow-auto
                         

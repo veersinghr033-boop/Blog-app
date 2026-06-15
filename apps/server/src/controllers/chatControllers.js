@@ -1,6 +1,7 @@
 import Chat from "../models/chatModel.js";
 import Message from "../models/message.js";
 import Group from "../models/GroupModel.js";
+import User from "../models/UsersModel.js";
 import { emitSortedUsers } from "./userConlrollers.js";
 
 export const getMessages = async(req, res) => {
@@ -83,6 +84,7 @@ export const createChat = async(req, res) => {
                 timestamp: newMsg.timestamp,
             });
 
+            const senderUser = await User.findById(senderId).select("userName");
             const receiverIds = (allMembers.participants || [])
                 .map((participant) => participant._id.toString())
                 .filter(
@@ -93,6 +95,7 @@ export const createChat = async(req, res) => {
             receiverIds.forEach((receiverId) => {
                 io.to(receiverId).emit("newNotification", {
                     senderId,
+                    senderName: group.name || senderUser.userName || "Someone",
                     groupId,
                     receiverId,
                     message,
@@ -144,8 +147,10 @@ export const createChat = async(req, res) => {
             message,
             timestamp: newMsg.timestamp,
         });
+        const senderUser = await User.findById(senderId).select("userName");
         io.to(receiverId).emit("newNotification", {
             senderId,
+            senderName: senderUser.userName || "Someone",
             receiverId,
             message,
             type: "private",
@@ -197,7 +202,6 @@ const markMessagesAsRead = async(req, res) => {
     try {
         const { chatId } = req.params;
 
-        // const UserId = req.user.id;
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "server error" });

@@ -54,7 +54,7 @@ export default function BlogActions({
     return (
         <>
             <Text
-                className={`text-sm cursor-pointer hover:text-blue-500 ${isLiked ? "text-blue-500!" : "text-gray-500!"
+                className={`flex items-center gap-1 text-sm cursor-pointer hover:text-blue-500 ${isLiked ? "text-blue-500!" : "text-gray-500!"
                     }`}
                 onClick={() => handleLike(post._id)}
             >
