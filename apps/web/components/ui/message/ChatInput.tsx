@@ -1,6 +1,6 @@
 "use client";
-import { message } from "antd";
-import { useRef, useState } from "react";
+import { message, Button } from "antd";
+import { useEffect, useRef, useState } from "react";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
@@ -18,6 +18,9 @@ export default function ChatInput({
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const userId = useAppSelector((state) => state.auth.user?.id);
     const [messageText, setMessageText] = useState("");
+    useEffect(() => {
+        setMessageText("")
+    }, [selectedUser ])
 
     const sendMutation = useMutation({
         mutationFn: async (payload: any) => {
@@ -96,13 +99,14 @@ export default function ChatInput({
                     }
                 />
 
-                <button
-                    type="submit"
+                <Button
+                    htmlType="submit"
                     disabled={!messageText.trim()}
-                    className="rounded-2xl bg-black px-6 py-3 text-white disabled:opacity-50"
+                    loading={sendMutation.isPending}
+                    className="rounded-2xl! bg-black! px-6! py-5! text-white! disabled:opacity-50!"
                 >
                     Send
-                </button>
+                </Button>
             </div>
         </form>
     );

@@ -13,8 +13,8 @@ export const getMessages = async(req, res) => {
 
         const chat = await Chat.findOne({
             participants,
+            isGroupChat: false,
         });
-        // console.log(chat);
 
         if (!chat) {
             return res.json([]);
@@ -63,8 +63,9 @@ export const createChat = async(req, res) => {
                 senderId,
                 chatId: chat._id,
                 message,
+                isRead: false,
+                readBy: [senderId],
             });
-
             await Chat.findByIdAndUpdate(chat._id, {
                 lastMessage: newMsg._id,
                 updatedAt: new Date(),
@@ -73,18 +74,25 @@ export const createChat = async(req, res) => {
                 "participants",
                 "_id",
             );
+
+
+            // const unRead =
+            const senderUser = await User.findById(senderId).select("userName");
+
             io.to(groupId).emit("receiveGroupMessage", {
                 _id: newMsg._id,
                 senderId: {
                     _id: senderId,
+                    userName: senderUser.userName,
                 },
                 chatId: chat._id,
                 groupId,
                 message,
                 timestamp: newMsg.timestamp,
+                isRead: false,
+                readBy: [],
             });
 
-            const senderUser = await User.findById(senderId).select("userName");
             const receiverIds = (allMembers.participants || [])
                 .map((participant) => participant._id.toString())
                 .filter(
@@ -92,7 +100,7 @@ export const createChat = async(req, res) => {
                     participantId && participantId !== senderId.toString(),
                 );
 
-            receiverIds.forEach((receiverId) => {
+            receiverIds.forEach(async(receiverId) => {
                 io.to(receiverId).emit("newNotification", {
                     senderId,
                     senderName: group.name || senderUser.userName || "Someone",
@@ -102,6 +110,8 @@ export const createChat = async(req, res) => {
                     type: "group",
                     timestamp: newMsg.timestamp,
                 });
+                await emitSortedUsers(io, receiverId);
+
             });
 
             return res.status(201).json({
@@ -129,6 +139,8 @@ export const createChat = async(req, res) => {
             senderId,
             chatId: chat._id,
             message,
+            isRead: false,
+            readBy: [],
         });
 
         await Chat.findByIdAndUpdate(chat._id, {
@@ -137,17 +149,20 @@ export const createChat = async(req, res) => {
         });
 
         const room = participants.join("_");
+        const senderUser = await User.findById(senderId).select("userName");
 
         io.to(room).emit("receiveMessage", {
             _id: newMsg._id,
             senderId: {
                 _id: senderId,
+                userName: senderUser.userName,
             },
             receiverId,
             message,
             timestamp: newMsg.timestamp,
+            isRead: false,
+            readBy: [],
         });
-        const senderUser = await User.findById(senderId).select("userName");
         io.to(receiverId).emit("newNotification", {
             senderId,
             senderName: senderUser.userName || "Someone",
@@ -155,6 +170,8 @@ export const createChat = async(req, res) => {
             message,
             type: "private",
             timestamp: newMsg.timestamp,
+            isRead: false,
+            readBy: [],
         });
 
         await emitSortedUsers(io, senderId);
@@ -176,42 +193,131 @@ export const createChat = async(req, res) => {
 export const getGroupMessages = async(req, res) => {
     try {
         const { groupId } = req.params;
+
         const group = await Group.findById(groupId);
 
         if (!group) {
-            return res.status(404).json({ message: "Group not found" });
+            return res.status(404).json({
+                message: "Group not found",
+            });
         }
-        const chat = await Chat.findById({
-            _id: group.chatId,
-        });
+
+        const chat = await Chat.findById(group.chatId);
+
         if (!chat) {
             return res.json([]);
         }
+
         const messages = await Message.find({
                 chatId: chat._id,
             })
             .populate("senderId", "userName")
             .sort({ timestamp: 1 });
+
         res.status(200).json(messages);
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: "server error" });
+
+        res.status(500).json({
+            message: "server error",
+        });
     }
 };
-const markMessagesAsRead = async(req, res) => {
+export const markMessagesAsRead = async(req, res) => {
     try {
-        const { chatId } = req.params;
+        const { receiverId, groupId } = req.body;
+        const userId = req.user.id;
+        console.log(userId);
+        const io = req.app.get("io");
 
+        let chat;
+
+        if (groupId) {
+            const group = await Group.findById(groupId);
+
+            if (!group) {
+                return res.status(404).json({
+                    message: "Group not found",
+                });
+            }
+
+            // when all prticipants are in the chat of group 
+
+
+            if (!chat) {
+                return res.status(404).json({
+                    message: "Chat not found",
+                });
+            }
+        } else if (receiverId) {
+            const participants = [userId, receiverId].sort();
+
+            chat = await Chat.findOne({
+                participants,
+                isGroupChat: false,
+            });
+
+            if (!chat) {
+                return res.status(404).json({
+                    message: "Chat not found",
+                });
+            }
+        } else {
+            return res.status(400).json({
+                message: "Missing receiverId or groupId",
+            });
+        }
+
+        const unreadMessages = await Message.find({
+            chatId: chat._id,
+            senderId: { $ne: userId },
+            isRead: false,
+        }).select("_id senderId");
+
+        if (!unreadMessages.length) {
+            return res.status(200).json({
+                message: "No unread messages",
+            });
+        }
+
+        await Message.updateMany({
+            _id: {
+                $in: unreadMessages.map((m) => m._id),
+            },
+        }, {
+            $set: {
+                isRead: true,
+            },
+            $addToSet: {
+                readBy: userId,
+            },
+        }, );
+
+        const senderIds = [
+            ...new Set(unreadMessages.map((m) => m.senderId.toString())),
+        ];
+        console.log(unreadMessages);
+        senderIds.forEach((senderId) => {
+            io.to(senderId).emit("messagesRead", {
+                chatId: chat._id,
+                readBy: userId,
+                isRead: true,
+            });
+        });
+
+        return res.status(200).json({
+            message: "Messages marked as read",
+        });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: "server error" });
+
+        res.status(500).json({
+            message: "server error",
+        });
     }
 };
 const notifications = async(req, res) => {
-    try {
-
-
-    } catch (error) {
+    try {} catch (error) {
         console.log(error);
         res.status(500).json({ message: "server error" });
     }

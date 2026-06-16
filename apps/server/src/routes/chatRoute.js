@@ -3,7 +3,7 @@ import {
     createChat,
     getMessages,
     getGroupMessages,
-    // markMessagesAsRead,
+    markMessagesAsRead,
 } from "../controllers/chatControllers.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
 
@@ -12,5 +12,5 @@ const router = express.Router();
 router.post("/chat", verifyToken, createChat);
 router.get("/chat/:receiverId", verifyToken, getMessages);
 router.get("/chat/group-messages/:groupId", verifyToken, getGroupMessages);
-// router.put("/read/:chatId", verifyToken, markMessagesAsRead);
+router.put("/read", verifyToken, markMessagesAsRead);
 export default router;

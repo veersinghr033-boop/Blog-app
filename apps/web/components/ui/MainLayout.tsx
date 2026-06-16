@@ -26,7 +26,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
             "Someone";
         const senderId = userStatus.latestNotification?.senderId
 
-        console.log(senderId, userStatus.latestNotification)
+        // console.log(senderId, userStatus.latestNotification)
         if (userStatus.latestNotification.groupId) {
             notification.info({
                 message: "New Group Message",

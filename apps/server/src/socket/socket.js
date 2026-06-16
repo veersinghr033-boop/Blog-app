@@ -1,5 +1,9 @@
 import { Server } from "socket.io";
 import { emitSortedUsers } from "../controllers/userConlrollers.js";
+import User from "../models/UsersModel.js";
+import Chat from "../models/chatModel.js";
+import Group from "../models/GroupModel.js";
+import Message from "../models/message.js";
 
 const socketToUser = new Map();
 const userStatus = new Map();
@@ -103,6 +107,27 @@ export const initSocket = (server) => {
         userId: senderId,
         chatId: room,
       });
+    });
+    socket.on("readMessages", async ({ chatId, userId }) => {
+      const chat = await Chat.findById(chatId);
+      if (!chat) {
+        return;
+      }
+
+      await Message.updateMany(
+        {
+          chatId,
+          readBy: { $ne: userId },
+        },
+        {
+          $set: {
+            isRead: true,
+          },
+          $addToSet: {
+            readBy: userId,
+          },
+        },
+      );
     });
 
     socket.on("disconnect", () => {

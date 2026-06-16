@@ -3,7 +3,7 @@
 import { Virtuoso } from "react-virtuoso";
 import { useEffect, useRef, useState } from "react";
 import { useAppSelector } from "@/lib/store/hooks";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, Mutation } from "@tanstack/react-query";
 import api from "@/utills/axios";
 interface Props {
   socketRef: any;
@@ -11,11 +11,26 @@ interface Props {
   clearNotification: any;
 }
 interface MessageType {
-  senderId: { _id: string; userName: string };
+  _id: string;
+
+  chatId?: any;
+
+  senderId: {
+    _id: string;
+    userName: string;
+  };
+
   receiverId?: string;
+
   groupId?: string;
+
   message: string;
+
   timestamp: string;
+
+  isRead: boolean;
+
+  readBy: string[];
 }
 
 export default function ChatMessages({
@@ -45,12 +60,32 @@ export default function ChatMessages({
       setMessages(data);
     }
   }, [data]);
-//   console.log(data)
+
+
+
   const selectedChatId = selectedUser?.id || selectedUser?._id;
 
   useEffect(() => {
     if (!selectedChatId) return;
     clearNotification(selectedChatId);
+
+    const markAsRead = async () => {
+      try {
+        if (selectedUser.type === "group") {
+          await api.put("/read", {
+            groupId: selectedUser.id,
+          });
+        } else {
+          await api.put("/read", {
+            receiverId: selectedUser.id,
+          });
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    markAsRead();
+
   }, [selectedChatId, messages]);
 
   useEffect(() => {
@@ -126,6 +161,25 @@ export default function ChatMessages({
         setMessages((prev) => [...prev, msg]);
       }
     };
+    const readHandler = ({ chatId, readBy }: { chatId: string; readBy: string }) => {
+      setMessages((prev) =>
+        prev.map((msg) => {
+          const msgChatId = msg.chatId?._id || msg.chatId;
+          const sameChat = msgChatId && String(msgChatId) === String(chatId);
+          console.log(sameChat ,"ok" , msgChatId)
+          if (sameChat && msg.senderId._id === userId) {
+            return { ...msg, isRead: true, readBy: Array.isArray(msg.readBy) ? Array.from(new Set([...(msg.readBy || []), readBy])) : [readBy] };
+          }
+
+          return msg;
+        }),
+      );
+    };
+
+    socketRef.current.on("messagesRead", readHandler);
+
+
+
 
     socketRef.current.on("receiveMessage", privateHandler);
     socketRef.current.on("userTyping", typingHandler);
@@ -135,8 +189,33 @@ export default function ChatMessages({
       socketRef.current?.off("receiveMessage", privateHandler);
       socketRef.current?.off("userTyping", typingHandler);
       socketRef.current?.off("userStopTyping", stopTypingHandler);
+      socketRef.current.off(
+        "messagesRead",
+        readHandler
+      );
     };
   }, [selectedUser, userId]);
+  // useEffect(() => {
+  //   if (!selectedUser )return;
+
+  //   const markAsRead = async () => {
+  //     try {
+  //       if (selectedUser.type === "group") {
+  //         await api.put("/read", {
+  //           groupId: selectedUser.id,
+  //         });
+  //       } else {
+  //         await api.put("/read", {
+  //           receiverId: selectedUser.id,
+  //         });
+  //       }
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   };
+
+  //   markAsRead();
+  // }, [selectedUser, messages]);
   return (
     <>
       <Virtuoso
@@ -148,9 +227,8 @@ export default function ChatMessages({
 
           return (
             <div
-              className={`flex flex-col gap-1 mx-4 py-1.5 ${
-                isMine ? "items-end" : "items-start"
-              }`}
+              className={`flex flex-col gap-1 mx-4 py-1.5 ${isMine ? "items-end" : "items-start"
+                }`}
             >
               <div className="text-xs text-gray-400 px-1">
                 {isMine ? "You " : item.senderId.userName}{" "}
@@ -161,12 +239,16 @@ export default function ChatMessages({
               </div>
 
               <div
-                className={`max-w-[70%] rounded-2xl px-5 py-2 ${
-                  isMine ? "bg-blue-500 text-white" : "bg-gray-100 text-black"
-                }`}
+                className={`max-w-[70%] rounded-2xl px-5 py-2 ${isMine ? "bg-blue-500 text-white" : "bg-gray-100 text-black"
+                  }`}
               >
                 {item.message}
               </div>
+              {isMine && (
+                <div className="text-[11px] text-gray-400 mt-1">
+                  {item.isRead ? "Seen" : "Send"}
+                </div>
+              )}
             </div>
           );
         }}
@@ -183,7 +265,7 @@ export default function ChatMessages({
             typing...
           </div>
         ) : null;
-      })}
+      })()}
     </>
   );
 }

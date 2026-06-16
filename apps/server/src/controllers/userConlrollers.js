@@ -1,6 +1,7 @@
 import User from "../models/UsersModel.js";
 import Chat from "../models/chatModel.js";
 import Group from "../models/GroupModel.js";
+import Message from "../models/message.js";
 
 export const getAllUsers = async(req, res) => {
     const userId = req.user.id;
@@ -49,6 +50,7 @@ export const emitSortedUsers = async(io, currentUserId) => {
     const chats = await Chat.find({
         participants: currentUserId,
     });
+    //   console.log("chats", chats);
 
     const groups = await Group.find({
         chatId: { $in: chats.map((c) => c._id) },
@@ -56,25 +58,43 @@ export const emitSortedUsers = async(io, currentUserId) => {
 
     let result = [];
 
-    result.push(
-        ...groups.map((group) => {
+    const groupEntries = await Promise.all(
+        groups.map(async(group) => {
             const groupChat = chats.find(
                 (chat) => chat._id.toString() === group.chatId.toString(),
             );
+
+            const messages = await Message.find({
+                chatId: group.chatId,
+                isRead: false,
+                readBy: { $ne: currentUserId },
+            });
+            const unreadCount = Array.isArray(messages) ? messages.length : 0;
 
             return {
                 id: group._id,
                 chatId: group.chatId,
                 name: group.name,
                 type: "group",
-                // member: group,
-                updatedAt: groupChat.updatedAt || group.updatedAt,
+                updatedAt: groupChat && groupChat.updatedAt ?
+                    groupChat.updatedAt : group.updatedAt,
+                unreadCount,
             };
         }),
     );
 
+    result.push(...groupEntries);
+
     for (const chat of chats) {
         if (chat.isGroupChat) continue;
+
+        const messages = await Message.find({
+            chatId: chat._id,
+            isRead: false,
+            readBy: { $ne: currentUserId },
+            senderId: { $ne: currentUserId },
+        });
+        const unreadCount = Array.isArray(messages) ? messages.length : 0;
 
         const otherUserId = chat.participants.find(
             (id) => id && id.toString() !== currentUserId.toString(),
@@ -92,6 +112,8 @@ export const emitSortedUsers = async(io, currentUserId) => {
             role: user.role,
             type: "user",
             updatedAt: chat.updatedAt,
+
+            unreadCount,
         });
     }
 
@@ -122,7 +144,7 @@ export const emitSortedUsers = async(io, currentUserId) => {
 
         return a.name.localeCompare(b.name);
     });
-
+    console.log("sorted users", result);
     io.to(currentUserId.toString()).emit("sortedUsers", result);
 
     return result;

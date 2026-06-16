@@ -1,12 +1,14 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import auths from "./features/auth";
 import blog from "./features/blog";
+import Notification from "./features/Notification"
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
 const rootReducer = combineReducers({
   auth: auths,
   blog: blog,
+  notification:Notification
 });
  
 

@@ -55,14 +55,14 @@ export default function UserSidebar({
       ...user,
       //   type: "user",
     }));
-
+// console.log(sortedUsers)
 
   return (
     <Layout.Sider
       width={250}
-      className="min-h-[calc(100vh-125px)] bg-white! shadow-sm border border-gray-200 border-r-0"
+      className="h-[calc(100vh-113px)]!  overflow-auto bg-white! shadow-sm border border-gray-200 border-r-0"
     >
-      <div className="px-4 flex gap-2 justify-between items-center py-4 border-b border-gray-300">
+      <div className="px-4 flex  gap-2 justify-between items-center py-4 border-b border-gray-300">
         <div className="text-base font-semibold capitalize truncate">
           Welcome, {userName || "User"}
         </div>
@@ -76,7 +76,7 @@ export default function UserSidebar({
         </Button>
       </div>
 
-      <div className="p-4">
+      <div className="p-4 ">
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -85,7 +85,7 @@ export default function UserSidebar({
         />
       </div>
 
-      <div className="overflow-y-auto">
+      <div className="overflow-y-auto h-[calc(100vh-260px)] overflow-auto z-1" >
         {filteredUsers.map((item: any) => {
           const isGroup = item.type === "group";
           const chatKey = item.id || item._id;
@@ -99,7 +99,7 @@ export default function UserSidebar({
               className={`w-full px-6 py-4 flex items-center gap-3 border-y border-gray-200 hover:bg-slate-50
                 ${isSelected ? "bg-slate-100" : ""}`}
             >
-              <Badge count={notifications[chatKey] || 0} overflowCount={99}>
+              <Badge count={item.unreadCount} overflowCount={99}>
                 <div className="relative h-12 w-12 rounded-full bg-black text-white flex items-center justify-center capitalize font-semibold">
                   {isGroup ? <TeamOutlined /> : item.name?.[0]}
                 </div>
