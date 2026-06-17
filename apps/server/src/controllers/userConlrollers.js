@@ -6,7 +6,10 @@ import Message from "../models/message.js";
 export const getAllUsers = async(req, res) => {
     const userId = req.user.id;
     try {
-        const users = await User.find({ _id: { $ne: userId } });
+        const users = await User.find({
+            _id: { $ne: userId },
+            role: { $ne: "admin" },
+        });
         res.status(200).json(users);
     } catch (error) {
         console.log(error);
@@ -45,6 +48,7 @@ export const deleteUser = async(req, res) => {
 export const emitSortedUsers = async(io, currentUserId) => {
     const users = await User.find({
         _id: { $ne: currentUserId },
+        role: { $ne: "admin" },
     });
 
     const chats = await Chat.find({
@@ -66,7 +70,6 @@ export const emitSortedUsers = async(io, currentUserId) => {
 
             const messages = await Message.find({
                 chatId: group.chatId,
-                isRead: false,
                 readBy: { $ne: currentUserId },
             });
             const unreadCount = Array.isArray(messages) ? messages.length : 0;
@@ -90,7 +93,6 @@ export const emitSortedUsers = async(io, currentUserId) => {
 
         const messages = await Message.find({
             chatId: chat._id,
-            isRead: false,
             readBy: { $ne: currentUserId },
             senderId: { $ne: currentUserId },
         });
@@ -114,6 +116,7 @@ export const emitSortedUsers = async(io, currentUserId) => {
             updatedAt: chat.updatedAt,
 
             unreadCount,
+
         });
     }
 
@@ -144,7 +147,7 @@ export const emitSortedUsers = async(io, currentUserId) => {
 
         return a.name.localeCompare(b.name);
     });
-    console.log("sorted users", result);
+    // console.log("sorted users", result);
     io.to(currentUserId.toString()).emit("sortedUsers", result);
 
     return result;

@@ -3,7 +3,7 @@
 import { Layout, Drawer, notification } from "antd"
 import Navbar from "./navbar"
 import Sidebar from "./sidebar"
-import { useState ,useEffect } from "react"
+import { useState, useEffect } from "react"
 import useUserStatus from "../ui/message/useUserStatus"
 import { useAppSelector } from "@/lib/store/hooks"
 
@@ -12,12 +12,13 @@ const { Content } = Layout
 function MainLayout({ children }: { children: React.ReactNode }) {
     const [open, setOpen] = useState(false)
 
-      const userId = useAppSelector((state) => state.auth.user?.id);
-    
-  const userStatus = useUserStatus(userId);
+    const userId = useAppSelector((state) => state.auth.user?.id);
+
+    const userStatus = useUserStatus(userId);
 
     useEffect(() => {
         if (!userStatus.latestNotification) return;
+        console.log(userStatus.latestNotification)
 
         const senderName =
             userStatus.latestNotification?.senderName ||
@@ -25,19 +26,20 @@ function MainLayout({ children }: { children: React.ReactNode }) {
             userStatus.latestNotification?.sender?.name ||
             "Someone";
         const senderId = userStatus.latestNotification?.senderId
-
-        // console.log(senderId, userStatus.latestNotification)
+        const fullMsg = userStatus.latestNotification.message || "";
+        const first10Words = fullMsg.split(/\s+/).filter(Boolean).slice(0, 7).join(" ") + (fullMsg.split(/\s+/).filter(Boolean).length > 10 ? "..." : "");
         if (userStatus.latestNotification.groupId) {
+           
             notification.info({
-                message: "New Group Message",
-                description: `${senderName} sent a message in ${userStatus.latestNotification.groupName || "Group"}`,
+                message: `New Message in ${userStatus.latestNotification.groupName || "a group"} sent by ${senderName}`,
+                description: ` ${first10Words} `,
                 placement: "topRight",
                 duration: 3,
             });
         } else {
             notification.info({
-                message: "New Message",
-                description: `${senderName} sent you a message`,
+                message: "New Message sent by " + senderName,
+                description: `${first10Words}`,
                 placement: "topRight",
                 duration: 3,
             });
@@ -57,7 +59,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                     open={open}
                     onClose={() => setOpen(false)}
                     width={250}
-                    
+
                 >
                     <Sidebar />
                 </Drawer>

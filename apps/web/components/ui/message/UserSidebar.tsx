@@ -55,16 +55,16 @@ export default function UserSidebar({
       ...user,
       //   type: "user",
     }));
-// console.log(sortedUsers)
+  // console.log(sortedUsers)
 
   return (
     <Layout.Sider
       width={250}
       className="h-[calc(100vh-113px)]!  overflow-auto bg-white! shadow-sm border border-gray-200 border-r-0"
     >
-      <div className="px-4 flex  gap-2 justify-between items-center py-4 border-b border-gray-300">
-        <div className="text-base font-semibold capitalize truncate">
-          Welcome, {userName || "User"}
+      <div className="px-4 flex  gap-2 justify-between items-center py-2 border-b border-gray-300">
+        <div className="text-base font-semibold capitalize overflow-x-auto">
+          Welcome to, {userName || "User"}
         </div>
 
         <Button
@@ -122,7 +122,7 @@ export default function UserSidebar({
                 <div className="font-medium capitalize">{item.name}</div>
 
                 <div className="text-sm text-gray-500">
-                  {isGroup ? `Group` : `(${item.role})`}
+                  {isGroup ? `Group` : "User"}
                 </div>
               </div>
             </button>

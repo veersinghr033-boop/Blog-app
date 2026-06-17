@@ -30,10 +30,17 @@ export const initSocket = (server) => {
     };
 
     socket.on("userOnline", async (userId) => {
+      // consol  e.log("USER ONLINE:", userId);
+
       userStatus.set(userId, "online");
       socketToUser.set(socket.id, userId);
 
       socket.join(userId);
+      // console.log(
+      //     "ROOM AFTER JOIN:",
+      //     userId,
+      //     io.sockets.adapter.rooms.get(userId),
+      // );
 
       io.emit("userStatus", {
         userId,
@@ -108,26 +115,77 @@ export const initSocket = (server) => {
         chatId: room,
       });
     });
-    socket.on("readMessages", async ({ chatId, userId }) => {
-      const chat = await Chat.findById(chatId);
-      if (!chat) {
-        return;
-      }
 
-      await Message.updateMany(
-        {
+    socket.on("readMessages", async ({ chatId, userId }) => {
+      try {
+        const chat = await Chat.findById(chatId);
+
+        if (!chat) return;
+
+        const unreadMessages = await Message.find({
           chatId,
+          senderId: { $ne: userId },
           readBy: { $ne: userId },
-        },
-        {
-          $set: {
-            isRead: true,
+        }).select("_id senderId");
+
+        if (!unreadMessages.length) return;
+
+        await Message.updateMany(
+          {
+            _id: {
+              $in: unreadMessages.map((m) => m._id),
+            },
+            senderId: { $ne: userId },
           },
-          $addToSet: {
-            readBy: userId,
+          {
+            $addToSet: {
+              readBy: userId,
+            },
           },
-        },
-      );
+        );
+
+        const reader = await User.findById(userId).select("userName");
+        const group = await Group.findOne({ chatId }).select("_id");
+        const groupRoom = group && group._id ? group._id.toString() : null;
+        const chatRoom =
+          groupRoom ||
+          chat.participants
+            .map((participant) => participant.toString())
+            .sort()
+            .join("_");
+
+        const senderIds = [
+          ...new Set(
+            unreadMessages
+              .map((m) => m.senderId.toString())
+              .filter((id) => id !== userId.toString()),
+          ),
+        ];
+
+        const payload = {
+          chatId,
+          reader: {
+            _id: reader._id,
+            userName: reader.userName,
+          },
+          messageIds: unreadMessages.map((m) => m._id.toString()),
+        };
+
+        senderIds.forEach((senderId) => {
+          io.to(senderId).emit("messagesRead", {
+            ...payload,
+            messageIds: unreadMessages
+              .filter((m) => m.senderId.toString() === senderId)
+              .map((m) => m._id.toString()),
+          });
+        });
+
+        if (chatRoom) {
+          io.to(chatRoom).emit("messagesRead", payload);
+        }
+      } catch (error) {
+        console.log(error);
+      }
     });
 
     socket.on("disconnect", () => {

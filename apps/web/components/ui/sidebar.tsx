@@ -37,7 +37,7 @@ const menuByRole: Record<string, MenuItem[]> = {
         { label: "Users", href: "/admin/user", icon: <UsergroupAddOutlined /> },
         { label: "Blogs", href: "/admin/blogs", icon: <BookOutlined /> },
         { label: "Reports", href: "/admin/reports", icon: <AppstoreOutlined /> },
-        { label: "Messages", href: "/admin/messages", icon: <MessageOutlined /> },
+        // { label: "Messages", href: "/adm in/messages", icon: <MessageOutlined /> },
     ],
    
     reader: [

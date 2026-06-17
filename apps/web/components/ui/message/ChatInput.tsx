@@ -85,9 +85,9 @@ export default function ChatInput({
     return (
         <form
             onSubmit={handleSend}
-            className="border-t border-gray-300 bg-white px-6 py-4"
+            className="border-t border-gray-300 bg-white p-2 lg:px-6 py-4 min-w-10 "
         >
-            <div className="flex gap-3">
+            <div className="flex lg:gap-3">
                 <input
                     value={messageText}
                     onChange={handleTyping}
@@ -103,7 +103,7 @@ export default function ChatInput({
                     htmlType="submit"
                     disabled={!messageText.trim()}
                     loading={sendMutation.isPending}
-                    className="rounded-2xl! bg-black! px-6! py-5! text-white! disabled:opacity-50!"
+                    className="rounded-2xl! bg-black! lg:px-6! py-5! text-white! disabled:opacity-50!"
                 >
                     Send
                 </Button>

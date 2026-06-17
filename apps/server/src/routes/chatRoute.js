@@ -3,14 +3,24 @@ import {
     createChat,
     getMessages,
     getGroupMessages,
-    markMessagesAsRead,
+    // markMessagesAsRead,
 } from "../controllers/chatControllers.js";
-import { verifyToken } from "../middleware/authMiddleware.js";
+import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/chat", verifyToken, createChat);
-router.get("/chat/:receiverId", verifyToken, getMessages);
-router.get("/chat/group-messages/:groupId", verifyToken, getGroupMessages);
-router.put("/read", verifyToken, markMessagesAsRead);
+router.post("/chat", verifyToken, authorizeRoles("reader"), createChat);
+router.get(
+    "/chat/:receiverId",
+    verifyToken,
+    authorizeRoles("reader"),
+    getMessages,
+);
+router.get(
+    "/chat/group-messages/:groupId",
+    verifyToken,
+    authorizeRoles("reader"),
+    getGroupMessages,
+);
+// router.put("/read", verifyToken, authorizeRoles("reader"), markMessagesAsRead);
 export default router;

@@ -12,6 +12,12 @@ export default function useUserStatus(userId?: string) {
   );
   const [latestNotification, setLatestNotification] = useState<any>(null);
 
+  const getActiveChatId = useCallback(() => {
+    if (typeof window === "undefined") return null;
+
+    return window.localStorage.getItem("activeChatId");
+  }, []);
+
   useEffect(() => {
     if (!userId) return;
 
@@ -46,6 +52,10 @@ export default function useUserStatus(userId?: string) {
         (data?.type === "private" ? senderKey : data?.receiverId);
 
       if (!key) return;
+
+      const activeChatId = getActiveChatId();
+
+      if (senderKey === userId || activeChatId === key) return;
 
       setNotifications((prev) => ({
         ...prev,
@@ -123,7 +133,7 @@ export default function useUserStatus(userId?: string) {
       socket.off("userStatus", handleStatus);
       socket.off("newNotification", handleNotification);
     };
-  }, [userId]);
+  }, [getActiveChatId, userId]);
   const clearNotification = useCallback((id?: string) => {
     if (!id) return;
 

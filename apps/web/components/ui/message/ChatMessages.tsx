@@ -3,7 +3,8 @@
 import { Virtuoso } from "react-virtuoso";
 import { useEffect, useRef, useState } from "react";
 import { useAppSelector } from "@/lib/store/hooks";
-import { useQuery, Mutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { CheckCircleOutlined,EyeOutlined  } from "@ant-design/icons"
 import api from "@/utills/axios";
 interface Props {
   socketRef: any;
@@ -30,7 +31,7 @@ interface MessageType {
 
   isRead: boolean;
 
-  readBy: string[];
+  readBy: { _id: string; userName: string }[];
 }
 
 export default function ChatMessages({
@@ -61,31 +62,11 @@ export default function ChatMessages({
     }
   }, [data]);
 
-
-
   const selectedChatId = selectedUser?.id || selectedUser?._id;
 
   useEffect(() => {
     if (!selectedChatId) return;
     clearNotification(selectedChatId);
-
-    const markAsRead = async () => {
-      try {
-        if (selectedUser.type === "group") {
-          await api.put("/read", {
-            groupId: selectedUser.id,
-          });
-        } else {
-          await api.put("/read", {
-            receiverId: selectedUser.id,
-          });
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    markAsRead();
-
   }, [selectedChatId, messages]);
 
   useEffect(() => {
@@ -161,25 +142,6 @@ export default function ChatMessages({
         setMessages((prev) => [...prev, msg]);
       }
     };
-    const readHandler = ({ chatId, readBy }: { chatId: string; readBy: string }) => {
-      setMessages((prev) =>
-        prev.map((msg) => {
-          const msgChatId = msg.chatId?._id || msg.chatId;
-          const sameChat = msgChatId && String(msgChatId) === String(chatId);
-          console.log(sameChat ,"ok" , msgChatId)
-          if (sameChat && msg.senderId._id === userId) {
-            return { ...msg, isRead: true, readBy: Array.isArray(msg.readBy) ? Array.from(new Set([...(msg.readBy || []), readBy])) : [readBy] };
-          }
-
-          return msg;
-        }),
-      );
-    };
-
-    socketRef.current.on("messagesRead", readHandler);
-
-
-
 
     socketRef.current.on("receiveMessage", privateHandler);
     socketRef.current.on("userTyping", typingHandler);
@@ -189,33 +151,47 @@ export default function ChatMessages({
       socketRef.current?.off("receiveMessage", privateHandler);
       socketRef.current?.off("userTyping", typingHandler);
       socketRef.current?.off("userStopTyping", stopTypingHandler);
-      socketRef.current.off(
-        "messagesRead",
-        readHandler
-      );
     };
   }, [selectedUser, userId]);
-  // useEffect(() => {
-  //   if (!selectedUser )return;
+  useEffect(() => {
+    if (!socketRef.current) return;
 
-  //   const markAsRead = async () => {
-  //     try {
-  //       if (selectedUser.type === "group") {
-  //         await api.put("/read", {
-  //           groupId: selectedUser.id,
-  //         });
-  //       } else {
-  //         await api.put("/read", {
-  //           receiverId: selectedUser.id,
-  //         });
-  //       }
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   };
+    const readHandler = (data: any) => {
+      setMessages((prev) =>
+        prev.map((msg) => {
+          if (!data.messageIds.includes(msg._id)) {
+            return msg;
+          }
 
-  //   markAsRead();
-  // }, [selectedUser, messages]);
+          return {
+            ...msg,
+            readBy: msg.readBy.some((user) => user._id === data.reader._id)
+              ? msg.readBy
+              : [...msg.readBy, data.reader],
+          };
+        }),
+      );
+    };
+
+    socketRef.current.on("messagesRead", readHandler);
+
+    return () => {
+      socketRef.current.off("messagesRead", readHandler);
+    };
+  }, []);
+  useEffect(() => {
+    if (!selectedUser || !socketRef.current || !messages.length) return;
+
+    const chatId = messages[0]?.chatId;
+
+    if (!chatId) return;
+
+    socketRef.current.emit("readMessages", {
+      chatId,
+      userId,
+    });
+  }, [selectedUser, messages]);
+
   return (
     <>
       <Virtuoso
@@ -224,14 +200,20 @@ export default function ChatMessages({
         followOutput="smooth"
         itemContent={(index, item) => {
           const isMine = item.senderId._id === userId;
-
+          const isReadByReceiver = item.readBy.some(
+            (user) => user._id !== userId,
+          );
+          const groupReadUsers = item.readBy.filter(
+            (user) => user._id !== item.senderId._id,
+          );
           return (
             <div
-              className={`flex flex-col gap-1 mx-4 py-1.5 ${isMine ? "items-end" : "items-start"
-                }`}
+              className={`flex flex-col gap-1 mx-4 py-1.5 ${
+                isMine ? "items-end" : "items-start"
+              }`}
             >
               <div className="text-xs text-gray-400 px-1">
-                {isMine ? "You " : item.senderId.userName}{" "}
+                {isMine ? null : item.senderId.userName}{" "}
                 {new Date(item.timestamp).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -239,14 +221,27 @@ export default function ChatMessages({
               </div>
 
               <div
-                className={`max-w-[70%] rounded-2xl px-5 py-2 ${isMine ? "bg-blue-500 text-white" : "bg-gray-100 text-black"
-                  }`}
+                className={`max-w-[70%] rounded-2xl wrap-break-word px-5 py-2 ${
+                  isMine ? "bg-blue-500 text-white" : "bg-gray-100 text-black"
+                }`}
               >
                 {item.message}
               </div>
-              {isMine && (
-                <div className="text-[11px] text-gray-400 mt-1">
-                  {item.isRead ? "Seen" : "Send"}
+              {isMine && selectedUser.type !== "group" && (
+                <div className="text-[11px] text-gray-400 " title={isReadByReceiver ? "Seen" : "Sent"} >
+                  {isReadByReceiver ? <EyeOutlined /> : <CheckCircleOutlined />}
+                </div>
+              )}
+              {isMine && selectedUser.type === "group" && (
+                <div
+                  className="text-[11px] text-gray-400  "
+                  title={
+                    groupReadUsers.length
+                      ? `Seen by: ${groupReadUsers.map((user) => user.userName).join(", ")}`
+                      : "Sent"
+                  }
+                >
+                  {groupReadUsers.length ? <EyeOutlined/> : <CheckCircleOutlined/>}
                 </div>
               )}
             </div>

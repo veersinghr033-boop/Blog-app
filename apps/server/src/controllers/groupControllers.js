@@ -18,14 +18,12 @@ export const createGroup = async(req, res) => {
 
         const participants = [...new Set([userId, ...normalizedMembers])].sort();
 
-        let chat = await Chat.findOne({ participants });
 
-        if (!chat) {
-            chat = await Chat.create({
-                participants,
-                isGroupChat: true,
-            });
-        }
+        const chat = await Chat.create({
+            participants,
+            isGroupChat: true,
+        });
+
 
         const group = await Group.create({
             name: groupName.trim(),
