@@ -12,7 +12,7 @@ import BlogHeader from "./BlogHeader";
 import BlogActions from "./BlogActions";
 import AddCommentForm from "./AddCommentForm";
 import CommentList from "./CommentList";
-import ReportModal from "../Repot";
+import ReportModal from "../Report";
 
 const { Title, Text } = Typography;
 

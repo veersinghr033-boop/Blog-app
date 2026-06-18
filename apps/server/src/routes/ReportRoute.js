@@ -1,11 +1,11 @@
 import e from "express";
 import {
-  createReport,
-  getReports,
-  getReportById,
-  deleteReport,
-  getByUserId
-} from "../controllers/RepotControllers.js";
+    createReport,
+    getReports,
+    getReportById,
+    deleteReport,
+    getByUserId
+} from "../controllers/ReportControllers.js";
 import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = e.Router();

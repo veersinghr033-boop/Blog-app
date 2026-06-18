@@ -58,7 +58,7 @@ export default function ChatInput({
             message: messageText,
             timestamp: new Date().toISOString(),
         });
-    };
+    }; 
 
     const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;

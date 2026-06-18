@@ -9,7 +9,7 @@ import commentRoutes from "./src/routes/commentRoutes.js";
 import openAiRoute from "./src/routes/openAiRoute.js";
 import blogSaveRoute from "./src/routes/BlogSaveRoute.js";
 import userRoute from "./src/routes/userRoute.js";
-import reportRoute from "./src/routes/RepotRoute.js";
+import reportRoute from "./src/routes/ReportRoute.js";
 import chatRoute from "./src/routes/chatRoute.js";
 import viewRoute from "./src/routes/viewRoute.js";
 import replyRoute from "./src/routes/replyRoute.js";
@@ -34,14 +34,14 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(apiLimiter);
 app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-  }),
+    cors({
+        origin: "http://localhost:3000",
+        credentials: true,
+    }),
 );
 
 app.get("/", (req, res) => {
-  res.send("Blog API Running");
+    res.send("Blog API Running");
 });
 app.use("/api/auth", authRoutes);
 app.use("/api/blogs", blogRoutes);
@@ -56,5 +56,5 @@ app.use("/api/views", viewRoute);
 app.use("/api/replies", replyRoute);
 app.use("/api/groups", groupRoute);
 server.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT}`);
+    console.log(`Server running on port ${process.env.PORT}`);
 });

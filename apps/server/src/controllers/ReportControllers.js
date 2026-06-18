@@ -1,4 +1,4 @@
-import Report from "../models/RepotModel.js";
+import Report from "../models/ReportModel.js";
 
 // CREATE REPORT
 export const createReport = async(req, res) => {
