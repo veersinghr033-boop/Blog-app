@@ -20,7 +20,7 @@ export default function ChatInput({
     const [messageText, setMessageText] = useState("");
     useEffect(() => {
         setMessageText("")
-    }, [selectedUser ])
+    }, [selectedUser])
 
     const sendMutation = useMutation({
         mutationFn: async (payload: any) => {
@@ -29,8 +29,10 @@ export default function ChatInput({
         onSuccess: () => {
             setMessageText("");
         },
-        onError: () => {
-            message.error("Failed to send message");
+        onError: (error:any) => {
+            message.error(
+                error?.response?.data?.message || "Failed to delete message",
+            );
         },
     });
 
@@ -85,13 +87,13 @@ export default function ChatInput({
     return (
         <form
             onSubmit={handleSend}
-            className="border-t border-gray-300 bg-white p-2 lg:px-6 py-4 min-w-10 "
+            className="border-t border-gray-300 bg-white p-3 sm:px-4 sm:py-4"
         >
-            <div className="flex lg:gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
                 <input
                     value={messageText}
                     onChange={handleTyping}
-                    className="flex-1 rounded-full border border-gray-300 px-5 py-3"
+                    className="w-full flex-1 rounded-full border border-gray-300 px-4 py-3 sm:px-5"
                     placeholder={
                         selectedUser?.type === "group"
                             ? "Send message to group..."
@@ -102,8 +104,8 @@ export default function ChatInput({
                 <Button
                     htmlType="submit"
                     disabled={!messageText.trim()}
-                    loading={sendMutation.isPending}
-                    className="rounded-2xl! bg-black! lg:px-6! py-5! text-white! disabled:opacity-50!"
+                    loading={sendMutation.isPending }
+                    className="w-full rounded-2xl! bg-black! py-5! text-white! disabled:opacity-50! sm:w-auto sm:px-6!"
                 >
                     Send
                 </Button>

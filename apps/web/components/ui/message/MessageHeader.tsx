@@ -1,18 +1,23 @@
 "use client";
 
-import { TeamOutlined } from "@ant-design/icons";
+import { MenuOutlined, TeamOutlined } from "@ant-design/icons";
+import { Button } from "antd";
 import ViewGroup from "./ViewGroup";
 import { useState } from "react";
 interface MessageHeaderProps {
   selectedUser: any;
   userStatuses: Record<string, string>;
   setSelectedUser: any;
+  mobile?: boolean;
+  onOpenSidebar?: () => void;
 }
 
 export default function MessageHeader({
   selectedUser,
   userStatuses,
   setSelectedUser,
+  mobile = false,
+  onOpenSidebar,
 }: MessageHeaderProps) {
   const [open, setOpen] = useState(false);
   const [selectGroup, setSelectGroup] = useState<String>("");
@@ -26,11 +31,17 @@ export default function MessageHeader({
   };
   return (
     <>
-      <header className="flex items-center border-b border-gray-300 bg-white px-6 py-3">
-        <div
-          className="flex items-center gap-4 cursor-pointer"
-          onClick={handleView}
-        >
+      <header className="flex items-center gap-2 border-b border-gray-300 bg-white px-3 py-4 sm:px-6">
+        {mobile && onOpenSidebar ? (
+          <Button
+            type="text"
+            className="shrink-0 md:hidden"
+            icon={<MenuOutlined />}
+            onClick={onOpenSidebar}
+          />
+        ) : null}
+
+        <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4 cursor-pointer" onClick={handleView}>
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-black text-white font-semibold uppercase relative">
             {selectedUser?.type === "group" ? (
               <TeamOutlined />
@@ -40,23 +51,22 @@ export default function MessageHeader({
 
             {selectedUser?.type !== "group" && (
               <span
-                className={`w-3 h-3 rounded-full absolute bottom-0 right-0 ${
-                  userStatuses[selectedUser?.id || ""] === "online"
+                className={`w-3 h-3 rounded-full absolute bottom-0 right-0 ${userStatuses[selectedUser?.id || ""] === "online"
                     ? "bg-green-500"
                     : userStatuses[selectedUser?.id || ""] === "away"
                       ? "bg-yellow-400"
                       : "bg-red-400"
-                }`}
+                  }`}
               />
             )}
           </div>
 
-          <div>
-            <div className="text-base font-semibold capitalize">
+          <div className="min-w-0">
+            <div className="truncate text-base font-semibold capitalize">
               {selectedUser?.name || "Open a chat"}
             </div>
 
-            <div className="text-xs text-gray-500">
+            <div className="truncate text-xs text-gray-500">
               {selectedUser?.type === "group"
                 ? "Group Chat"
                 : userStatuses[selectedUser?.id || ""] || "offline"}

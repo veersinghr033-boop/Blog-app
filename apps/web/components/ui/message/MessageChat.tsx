@@ -1,6 +1,6 @@
 "use client";
 
-import { Layout } from "antd";
+import { Button } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 
@@ -12,6 +12,8 @@ export default function MessageChat({
   selectedUser,
   setSelectedUser,
   clearNotification,
+  mobile,
+  onOpenSidebar,
 }: any) {
   const [userStatuses, setUserStatuses] = useState<Record<string, string>>({});
   const socketRef = useRef<any>(null);
@@ -30,16 +32,18 @@ export default function MessageChat({
   }, []);
 
   return (
-    <Layout className="md:p-0 shadow-lg border border-gray-200">
-      <div className="h-[calc(100vh-115px)] rounded bg-white">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden border border-gray-200 bg-white shadow-lg ">
+      <div className="flex min-h-0 flex-1 flex-col bg-white">
         <MessageHeader
           selectedUser={selectedUser}
           userStatuses={userStatuses}
           setSelectedUser={setSelectedUser}
+          mobile={mobile}
+          onOpenSidebar={onOpenSidebar}
         />
-        <section className="flex flex-col justify-between">
+        <section className="flex min-h-0 flex-1 flex-col justify-between">
           {selectedUser ? (
-            <div className="flex flex-col h-[calc(100vh-180px)]">
+            <div className="flex min-h-0 flex-1 flex-col">
               <ChatMessages
                 selectedUser={selectedUser}
                 socketRef={socketRef}
@@ -49,12 +53,17 @@ export default function MessageChat({
               <ChatInput selectedUser={selectedUser} socketRef={socketRef} />
             </div>
           ) : (
-            <div className="h-full flex items-center justify-center text-gray-500">
-              Select a user or group to start chatting.
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6 text-center text-gray-500">
+              <div>Select a user or group to start chatting.</div>
+              {mobile && onOpenSidebar ? (
+                <Button type="primary" className="bg-black!" onClick={onOpenSidebar}>
+                  Open chats
+                </Button>
+              ) : null}
             </div>
           )}
         </section>
       </div>
-    </Layout>
+    </div>
   );
 }

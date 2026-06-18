@@ -34,14 +34,14 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                 message: `New Message in ${userStatus.latestNotification.groupName || "a group"} sent by ${senderName}`,
                 description: ` ${first10Words} `,
                 placement: "topRight",
-                duration: 3,
+                duration: 1.5,
             });
         } else {
             notification.info({
                 message: "New Message sent by " + senderName,
                 description: `${first10Words}`,
                 placement: "topRight",
-                duration: 3,
+                duration: 1.5,
             });
         }
     }, [userStatus.latestNotification]);

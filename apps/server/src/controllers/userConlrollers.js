@@ -71,6 +71,7 @@ export const emitSortedUsers = async(io, currentUserId) => {
             const messages = await Message.find({
                 chatId: group.chatId,
                 readBy: { $ne: currentUserId },
+                senderId: { $ne: currentUserId },
             });
             const unreadCount = Array.isArray(messages) ? messages.length : 0;
 

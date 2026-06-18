@@ -3,34 +3,33 @@
 import { Virtuoso } from "react-virtuoso";
 import { useEffect, useRef, useState } from "react";
 import { useAppSelector } from "@/lib/store/hooks";
-import { useQuery } from "@tanstack/react-query";
-import { CheckCircleOutlined,EyeOutlined  } from "@ant-design/icons"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  CheckCircleOutlined,
+  EllipsisOutlined,
+  EyeOutlined,
+} from "@ant-design/icons";
 import api from "@/utills/axios";
+import { message, Button, Popover, Tooltip } from "antd";
+
 interface Props {
   socketRef: any;
   selectedUser: any;
   clearNotification: any;
 }
+
 interface MessageType {
   _id: string;
-
   chatId?: any;
-
   senderId: {
     _id: string;
     userName: string;
   };
-
   receiverId?: string;
-
   groupId?: string;
-
   message: string;
-
   timestamp: string;
-
   isRead: boolean;
-
   readBy: { _id: string; userName: string }[];
 }
 
@@ -43,19 +42,23 @@ export default function ChatMessages({
   const currentRoomRef = useRef<string | null>(null);
   const [typingUsers, setTypingUsers] = useState<Record<string, boolean>>({});
   const userId = useAppSelector((state) => state.auth.user?.id);
+
   const { data } = useQuery<MessageType[]>({
     queryKey: ["chatMessages", selectedUser?._id || selectedUser?.id],
     queryFn: async () => {
       if (!selectedUser) return [];
+
       if (selectedUser.type === "group") {
         const res = await api.get(`/chat/group-messages/${selectedUser.id}`);
         return res.data;
       }
+
       const res = await api.get(`/chat/${selectedUser.id}`);
       return res.data;
     },
     enabled: !!selectedUser,
   });
+
   useEffect(() => {
     if (data) {
       setMessages(data);
@@ -153,6 +156,7 @@ export default function ChatMessages({
       socketRef.current?.off("userStopTyping", stopTypingHandler);
     };
   }, [selectedUser, userId]);
+
   useEffect(() => {
     if (!socketRef.current) return;
 
@@ -179,6 +183,7 @@ export default function ChatMessages({
       socketRef.current.off("messagesRead", readHandler);
     };
   }, []);
+
   useEffect(() => {
     if (!selectedUser || !socketRef.current || !messages.length) return;
 
@@ -192,62 +197,137 @@ export default function ChatMessages({
     });
   }, [selectedUser, messages]);
 
+  const queryClient = useQueryClient();
+
+  const deleteMessageMutation = useMutation({
+    mutationFn: async (messageId: string) => {
+      return api.delete(`/chat/message/${messageId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["chatMessages", selectedUser?._id || selectedUser?.id],
+      });
+    },
+    onError: (error: any) => {
+      message.error(
+        error?.response?.data?.message || "Failed to delete message",
+      );
+    },
+  });
+
+  const deleteMessageById = (messageId: string) => {
+    deleteMessageMutation.mutate(messageId);
+  };
+
   return (
     <>
-      <Virtuoso
-        style={{ height: "100%" }}
-        data={messages}
-        followOutput="smooth"
-        itemContent={(index, item) => {
-          const isMine = item.senderId._id === userId;
-          const isReadByReceiver = item.readBy.some(
-            (user) => user._id !== userId,
-          );
-          const groupReadUsers = item.readBy.filter(
-            (user) => user._id !== item.senderId._id,
-          );
-          return (
-            <div
-              className={`flex flex-col gap-1 mx-4 py-1.5 ${
-                isMine ? "items-end" : "items-start"
-              }`}
-            >
-              <div className="text-xs text-gray-400 px-1">
-                {isMine ? null : item.senderId.userName}{" "}
-                {new Date(item.timestamp).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </div>
+      <div className="min-h-0 flex-1 overflow-hidden">
+        <Virtuoso
+          style={{ height: "100%" }}
+          data={messages}
+          followOutput="smooth"
+          itemContent={(_, item) => {
+            const isMine = item.senderId._id === userId;
+            const isReadByReceiver = item.readBy.some(
+              (user) => user._id !== userId,
+            );
+            const groupReadUsers = item.readBy.filter(
+              (user) => user._id !== item.senderId._id,
+            );
 
+            return (
               <div
-                className={`max-w-[70%] rounded-2xl wrap-break-word px-5 py-2 ${
-                  isMine ? "bg-blue-500 text-white" : "bg-gray-100 text-black"
+                className={`flex flex-col gap-1 mx-2 py-1.5 sm:mx-4 ${
+                  isMine ? "items-end" : "items-start"
                 }`}
               >
-                {item.message}
-              </div>
-              {isMine && selectedUser.type !== "group" && (
-                <div className="text-[11px] text-gray-400 " title={isReadByReceiver ? "Seen" : "Sent"} >
-                  {isReadByReceiver ? <EyeOutlined /> : <CheckCircleOutlined />}
+                <div className="px-1 text-xs text-gray-400">
+                  {isMine ? null : item.senderId.userName}{" "}
+                  {new Date(item.timestamp).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                  {isMine && (
+                    <Popover
+                      content={
+                        <div>
+                          <Button
+                            type="text"
+                            danger
+                            size="small"
+                            onClick={() => deleteMessageById(item._id)}
+                            loading={deleteMessageMutation.isPending}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      }
+                      trigger="click"
+                      placement="bottomRight"
+                    >
+                      <Button type="text" size="small">
+                        <EllipsisOutlined />
+                      </Button>
+                    </Popover>
+                  )}
                 </div>
-              )}
-              {isMine && selectedUser.type === "group" && (
+
                 <div
-                  className="text-[11px] text-gray-400  "
-                  title={
-                    groupReadUsers.length
-                      ? `Seen by: ${groupReadUsers.map((user) => user.userName).join(", ")}`
-                      : "Sent"
-                  }
+                  className={`h-full max-w-[85%] wrap-break-word rounded-2xl px-4 py-2 sm:max-w-[70%] sm:px-5 ${
+                    isMine ? "bg-blue-500 text-white" : "bg-gray-100 text-black"
+                  }`}
                 >
-                  {groupReadUsers.length ? <EyeOutlined/> : <CheckCircleOutlined/>}
+                  {item.message}
                 </div>
-              )}
-            </div>
-          );
-        }}
-      />
+
+                {isMine && selectedUser.type !== "group" && (
+                  <Tooltip
+                    title={isReadByReceiver ? "Seen" : "Send"}
+                    color="white"
+                  >
+                    <div className="text-[11px] text-gray-400">
+                      {isReadByReceiver ? (
+                        <EyeOutlined />
+                      ) : (
+                        <CheckCircleOutlined />
+                      )}
+                    </div>
+                  </Tooltip>
+                )}
+
+                {isMine && selectedUser.type === "group" && (
+                  <Tooltip
+                    title={
+                      groupReadUsers.length ? (
+                        <div>
+                          {"Seen by :"}
+                          {groupReadUsers.map((user: any) => (
+                            <div key={user.id} className="text-gray-600">
+                              {" "}
+                              {user.userName}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        "Send"
+                      )
+                    }
+                    color="white"
+                  >
+                    <div className="text-[11px] text-gray-400">
+                      {groupReadUsers.length ? (
+                        <EyeOutlined />
+                      ) : (
+                        <CheckCircleOutlined />
+                      )}
+                    </div>
+                  </Tooltip>
+                )}
+              </div>
+            );
+          }}
+        />
+      </div>
 
       {(() => {
         const currentChatKey =
@@ -256,7 +336,7 @@ export default function ChatMessages({
             : [userId, selectedUser.id].sort().join("_");
 
         return typingUsers[currentChatKey] ? (
-          <div className="text-xs text-blue-500 animate-pulse p-1">
+          <div className="p-1 text-xs text-blue-500 animate-pulse">
             typing...
           </div>
         ) : null;
