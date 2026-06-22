@@ -1,0 +1,20 @@
+[33md908c22[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Remove Firebase service account key
+[33m5dbd120[m Completed FCM integration for real-time push notifications.
+[33mffa81be[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Delete messages in chat new
+[33mcfe2e35[m Delete messages in chat
+[33m16b8ff4[m Added seen-user names functionality for group messages.
+[33m37cc7d6[m addImplemented message status indicators (Sent and Seen).
+[33m2c44403[m add Typing indicator
+[33m74a5309[m add notification
+[33mb96303e[m new
+[33m4612005[m admin can add member
+[33mf54d16c[m add user can delete group and members
+[33m8caaf19[m add group in message
+[33m377f2e5[m Added group chat functionality\
+[33mec12eae[m Update project
+[33m2b1c6e2[m Update project
+[33m325c81d[m Update project
+[33ma968cc6[m your update message
+[33m0ef272c[m Update project
+[33m4446523[m your update message
+[33mc0b16ca[m first commit

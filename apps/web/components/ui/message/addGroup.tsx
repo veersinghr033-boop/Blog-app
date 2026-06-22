@@ -57,6 +57,7 @@ function AddGroup({
                 queryKey: ["groups"]
             });
             message.success("Group created successfully");
+                
         },
         onError: (error: any) => {
             message.error(

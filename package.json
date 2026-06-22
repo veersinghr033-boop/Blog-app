@@ -1,8 +1,7 @@
 {
   "name": "blogging-app",
   "private": true,
-    "packageManager": "npm@10.8.2",
-
+  "packageManager": "npm@10.8.2",
   "workspaces": [
     "apps/*"
   ],
@@ -11,5 +10,9 @@
   },
   "devDependencies": {
     "turbo": "^2.0.0"
+  },
+  "dependencies": {
+    "firebase": "^12.15.0",
+    "firebase-admin": "^14.0.0"
   }
 }

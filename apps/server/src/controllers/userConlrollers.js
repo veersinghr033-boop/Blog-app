@@ -165,3 +165,25 @@ export const getUsersSorted = async(req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
+
+export const saveFcmToken = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { token } = req.body;
+
+    await User.findByIdAndUpdate(userId, {
+      fcmToken: token,
+    });
+// console.log("Saved FCM:", token);
+    return res.json({
+      success: true,
+    });
+  } catch (error) {
+    return res.json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+ 

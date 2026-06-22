@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema({
     enum: ["admin", "author", "reader"],
     default: "reader",
   },
+  fcmToken : {
+    type: String,
+    default: ""
+  }
 },{timestamps: true});
 
 const User = mongoose.model("User", userSchema);

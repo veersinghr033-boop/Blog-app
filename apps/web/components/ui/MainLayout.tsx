@@ -3,7 +3,7 @@
 import { Layout, Drawer, notification } from "antd"
 import Navbar from "./navbar"
 import Sidebar from "./sidebar"
-import { useState, useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import useUserStatus from "../ui/message/useUserStatus"
 import { useAppSelector } from "@/lib/store/hooks"
 
@@ -11,6 +11,7 @@ const { Content } = Layout
 
 function MainLayout({ children }: { children: React.ReactNode }) {
     const [open, setOpen] = useState(false)
+    const lastNotificationKeyRef = useRef<string | null>(null)
 
     const userId = useAppSelector((state) => state.auth.user?.id);
 
@@ -18,7 +19,10 @@ function MainLayout({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         if (!userStatus.latestNotification) return;
-        console.log(userStatus.latestNotification)
+
+        if (typeof document !== "undefined" && document.hidden) {
+            return;
+        }
 
         const senderName =
             userStatus.latestNotification?.senderName ||
@@ -28,8 +32,23 @@ function MainLayout({ children }: { children: React.ReactNode }) {
         const senderId = userStatus.latestNotification?.senderId
         const fullMsg = userStatus.latestNotification.message || "";
         const first10Words = fullMsg.split(/\s+/).filter(Boolean).slice(0, 7).join(" ") + (fullMsg.split(/\s+/).filter(Boolean).length > 10 ? "..." : "");
+        const notificationKey = JSON.stringify({
+            senderId: typeof senderId === "string" ? senderId : senderId?._id,
+            groupId: userStatus.latestNotification.groupId || null,
+            receiverId: userStatus.latestNotification.receiverId || null,
+            message: fullMsg,
+            timestamp: userStatus.latestNotification.timestamp || null,
+            type: userStatus.latestNotification.type || null,
+        });
+
+        if (lastNotificationKeyRef.current === notificationKey) {
+            return;
+        }
+
+        lastNotificationKeyRef.current = notificationKey;
+
         if (userStatus.latestNotification.groupId) {
-           
+
             notification.info({
                 message: `New Message in ${userStatus.latestNotification.groupName || "a group"} sent by ${senderName}`,
                 description: ` ${first10Words} `,

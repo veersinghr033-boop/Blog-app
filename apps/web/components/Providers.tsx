@@ -9,14 +9,27 @@ import {
 } from "@tanstack/react-query";
 
 import { store, persistor } from "@/lib/store/store";
-
+import { useFCM } from "@/hooks/useFCM";
+import { useAppSelector } from "@/lib/store/hooks";
 const queryClient = new QueryClient();
+
+function FCMProvider({ children }: {
+  children: React.ReactNode;
+}) {
+
+  const userId = useAppSelector((state) => state.auth.user?.id);
+
+  useFCM({ userId });
+
+  return children;
+}
 
 export default function Providers({
   children,
 }: {
   children: React.ReactNode;
 }) {
+
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
@@ -24,7 +37,9 @@ export default function Providers({
           loading={<Spin size="large" />}
           persistor={persistor}
         >
-          {children}
+          <FCMProvider>
+            {children}
+          </FCMProvider>
         </PersistGate>
       </Provider>
     </QueryClientProvider>
