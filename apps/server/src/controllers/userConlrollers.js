@@ -54,7 +54,6 @@ export const emitSortedUsers = async(io, currentUserId) => {
     const chats = await Chat.find({
         participants: currentUserId,
     });
-    //   console.log("chats", chats);
 
     const groups = await Group.find({
         chatId: { $in: chats.map((c) => c._id) },
@@ -148,7 +147,6 @@ export const emitSortedUsers = async(io, currentUserId) => {
 
         return a.name.localeCompare(b.name);
     });
-    // console.log("sorted users", result);
     io.to(currentUserId.toString()).emit("sortedUsers", result);
 
     return result;
@@ -175,7 +173,6 @@ export const saveFcmToken = async (req, res) => {
     await User.findByIdAndUpdate(userId, {
       fcmToken: token,
     });
-// console.log("Saved FCM:", token);
     return res.json({
       success: true,
     });

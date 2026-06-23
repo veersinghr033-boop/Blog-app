@@ -54,9 +54,7 @@ export default function UserSidebar({
     .filter((user) => user.name.toLowerCase().includes(search.toLowerCase()))
     .map((user) => ({
       ...user,
-      //   type: "user",
     }));
-  // console.log(selectedUser)
 
   return (
     <Layout.Sider

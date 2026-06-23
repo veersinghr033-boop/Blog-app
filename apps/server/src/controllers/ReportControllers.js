@@ -1,6 +1,5 @@
 import Report from "../models/ReportModel.js";
 
-// CREATE REPORT
 export const createReport = async(req, res) => {
     try {
         const userId = req.user.id;
@@ -13,7 +12,6 @@ export const createReport = async(req, res) => {
             });
         }
 
-        // Prevent duplicate report
         const existingReport = await Report.findOne({
             blogId,
             userId,

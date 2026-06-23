@@ -30,18 +30,12 @@ export const initSocket = (server) => {
     };
 
     socket.on("userOnline", async (userId) => {
-      // consol  e.log("USER ONLINE:", userId);
 
       userStatus.set(userId, "online");
       socketToUser.set(socket.id, userId);
 
       socket.join(userId);
-      // console.log(
-      //     "ROOM AFTER JOIN:",
-      //     userId,
-      //     io.sockets.adapter.rooms.get(userId),
-      // );
-
+     
       io.emit("userStatus", {
         userId,
         status: "online",

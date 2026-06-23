@@ -1,9 +1,15 @@
+
 "use client";
 
 import { Virtuoso } from "react-virtuoso";
 import { useEffect, useRef, useState } from "react";
 import { useAppSelector } from "@/lib/store/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useInfiniteQuery,
+} from "@tanstack/react-query";
 import {
   CheckCircleOutlined,
   EllipsisOutlined,
@@ -12,10 +18,16 @@ import {
 import api from "@/utills/axios";
 import { message, Button, Popover, Tooltip } from "antd";
 
+interface SelectedUser {
+  id?: string;
+  _id?: string;
+  type?: "group" | string;
+}
+
 interface Props {
   socketRef: any;
-  selectedUser: any;
-  clearNotification: any;
+  selectedUser: SelectedUser;
+  clearNotification: (chatId: string) => void;
 }
 
 interface MessageType {
@@ -31,6 +43,13 @@ interface MessageType {
   timestamp: string;
   isRead: boolean;
   readBy: { _id: string; userName: string }[];
+
+}
+
+interface MessagePage {
+  messages: MessageType[];
+  hasMore: boolean;
+  nextCursor: string | null;
 }
 
 export default function ChatMessages({
@@ -38,35 +57,58 @@ export default function ChatMessages({
   selectedUser,
   clearNotification,
 }: Props) {
-  const [messages, setMessages] = useState<MessageType[]>([]);
   const currentRoomRef = useRef<string | null>(null);
   const [typingUsers, setTypingUsers] = useState<Record<string, boolean>>({});
   const userId = useAppSelector((state) => state.auth.user?.id);
+  const virtuosoRef = useRef<any>(null);
+  const selectedChatId = selectedUser.id || selectedUser._id || "";
+  const firstItemIndex = useRef(100000);
+  const { data, fetchPreviousPage, hasPreviousPage, isFetchingPreviousPage } =
+    useInfiniteQuery<MessagePage>({
+      queryKey: ["chatMessages", selectedUser.type, selectedChatId],
 
-  const { data } = useQuery<MessageType[]>({
-    queryKey: ["chatMessages", selectedUser?._id || selectedUser?.id],
-    queryFn: async () => {
-      if (!selectedUser) return [];
+      queryFn: async ({ pageParam }) => {
+        if (!selectedChatId) {
+          return {
+            messages: [],
+            hasMore: false,
+            nextCursor: null,
+          };
+        }
 
-      if (selectedUser.type === "group") {
-        const res = await api.get(`/chat/group-messages/${selectedUser.id}`);
+        const before = pageParam ? `?before=${pageParam}` : "";
+
+        const url =
+          selectedUser.type === "group"
+            ? `/chat/group-messages/${selectedChatId}${before}`
+            : `/chat/${selectedChatId}${before}`;
+
+        const res = await api.get(url);
+
         return res.data;
-      }
+      },
 
-      const res = await api.get(`/chat/${selectedUser.id}`);
-      return res.data;
-    },
-    enabled: !!selectedUser,
-  });
+      initialPageParam: null,
+
+      getNextPageParam: (lastPage: MessagePage) =>
+        lastPage.hasMore ? lastPage.nextCursor : undefined,
+
+      getPreviousPageParam: (firstPage: MessagePage) =>
+        firstPage.hasMore ? firstPage.nextCursor : undefined,
+
+      staleTime: Infinity,
+      gcTime: 1000 * 60 * 30,
+
+      enabled: !!selectedChatId,
+    });
+
+  const messages = data?.pages.flatMap((page) => page.messages) ?? [];
 
   useEffect(() => {
-    if (data) {
-      setMessages(data);
+    if (!isFetchingPreviousPage && (data?.pages?.length ?? 0) > 1) {
+      firstItemIndex.current -= 20;
     }
-  }, [data]);
-
-  const selectedChatId = selectedUser?.id || selectedUser?._id;
-
+  }, [data?.pages?.length ?? 0]);
   useEffect(() => {
     if (!selectedChatId) return;
     clearNotification(selectedChatId);
@@ -105,27 +147,77 @@ export default function ChatMessages({
       }
     };
 
+    const messagesReadHandler = (payload: any) => {
+      queryClient.setQueryData(
+        ["chatMessages", selectedUser.type, selectedChatId],
+        (oldData: any) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: any) => ({
+              ...page,
+              messages: page.messages.map((msg: MessageType) => {
+                if (!payload.messageIds.includes(msg._id)) {
+                  return msg;
+                }
+
+                const exists = msg.readBy.some(
+                  (u) => u._id === payload.reader._id
+                );
+
+                if (exists) return msg;
+
+                return {
+                  ...msg,
+                  readBy: [...msg.readBy, payload.reader],
+                };
+              }),
+            })),
+          };
+        }
+      );
+    };
     if (selectedUser.type === "group") {
-      socketRef.current.emit("joinGroup", selectedUser.id);
+      socketRef.current.emit("joinGroup", selectedChatId);
 
       const groupHandler = (msg: MessageType) => {
-        if (msg.groupId === selectedUser.id) {
-          setMessages((prev) => [...prev, msg]);
-        }
+        if (msg.groupId !== selectedChatId) return;
+
+        queryClient.setQueryData(
+          ["chatMessages", selectedUser.type, selectedChatId],
+          (oldData: any) => {
+            if (!oldData) return oldData;
+
+            const pages = [...oldData.pages];
+
+            pages[pages.length - 1] = {
+              ...pages[pages.length - 1],
+              messages: [...pages[pages.length - 1].messages, msg],
+            };
+
+            return {
+              ...oldData,
+              pages,
+            };
+          },
+        );
       };
 
       socketRef.current.on("receiveGroupMessage", groupHandler);
       socketRef.current.on("userTyping", typingHandler);
       socketRef.current.on("userStopTyping", stopTypingHandler);
+      socketRef.current.on("messagesRead", messagesReadHandler);
 
       return () => {
         socketRef.current?.off("receiveGroupMessage", groupHandler);
         socketRef.current?.off("userTyping", typingHandler);
         socketRef.current?.off("userStopTyping", stopTypingHandler);
+        socketRef.current?.off("messagesRead", messagesReadHandler);
       };
     }
 
-    const room = [userId, selectedUser.id].sort().join("_");
+    const room = [userId, selectedChatId].sort().join("_");
 
     if (currentRoomRef.current) {
       socketRef.current.emit("leaveRoom", currentRoomRef.current);
@@ -133,7 +225,7 @@ export default function ChatMessages({
 
     socketRef.current.emit("joinRoom", {
       user1: userId,
-      user2: selectedUser.id,
+      user2: selectedChatId,
     });
 
     currentRoomRef.current = room;
@@ -141,48 +233,39 @@ export default function ChatMessages({
     const privateHandler = (msg: MessageType) => {
       const msgRoom = [msg.senderId._id, msg.receiverId].sort().join("_");
 
-      if (room === msgRoom) {
-        setMessages((prev) => [...prev, msg]);
-      }
-    };
+      if (room !== msgRoom) return;
 
+      queryClient.setQueryData(
+        ["chatMessages", selectedUser.type, selectedChatId],
+        (oldData: any) => {
+          if (!oldData) return oldData;
+
+          const pages = [...oldData.pages];
+
+          pages[pages.length - 1] = {
+            ...pages[pages.length - 1],
+            messages: [...pages[pages.length - 1].messages, msg],
+          };
+
+          return {
+            ...oldData,
+            pages,
+          };
+        },
+      );
+    };
     socketRef.current.on("receiveMessage", privateHandler);
     socketRef.current.on("userTyping", typingHandler);
     socketRef.current.on("userStopTyping", stopTypingHandler);
+    socketRef.current.on("messagesRead", messagesReadHandler);
 
     return () => {
       socketRef.current?.off("receiveMessage", privateHandler);
       socketRef.current?.off("userTyping", typingHandler);
       socketRef.current?.off("userStopTyping", stopTypingHandler);
+      socketRef.current?.off("messagesRead", messagesReadHandler);
     };
-  }, [selectedUser, userId]);
-
-  useEffect(() => {
-    if (!socketRef.current) return;
-
-    const readHandler = (data: any) => {
-      setMessages((prev) =>
-        prev.map((msg) => {
-          if (!data.messageIds.includes(msg._id)) {
-            return msg;
-          }
-
-          return {
-            ...msg,
-            readBy: msg.readBy.some((user) => user._id === data.reader._id)
-              ? msg.readBy
-              : [...msg.readBy, data.reader],
-          };
-        }),
-      );
-    };
-
-    socketRef.current.on("messagesRead", readHandler);
-
-    return () => {
-      socketRef.current.off("messagesRead", readHandler);
-    };
-  }, []);
+  }, [selectedUser, userId, messages.length]);
 
   useEffect(() => {
     if (!selectedUser || !socketRef.current || !messages.length) return;
@@ -205,7 +288,7 @@ export default function ChatMessages({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["chatMessages", selectedUser?._id || selectedUser?.id],
+        queryKey: ["chatMessages", selectedUser.type, selectedChatId],
       });
     },
     onError: (error: any) => {
@@ -218,14 +301,62 @@ export default function ChatMessages({
   const deleteMessageById = (messageId: string) => {
     deleteMessageMutation.mutate(messageId);
   };
+  const firstLoadRef = useRef(true);
 
+  useEffect(() => {
+    if (!messages.length) return;
+
+    if (firstLoadRef.current) {
+      firstLoadRef.current = false;
+
+      setTimeout(() => {
+        virtuosoRef.current?.scrollToIndex({
+          index: messages.length - 1,
+          behavior: "auto",
+        });
+      }, 10);
+    }
+  }, [messages.length]);
+  useEffect(() => {
+    console.log(
+      data?.pages.map((p, i) => ({
+        page: i,
+        first: p.messages[0]?.message,
+        last: p.messages[p.messages.length - 1]?.message,
+        count: p.messages.length,
+      })),
+    );
+  }, [data]);
+  useEffect(() => {
+    if (!selectedChatId) return;
+
+    firstLoadRef.current = true;
+    firstItemIndex.current = 100000;
+    virtuosoRef.current = null;
+  }, [selectedChatId]);
   return (
     <>
       <div className="min-h-0 flex-1 overflow-hidden">
         <Virtuoso
-          style={{ height: "100%" }}
+          key={selectedChatId}
+          ref={virtuosoRef}
           data={messages}
+          firstItemIndex={firstItemIndex.current}
+          computeItemKey={(_, item) => item._id}
           followOutput="smooth"
+          startReached={() => {
+            if (hasPreviousPage && !isFetchingPreviousPage) {
+              fetchPreviousPage();
+            }
+          }}
+          components={{
+            Header: () =>
+              isFetchingPreviousPage ? (
+                <div className="text-center py-2">
+                  Loading older messages...
+                </div>
+              ) : null,
+          }}
           itemContent={(_, item) => {
             const isMine = item.senderId._id === userId;
             const isReadByReceiver = item.readBy.some(
@@ -237,9 +368,8 @@ export default function ChatMessages({
 
             return (
               <div
-                className={`flex flex-col gap-1 mx-2 py-1.5 sm:mx-4 ${
-                  isMine ? "items-end" : "items-start"
-                }`}
+                className={`flex flex-col gap-1 mx-2 py-1.5 sm:mx-4 ${isMine ? "items-end" : "items-start"
+                  }`}
               >
                 <div className="px-1 text-xs text-gray-400">
                   {isMine ? null : item.senderId.userName}{" "}
@@ -273,9 +403,8 @@ export default function ChatMessages({
                 </div>
 
                 <div
-                  className={`h-full max-w-[85%] wrap-break-word rounded-2xl px-4 py-2 sm:max-w-[70%] sm:px-5 ${
-                    isMine ? "bg-blue-500 text-white" : "bg-gray-100 text-black"
-                  }`}
+                  className={`h-full max-w-[85%] wrap-break-word rounded-2xl px-4 py-2 sm:max-w-[70%] sm:px-5 ${isMine ? "bg-blue-500 text-white" : "bg-gray-100 text-black"
+                    }`}
                 >
                   {item.message}
                 </div>
@@ -332,8 +461,10 @@ export default function ChatMessages({
       {(() => {
         const currentChatKey =
           selectedUser.type === "group"
-            ? selectedUser.id
-            : [userId, selectedUser.id].sort().join("_");
+            ? selectedChatId
+            : userId
+              ? [userId, selectedChatId].sort().join("_")
+              : selectedChatId;
 
         return typingUsers[currentChatKey] ? (
           <div className="p-1 text-xs text-blue-500 animate-pulse">

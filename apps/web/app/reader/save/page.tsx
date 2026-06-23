@@ -8,7 +8,6 @@ import { fetchAllBlogs } from "@/lib/store/features/blogThunk"
 import { useQuery } from "@tanstack/react-query"
 import api from "@/utills/axios"
 function page() {
-  const dispatch = useAppDispatch()
 
   const { data, isError, error } = useQuery({
     queryKey: ["saved"],
@@ -24,13 +23,11 @@ function page() {
       console.error("Error fetching saved blogs:", error);
     }
   }, [isError, error])
-  // const savedBlogs = useAppSelector((state) => state.save.savedBlogs)
   const blogData = data?.map(
     (item: any) => item.blogDetails
   ) || []
 
 
-  // console.log("save", blogData)
   return (
     <Layout className="min-h-screen ">
       <header className="mb-6">

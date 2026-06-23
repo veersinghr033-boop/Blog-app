@@ -7,7 +7,7 @@ import {
 } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { useAppSelector } from "@/lib/store/hooks";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient  } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import CommentReply from "./commentReply";
 
@@ -17,7 +17,6 @@ const { Paragraph, Text } = Typography;
 interface Props {
     comments: any[];
     blogId: string;
-    // onDelete: (commentId: string) => void;
 }
 
 export default function CommentList({

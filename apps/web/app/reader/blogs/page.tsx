@@ -2,26 +2,14 @@
 
 import { Layout } from "antd"
 import Blog from "@/components/ui/blog/Blog";
-import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
-import { fetchBlogById } from "@/lib/store/features/blogThunk";
-import { useEffect, useMemo } from "react";
+import { useAppSelector } from "@/lib/store/hooks";
+import { useMemo } from "react";
 import api from "@/utills/axios";
 import { useQuery } from "@tanstack/react-query";
 
 function Blogs() {
     const userId = useAppSelector((state) => state.auth.user?.id);
 
-    // const blog = useAppSelector(
-    //     (state) => state.blog.currentBlog
-    // ) || [];
-
-    const dispatch = useAppDispatch();
-
-    // useEffect(() => {
-    //     if (userId) {
-    //         dispatch(fetchBlogById(userId) as any);
-    //     }
-    // }, [dispatch, userId]);
 
     const { data: blog = [], isLoading } = useQuery({
         queryKey: ["blogData", userId],

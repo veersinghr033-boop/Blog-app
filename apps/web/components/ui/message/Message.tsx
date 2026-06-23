@@ -71,7 +71,6 @@ export default function Message() {
       window.localStorage.removeItem("activeChatId");
     };
   }, []);
-  // console.log(selectedUser)
   return (
     <div className="flex h-[calc(100dvh-115px)] min-h-0 w-full overflow-hidden md:gap-0">
       <div className="hidden h-full md:block md:w-62.5 md:shrink-0">

@@ -28,5 +28,4 @@ router.delete(
   authorizeRoles("reader"),
   deleteMessage,
 );
-// router.put("/read", verifyToken, authorizeRoles("reader"), markMessagesAsRead);
 export default router;

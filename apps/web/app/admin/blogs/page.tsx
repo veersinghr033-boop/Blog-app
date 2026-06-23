@@ -11,7 +11,6 @@ import { useQuery } from "@tanstack/react-query"
 const { Search } = Input
 
 function Blogs() {
-    // const blogs = useAppSelector((state) => state.blog.blogs)
     const loading = useAppSelector((state) => state.blog.loading)
     const user = useAppSelector((state) => state.auth.user)
 
@@ -68,24 +67,7 @@ function Blogs() {
                         onChange={(e) => setSearchText(e.target.value)}
                     />
 
-                    {/* <Select
-                        className="w-1/4"
-                        value={statusFilter}
-                        onChange={(value) => setStatusFilter(value)}
-                        placeholder="Filter by status"
-                    >
-                        <Select.Option value="">
-                            All Status
-                        </Select.Option>
-
-                        <Select.Option value="published">
-                            Published
-                        </Select.Option>
-
-                        <Select.Option value="draft">
-                            Draft
-                        </Select.Option>
-                    </Select> */}
+                    
                 </div>
             </header>
 

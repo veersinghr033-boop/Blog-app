@@ -9,6 +9,7 @@ export const getMessages = async (req, res) => {
   try {
     const senderId = req.user.id;
     const { receiverId } = req.params;
+    const { before, limit = 20 } = req.query;
 
     const participants = [senderId, receiverId].sort();
 
@@ -18,17 +19,39 @@ export const getMessages = async (req, res) => {
     });
 
     if (!chat) {
-      return res.json([]);
+      return res.json({
+        messages: [],
+        hasMore: false,
+        nextCursor: null,
+      });
     }
 
-    const messages = await Message.find({
+    const query = {
       chatId: chat._id,
-    })
+    };
+
+    if (before) {
+      query.timestamp = {
+        $lt: new Date(before),
+      };
+    }
+
+    const messages = await Message.find(query)
       .populate("senderId", "userName")
       .populate("readBy", "userName")
-      .sort({ timestamp: 1 });
+      .sort({ timestamp: -1 })
+      .limit(Number(limit));
 
-    res.status(200).json(messages);
+    const reversedMessages = messages.reverse();
+console.log("before", before);
+console.log("returned", messages.length);
+console.log("nextCursor", reversedMessages[0]?.timestamp);
+    res.status(200).json({
+      messages: reversedMessages,
+      hasMore: messages.length === Number(limit),
+      nextCursor:
+        reversedMessages.length > 0 ? reversedMessages[0].timestamp : null,
+    });
   } catch (err) {
     console.error(err);
 
@@ -235,6 +258,7 @@ export const createChat = async (req, res) => {
 export const getGroupMessages = async (req, res) => {
   try {
     const { groupId } = req.params;
+    const { before, limit = 20 } = req.query;
 
     const group = await Group.findById(groupId);
 
@@ -247,17 +271,39 @@ export const getGroupMessages = async (req, res) => {
     const chat = await Chat.findById(group.chatId);
 
     if (!chat) {
-      return res.json([]);
+      return res.json({
+        messages: [],
+        hasMore: false,
+        nextCursor: null,
+      });
     }
 
-    const messages = await Message.find({
+    const query = {
       chatId: chat._id,
-    })
+    };
+
+    if (before) {
+      query.timestamp = {
+        $lt: new Date(before),
+      };
+    }
+
+    const messages = await Message.find(query)
       .populate("senderId", "userName")
       .populate("readBy", "userName")
-      .sort({ timestamp: 1 });
+      .sort({ timestamp: -1 })
+      .limit(Number(limit));
 
-    res.status(200).json(messages);
+    const reversedMessages = messages.reverse();
+console.log("before", before);
+console.log("returned", messages.length);
+console.log("nextCursor", reversedMessages[0]?.timestamp);
+    res.status(200).json({
+      messages: reversedMessages,
+      hasMore: messages.length === Number(limit),
+      nextCursor:
+        reversedMessages.length > 0 ? reversedMessages[0].timestamp : null,
+    });
   } catch (error) {
     console.log(error);
 
@@ -266,6 +312,7 @@ export const getGroupMessages = async (req, res) => {
     });
   }
 };
+
 export const deleteMessage = async (req, res) => {
   try {
     const { messageId } = req.params;

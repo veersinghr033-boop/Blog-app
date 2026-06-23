@@ -20,9 +20,6 @@ function Page() {
     }
   })
   
-  // const blogs = useAppSelector((state) => state.blog.blogs)
-
-//  console.log(blogs)
   return (
     <Layout className="min-h-screen">
       <header className="mb-6">

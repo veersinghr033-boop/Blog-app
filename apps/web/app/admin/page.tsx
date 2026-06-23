@@ -57,7 +57,6 @@ function page() {
     {
       title: "Total Blogs",
       value: blogs.length,
-      // value: 10,
       desc: "Published",
       bg: "bg-blue-100",
     },
@@ -70,7 +69,6 @@ function page() {
     {
       title: "Engagement",
       value: totalEngagement,
-      // value: 300,
       desc: "Likes and comments",
       bg: "bg-yellow-100",
     },
@@ -139,26 +137,7 @@ function page() {
               dataIndex: "joined",
               key: "joined",
             },
-            // {
-            //   title: "Actions",
-            //   key: "actions",
-            //   render: (_: any, record: UserType) => (
-            //     <div className="flex gap-2">
-
-
-            //       <Popconfirm
-            //         title="Are you sure you want to delete this user?"
-            //         onConfirm={() => handleDelete(record.key)}
-            //         okText="Yes"
-            //         cancelText="No"
-            //       >
-            //         <Button type="primary" danger size="small">
-            //           Delete
-            //         </Button>
-            //       </Popconfirm>
-            //     </div>
-            //   ),
-            // },
+        
           ]}
         />
 

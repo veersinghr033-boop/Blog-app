@@ -87,7 +87,6 @@ function AddMember({ group, onClose }: PropType) {
       <Button
         type="primary"
         htmlType="submit"
-        // loading={createGroupMutation.isPending}
         className="w-full bg-black!"
       >
         Add

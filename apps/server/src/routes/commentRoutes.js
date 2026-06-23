@@ -13,7 +13,6 @@ const router = e.Router();
 router.post(
   "/:blogId",
   verifyToken,
-  // authorizeRoles("reader", "admin"),
   createComment,
 );
 
