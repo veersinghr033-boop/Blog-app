@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useMemo, type FormEvent } from "react"
-import { useAppSelector } from "@/lib/store/hooks"
+import { useEffect, useMemo, useState } from "react"
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
+import { changePassword, updateProfile } from "@/lib/store/features/authThunk"
 
 import {
     Layout,
@@ -10,17 +11,20 @@ import {
     Avatar,
     Input,
     Button,
+    message,
 } from "antd"
 
 const { TextArea } = Input
 
 function Profile() {
+    const dispatch = useAppDispatch() as any
     const user = useAppSelector((state) => state.auth.user)
+    const loading = useAppSelector((state) => state.auth.loading)
 
     const initialValues = useMemo(
         () => ({
-            fullName:
-                user?.fullName ||
+            userName:
+                user?.userName ||
                 user?.name ||
                 user?.userName ||
                 "Emma Davis",
@@ -33,12 +37,21 @@ function Profile() {
         [user]
     )
 
-    const [fullName, setFullName] = useState(initialValues.fullName)
+    const [userName, setUserName] = useState(initialValues.userName)
     const [email, setEmail] = useState(initialValues.email)
     const [bio, setBio] = useState(initialValues.bio)
+    const [currentPassword, setCurrentPassword] = useState("")
+    const [newPassword, setNewPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
+
+    useEffect(() => {
+        setUserName(initialValues.userName)
+        setEmail(initialValues.email)
+        setBio(initialValues.bio)
+    }, [initialValues.userName, initialValues.email, initialValues.bio])
 
     const userInitial = useMemo(() => {
-        const name = fullName || initialValues.fullName
+        const name = userName || initialValues.userName
 
         return name
             .split(" ")
@@ -46,21 +59,43 @@ function Profile() {
             .join("")
             .slice(0, 2)
             .toUpperCase()
-    }, [fullName, initialValues.fullName])
+    }, [userName, initialValues.userName])
 
     const handleCancel = () => {
-        setFullName(initialValues.fullName)
+        setUserName(initialValues.userName)
         setEmail(initialValues.email)
         setBio(initialValues.bio)
+        setCurrentPassword("")
+        setNewPassword("")
+        setConfirmPassword("")
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        const resultAction = await dispatch(updateProfile({ userName, email, bio }))
 
-        console.log({
-            fullName,
-            email,
-            bio,
-        })
+        if (updateProfile.fulfilled.match(resultAction)) {
+            message.success(resultAction.payload?.message || "Profile updated successfully")
+        } else {
+            message.error(resultAction.payload as string)
+        }
+    }
+
+    const handlePasswordSubmit = async () => {
+        if (newPassword !== confirmPassword) {
+            message.error("New passwords do not match")
+            return
+        }
+
+        const resultAction = await dispatch(changePassword({ currentPassword, newPassword }))
+
+        if (changePassword.fulfilled.match(resultAction)) {
+            message.success(resultAction.payload?.message || "Password updated successfully")
+            setCurrentPassword("")
+            setNewPassword("")
+            setConfirmPassword("")
+        } else {
+            message.error(resultAction.payload as string)
+        }
     }
 
     return (
@@ -87,7 +122,7 @@ function Profile() {
 
                         <div>
                             <h2 className="font-semibold">
-                                {fullName}
+                                {userName}
                             </h2>
 
                             <p>{email}</p>
@@ -98,17 +133,17 @@ function Profile() {
 
 
                     <Form layout="vertical" className="mt-6" onFinish={handleSubmit}>
-                        <Form.Item label="Full Name">
+                        <Form.Item label="userName">
                             <Input
-                                value={fullName}
+                                value={userName}
                                 onChange={(e) =>
-                                    setFullName(e.target.value)
+                                    setUserName(e.target.value)
                                 }
                                 placeholder="Enter your full name"
                             />
                         </Form.Item>
 
-                        <Form.Item label="Email">
+                        <Form.Item label="Email" >
                             <Input
                                 type="email"
                                 value={email}
@@ -116,6 +151,7 @@ function Profile() {
                                     setEmail(e.target.value)
                                 }
                                 placeholder="Enter your email"
+                                disabled
                             />
                         </Form.Item>
 
@@ -126,7 +162,7 @@ function Profile() {
                                     setBio(e.target.value)
                                 }
                                 placeholder="Enter your bio"
-                                rows={4}
+                                rows={2}
                             />
                         </Form.Item>
 
@@ -135,6 +171,7 @@ function Profile() {
                                 type="primary"
                                 htmlType="submit"
                                 className="bg-black!"
+                                loading={loading}
                             >
                                 Save Changes
                             </Button>
@@ -151,30 +188,51 @@ function Profile() {
                         Password Change
                     </h2>
 
-                    <Form layout="vertical" className="mt-6">
+                    <Form layout="vertical" className="mt-6" onFinish={handlePasswordSubmit}>
                         <Form.Item label="Current Password">
                             <Input
                                 type="password"
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
                                 placeholder="Enter current password"
                             />
                         </Form.Item>
-                        <Form.Item label="New Password">
+                        <Form.Item label="New Password" >
                             <Input
                                 type="password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
                                 placeholder="Enter new password"
                             />
                         </Form.Item>
-                        <Form.Item label="Confirm New Password">
+                        <Form.Item label="Confirm New Password" rules={[
+                            {
+                                required: true,
+                                message:
+                                    "Please confirm your new password",
+                            },
+                            {
+                                validator: (_, value) => {
+                                    if (value && value !== newPassword) {
+                                        return Promise.reject(new Error("Passwords do not match"));
+                                    }
+                                    return Promise.resolve();
+                                }
+                            }
+                        ]}>
                             <Input
                                 type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
                                 placeholder="Confirm new password"
                             />
                         </Form.Item>
                         <div className="flex gap-4">
-                            <Button 
+                            <Button
                                 type="primary"
                                 htmlType="submit"
                                 className="bg-black!"
+                                loading={loading}
                             >
                                 Change Password
                             </Button>

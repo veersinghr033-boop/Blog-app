@@ -31,10 +31,21 @@ export const createComment = async (req, res) => {
 export const getCommentsByBlogId = async (req, res) => {
   try {
     const { blogId } = req.params;
-    const { before } = req.query;
+    const { before, limit = 6 } = req.query;
 
     const pipeline = [
       { $match: { blog: new mongoose.Types.ObjectId(blogId) } },
+    ];
+
+    if (before) {
+      pipeline.push({
+        $match: {
+          createdAt: { $lt: new Date(before) },
+        },
+      });
+    }
+
+    pipeline.push(
       {
         $lookup: {
           from: "users",
@@ -67,10 +78,21 @@ export const getCommentsByBlogId = async (req, res) => {
       {
         $sort: { createdAt: -1 },
       },
-    ];
-    const comments = await Comment.aggregate(pipeline);
-    // console.log(comments);
-    res.status(200).json({ comments });
+    );
+
+    const pageSize = Number(limit);
+    const comments = await Comment.aggregate(pipeline).limit(pageSize + 1);
+    const hasMore = comments.length > pageSize;
+    const pagedComments = hasMore ? comments.slice(0, pageSize) : comments;
+    const nextCursor = pagedComments.length
+      ? pagedComments[pagedComments.length - 1].createdAt
+      : null;
+
+    res.status(200).json({
+      comments: pagedComments,
+      hasMore,
+      nextCursor,
+    });
   } catch (error) {
     console.log(error);
     res

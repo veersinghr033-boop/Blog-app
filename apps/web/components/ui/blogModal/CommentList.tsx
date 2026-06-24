@@ -7,21 +7,27 @@ import {
 } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { useAppSelector } from "@/lib/store/hooks";
-import { useMutation, useQueryClient  } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import CommentReply from "./commentReply";
-
+import { Virtuoso } from "react-virtuoso";
 
 const { Paragraph, Text } = Typography;
 
 interface Props {
     comments: any[];
     blogId: string;
+    hasNextPage?: boolean;
+    isFetchingNextPage?: boolean;
+    fetchNextPage?: () => void;
 }
 
 export default function CommentList({
     comments,
     blogId,
+    hasNextPage = false,
+    isFetchingNextPage = false,
+    fetchNextPage,
 }: Props) {
     const queryClient = useQueryClient();
 
@@ -68,56 +74,57 @@ export default function CommentList({
 
     return (
         <>
-            {comments.map((comment) => (
-                <div
-                    key={comment._id}
-                    className="border border-gray-200 rounded-lg p-3 "
-                >
-                    <div className="flex items-start justify-between gap-4 ">
-                        <div className="flex flex-col gap-1 text-start">
-                            <div className="flex items-center  gap-2 ">
-                                <div className="bg-gray-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs uppercase">
-                                    {comment.user?.name?.charAt(0)}
+            <div className="h-72">
+                <Virtuoso
+                    data={comments}
+                    endReached={() => {
+                        if (hasNextPage && !isFetchingNextPage && fetchNextPage) {
+                            fetchNextPage();
+                        }
+                    }}
+                    components={{
+                        Footer: () =>
+                            isFetchingNextPage ? (
+                                <div className="text-center py-2">
+                                    Loading more comments...
                                 </div>
+                            ) : null,
+                    }}
+                    itemContent={(_, comment) => (
+                        <div
+                            key={comment._id}
+                            className="border border-gray-200 rounded-lg p-3 mb-2"
+                        >
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex flex-col gap-1 text-start">
+                                    <div className="flex items-center gap-2">
+                                        <div className="bg-gray-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs uppercase">
+                                            {comment.user?.name?.charAt(0)}
+                                        </div>
 
-                                <Text strong>
-                                    {comment.user?.name}
-                                </Text>
+                                        <Text strong>
+                                            {comment.user?.name}
+                                        </Text>
 
-                                <Text type="secondary">
-                                    {new Date(
-                                        comment.createdAt
-                                    ).toLocaleDateString()}
-                                </Text>
+                                        <Text type="secondary">
+                                            {new Date(comment.createdAt).toLocaleDateString()}
+                                        </Text>
+                                    </div>
+
+                                    <Text className="text-gray-700! pl-8">
+                                        {comment.comment}
+                                    </Text>
+                                </div>
                             </div>
 
-                            <Text className="text-gray-700! pl-8">
-                                {comment.comment}
-                            </Text>
+                            <CommentReply
+                                comment={comment}
+                                blogId={blogId}
+                            />
                         </div>
-
-                        {comment.user._id === user && (
-                            <Popconfirm
-                                title="Delete comment?"
-                                onConfirm={() =>
-                                    handleDeleteComment(comment._id)
-                                }
-                            >
-                                <Button
-                                    danger
-                                    type="text"
-                                    icon={<DeleteOutlined />}
-                                />
-                            </Popconfirm>
-                        )}
-                    </div>
-                    <CommentReply
-                        comment={comment}
-                        blogId={blogId}
-                    />
-
-                </div>
-            ))}
+                    )}
+                />
+            </div>
         </>
     );
 }

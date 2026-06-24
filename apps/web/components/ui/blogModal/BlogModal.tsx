@@ -4,7 +4,8 @@ import { Typography, Button } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import api from "@/utills/axios";
 
@@ -22,37 +23,95 @@ interface ReadBlogProps {
 
 function ReadBlog({ blog }: ReadBlogProps) {
     const router = useRouter();
-
+    const loadMoreRef = useRef<HTMLDivElement | null>(null);
     const [openReport, setOpenReport] =
         useState(false);
     const [commentAdded, setCommentAdded] =
         useState(false);
 
-    const { data: comments = [] } =
-        useQuery({
-            queryKey: [
-                "comments",
-                blog?._id,
-            ],
+    // const { data: comments = [] } =
+    //     useQuery({
+    //         queryKey: [
+    //             "comments",
+    //             blog?._id,
+    //         ],
 
-            enabled: !!blog?._id,
+    //         enabled: !!blog?._id,
 
-            queryFn: async () => {
-                const res = await api.get(
-                    `/comments/${blog._id}`
-                );
+    //         queryFn: async () => {
+    //             const res = await api.get(
+    //                 `/comments/${blog._id}`
+    //             );
 
-                return res.data.comments;
+    //             return res.data.comments;
+    //         },
+    //     });
+
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        refetch,
+    } = useInfiniteQuery({
+        queryKey: ["comments", blog?._id],
+        queryFn: async ({ pageParam }) => {
+            const before = pageParam ? `?before=${pageParam}` : "";
+
+            const res = await api.get(
+                `/comments/${blog._id}${before}`
+            );
+
+            return res.data;
+        },
+        initialPageParam: null,
+        getNextPageParam: (lastPage: any) =>
+            lastPage.hasMore ? lastPage.nextCursor : undefined,
+        enabled: !!blog?._id,
+    });
+    const commentOpen = async () => {
+        const newState = !commentAdded;
+
+        setCommentAdded(newState);
+
+        if (newState) {
+            await refetch();
+        }
+    };
+
+    const comments = data?.pages.flatMap((page: any) => page.comments) ?? [];
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const first = entries[0];
+
+                if (
+                    first.isIntersecting &&
+                    hasNextPage &&
+                    !isFetchingNextPage
+                ) {
+                    fetchNextPage();
+                }
             },
-        });
+            { threshold: 1 }
+        );
 
-    const commentOpen = () =>{
-        setCommentAdded((prev) => !prev);
+        const current = loadMoreRef.current;
 
-    }
+        if (current) {
+            observer.observe(current);
+        }
+
+        return () => {
+            if (current) {
+                observer.unobserve(current);
+            }
+        };
+    }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
     if (!blog) return null;
-    
+
     return (
         <div className="bg-white rounded-3xl shadow-xl border border-gray-200 p-6 max-w-full mx-auto ">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
@@ -90,19 +149,23 @@ function ReadBlog({ blog }: ReadBlogProps) {
 
                 <div className="border-t border-t-gray-200 pt-5">
 
-                   
+
                     {commentAdded && (
                         <>
                             <Title level={4}>
                                 Comments (
-                                {comments.length})
+                                {blog.comments?.count})
 
                             </Title>
                             <div className="max-h-72 overflow-y-auto flex flex-col gap-3 mb-4">
                                 <CommentList
                                     comments={comments}
                                     blogId={blog._id}
+                                    hasNextPage={hasNextPage}
+                                    isFetchingNextPage={isFetchingNextPage}
+                                    fetchNextPage={fetchNextPage}
                                 />
+                               
                             </div>
 
                             <AddCommentForm
@@ -110,9 +173,6 @@ function ReadBlog({ blog }: ReadBlogProps) {
                             />
                         </>
                     )}
-
-
-
 
                 </div>
             </div>

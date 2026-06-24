@@ -3,332 +3,432 @@ import Like from "../models/LikeModel.js";
 import Comment from "../models/CommentModel.js";
 import mongoose from "mongoose";
 
-export const getAllBlogs = async(req, res) => {
-    try {
-        const pipelines = [{
-                $lookup: {
-                    from: "users",
-                    localField: "author",
-                    foreignField: "_id",
-                    as: "authorDetails",
-                },
-            },
-            {
-                $unwind: "$authorDetails",
-            },
+export const getAllBlogs = async (req, res) => {
+  try {
+    const { before } = req.query;
+    const limit = 10;
 
-            {
-                $lookup: {
-                    from: "likes",
-                    localField: "_id",
-                    foreignField: "blog",
-                    as: "likesDetails",
-                },
-            },
+    const pipeline = [];
 
-            {
-                $lookup: {
-                    from: "comments",
-                    localField: "_id",
-                    foreignField: "blog",
-                    as: "commentsDetails",
-                },
-            },
-            {
-                $lookup: {
-                    from: "views",
-                    localField: "_id",
-                    foreignField: "blogId",
-                    as: "viewsDetails",
-                },
-            },
-
-            {
-                $project: {
-                    title: 1,
-                    content: 1,
-
-                    author: {
-                        id: "$authorDetails._id",
-                        userName: "$authorDetails.userName",
-                    },
-
-                    likes: {
-                        count: { $size: "$likesDetails" },
-                        users: {
-                            $map: {
-                                input: "$likesDetails",
-                                as: "like",
-                                in: "$$like.user",
-                            },
-                        },
-                    },
-
-                    comments: {
-                        count: { $size: "$commentsDetails" },
-                        details: "$commentsDetails",
-                    },
-
-                    views: {
-                        count: { $size: "$viewsDetails" },
-                        users: {
-                            $map: {
-                                input: "$viewsDetails",
-                                as: "view",
-                                in: "$$view.userId",
-                            },
-                        },
-                    },
-
-                    saveAs: 1,
-                    createdAt: 1,
-                    updatedAt: 1,
-                },
-            },
-        ];
-
-        const blogs = await Blog.aggregate(pipelines);
-
-        res.status(200).json({
-            message: "Blogs retrieved successfully",
-            blogs,
-        });
-    } catch (error) {
-        console.log(error);
-
-        res.status(500).json({
-            message: "Failed to retrieve blogs",
-        });
+    if (before) {
+      pipeline.push({
+        $match: {
+          createdAt: {
+            $lt: new Date(before),
+          },
+        },
+      });
     }
+    pipeline.push(
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $limit: limit + 1,
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          as: "authorDetails",
+        },
+      },
+      {
+        $unwind: "$authorDetails",
+      },
+
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "blog",
+          as: "likesDetails",
+        },
+      },
+
+      {
+        $lookup: {
+          from: "comments",
+          localField: "_id",
+          foreignField: "blog",
+          as: "commentsDetails",
+        },
+      },
+      {
+        $lookup: {
+          from: "views",
+          localField: "_id",
+          foreignField: "blogId",
+          as: "viewsDetails",
+        },
+      },
+
+      {
+        $project: {
+          title: 1,
+          content: 1,
+
+          author: {
+            id: "$authorDetails._id",
+            userName: "$authorDetails.userName",
+          },
+
+          likes: {
+            count: { $size: "$likesDetails" },
+            users: {
+              $map: {
+                input: "$likesDetails",
+                as: "like",
+                in: "$$like.user",
+              },
+            },
+          },
+
+          comments: {
+            count: { $size: "$commentsDetails" },
+            details: "$commentsDetails",
+          },
+
+          views: {
+            count: { $size: "$viewsDetails" },
+            users: {
+              $map: {
+                input: "$viewsDetails",
+                as: "view",
+                in: "$$view.userId",
+              },
+            },
+          },
+
+          saveAs: 1,
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      },
+    );
+
+    const blogs = await Blog.aggregate(pipeline);
+
+    const hasMore = blogs.length > limit;
+
+    if (hasMore) {
+      blogs.pop();
+    }
+    const Blogs = await Blog.find();
+    const totalBlogs = Blogs.length;
+    const totalLikes = Blogs.reduce(
+      (sum, blog) => sum + (blog.Likes?.length || 0),
+      0,
+    );
+    const totalComments = Blogs.reduce(
+      (sum, blog) => sum + (blog.Comments?.length || 0),
+      0,
+    );
+    const totalViews = Blogs.reduce(
+      (sum, blog) => sum + (blog.views?.length || 0),
+      0,
+    );
+    const stats = {
+      totalBlogs,
+      totalComments,
+      totalLikes,
+      totalViews,
+    };
+    res.status(200).json({
+      blogs,
+      stats,
+      hasMore,
+      nextCursor: hasMore ? blogs[blogs.length - 1].createdAt : null,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Failed to retrieve blogs",
+    });
+  }
 };
-export const getBlogById = async(req, res) => {
-    try {
-        const { id } = req.params;
-        const pipelines = [{
-                $match: { author: new mongoose.Types.ObjectId(id) },
-            },
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "author",
-                    foreignField: "_id",
-                    as: "authorDetails",
-                },
-            },
-            {
-                $unwind: "$authorDetails",
-            },
-            {
-                $lookup: {
-                    from: "likes",
-                    localField: "_id",
-                    foreignField: "blog",
-                    as: "likesDetails",
-                },
-            },
-            {
-                $lookup: {
-                    from: "comments",
-                    localField: "_id",
-                    foreignField: "blog",
-                    as: "commentsDetails",
-                },
-            },
-            {
-                $lookup: {
-                    from: "views",
-                    localField: "_id",
-                    foreignField: "blogId",
-                    as: "viewsDetails",
-                },
-            },
-            {
-                $project: {
-                    title: 1,
-                    content: 1,
+export const getBlogById = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-                    author: {
-                        id: "$authorDetails._id",
-                        userName: "$authorDetails.userName",
-                    },
+    const { before } = req.query;
+    const limit = 5;
 
-                    likes: {
-                        count: { $size: "$likesDetails" },
-                        users: {
-                            $map: {
-                                input: "$likesDetails",
-                                as: "like",
-                                in: "$$like.user",
-                            },
-                        },
-                    },
+    const pipeline = [];
 
-                    comments: {
-                        count: { $size: "$commentsDetails" },
-                        details: "$commentsDetails",
-                    },
-
-                    views: {
-                        count: { $size: "$viewsDetails" },
-                        users: {
-                            $map: {
-                                input: "$viewsDetails",
-                                as: "view",
-                                in: "$$view.userId",
-                            },
-                        },
-                    },
-
-                    saveAs: 1,
-                    createdAt: 1,
-                    updatedAt: 1,
-                },
-            },
-        ];
-        const blog = await Blog.aggregate(pipelines);
-
-        if (blog.length === 0) {
-            return res.status(404).json({
-                message: "Blog not found",
-            });
-        }
-        res.status(200).json({
-            message: "Blog retrieved successfully",
-            blog: blog,
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            message: "Failed to retrieve blog",
-        });
+    if (before) {
+      pipeline.push({
+        $match: {
+          createdAt: {
+            $lt: new Date(before),
+          },
+        },
+      });
     }
+    pipeline.push(
+      {
+        $match: { author: new mongoose.Types.ObjectId(id) },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $limit: limit + 1,
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          as: "authorDetails",
+        },
+      },
+      {
+        $unwind: "$authorDetails",
+      },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "blog",
+          as: "likesDetails",
+        },
+      },
+      {
+        $lookup: {
+          from: "comments",
+          localField: "_id",
+          foreignField: "blog",
+          as: "commentsDetails",
+        },
+      },
+      {
+        $lookup: {
+          from: "views",
+          localField: "_id",
+          foreignField: "blogId",
+          as: "viewsDetails",
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          content: 1,
+
+          author: {
+            id: "$authorDetails._id",
+            userName: "$authorDetails.userName",
+          },
+
+          likes: {
+            count: { $size: "$likesDetails" },
+            users: {
+              $map: {
+                input: "$likesDetails",
+                as: "like",
+                in: "$$like.user",
+              },
+            },
+          },
+
+          comments: {
+            count: { $size: "$commentsDetails" },
+            details: "$commentsDetails",
+          },
+
+          views: {
+            count: { $size: "$viewsDetails" },
+            users: {
+              $map: {
+                input: "$viewsDetails",
+                as: "view",
+                in: "$$view.userId",
+              },
+            },
+          },
+
+          saveAs: 1,
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      },
+    );
+    const blog = await Blog.aggregate(pipeline);
+    const blogs = await Blog.find({ author: id });
+
+    const totalBlogs = blogs.length;
+    const totalLikes = blogs.reduce(
+      (sum, blog) => sum + (blog.Likes?.length || 0),
+      0,
+    );
+    const totalComments = blogs.reduce(
+      (sum, blog) => sum + (blog.Comments?.length || 0),
+      0,
+    );
+    const totalViews = blogs.reduce(
+      (sum, blog) => sum + (blog.views?.length || 0),
+      0,
+    );
+    console.log(totalBlogs, totalComments, totalLikes, totalViews);
+    if (blog.length === 0) {
+      return res.status(404).json({
+        message: "Blog not found",
+      });
+    }
+    const hasMore = blog.length > limit;
+
+    if (hasMore) {
+      blog.pop();
+    }
+    const stats = {
+      totalBlogs,
+      totalComments,
+      totalLikes,
+      totalViews,
+    };
+
+    res.status(200).json({
+      blog,
+      ...(before ? {} : { stats }),
+      hasMore,
+      nextCursor: hasMore ? blog[blog.length - 1].createdAt : null,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Failed to retrieve blog",
+    });
+  }
 };
-export const createBlog = async(req, res) => {
-    try {
-        const { title, content, authorId } = req.body;
-        const newBlog = new Blog({ title, content, author: authorId });
-        await newBlog.save();
-        res.status(201).json({
-            message: "Blog created successfully",
-            blog: newBlog,
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Failed to create blog" });
-    }
+export const createBlog = async (req, res) => {
+  try {
+    const { title, content, authorId } = req.body;
+    const newBlog = new Blog({ title, content, author: authorId });
+    await newBlog.save();
+    res.status(201).json({
+      message: "Blog created successfully",
+      blog: newBlog,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to create blog" });
+  }
 };
 
-export const deleteBlog = async(req, res) => {
-    try {
-        const { id } = req.params;
-        const deletedBlog = await Blog.findByIdAndDelete(id);
-        if (deletedBlog) {
-            await Promise.all([
-                Like.deleteMany({ blog: id }),
-                Comment.deleteMany({ blog: id }),
-            ]);
-        }
-        res.status(200).json({ message: "Blog deleted successfully" });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Failed to delete blog" });
+export const deleteBlog = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedBlog = await Blog.findByIdAndDelete(id);
+    if (deletedBlog) {
+      await Promise.all([
+        Like.deleteMany({ blog: id }),
+        Comment.deleteMany({ blog: id }),
+      ]);
     }
+    res.status(200).json({ message: "Blog deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to delete blog" });
+  }
 };
 
-export const findByBlogId = async(req, res) => {
-    try {
-        const { blogId } = req.params;
-        const pipelines = [{
-                $match: { _id: new mongoose.Types.ObjectId(blogId) },
-            },
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "author",
-                    foreignField: "_id",
-                    as: "authorDetails",
-                },
-            },
-            {
-                $unwind: "$authorDetails",
-            },
-            {
-                $lookup: {
-                    from: "likes",
-                    localField: "_id",
-                    foreignField: "blog",
-                    as: "likesDetails",
-                },
-            },
-            {
-                $lookup: {
-                    from: "comments",
-                    localField: "_id",
-                    foreignField: "blog",
-                    as: "commentsDetails",
-                },
-            },
-            {
-                $lookup: {
-                    from: "views",
-                    localField: "_id",
-                    foreignField: "blogId",
-                    as: "viewsDetails",
-                },
-            },
-            {
-                $project: {
-                    title: 1,
-                    content: 1,
+export const findByBlogId = async (req, res) => {
+  try {
+    const { blogId } = req.params;
+    const pipelines = [
+      {
+        $match: { _id: new mongoose.Types.ObjectId(blogId) },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          as: "authorDetails",
+        },
+      },
+      {
+        $unwind: "$authorDetails",
+      },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "blog",
+          as: "likesDetails",
+        },
+      },
+      {
+        $lookup: {
+          from: "comments",
+          localField: "_id",
+          foreignField: "blog",
+          as: "commentsDetails",
+        },
+      },
+      {
+        $lookup: {
+          from: "views",
+          localField: "_id",
+          foreignField: "blogId",
+          as: "viewsDetails",
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          content: 1,
 
-                    author: {
-                        id: "$authorDetails._id",
-                        userName: "$authorDetails.userName",
-                    },
+          author: {
+            id: "$authorDetails._id",
+            userName: "$authorDetails.userName",
+          },
 
-                    likes: {
-                        count: { $size: "$likesDetails" },
-                        users: {
-                            $map: {
-                                input: "$likesDetails",
-                                as: "like",
-                                in: "$$like.user",
-                            },
-                        },
-                    },
-
-                    comments: {
-                        count: { $size: "$commentsDetails" },
-                        details: "$commentsDetails",
-                    },
-
-                    views: {
-                        count: { $size: "$viewsDetails" },
-                        users: {
-                            $map: {
-                                input: "$viewsDetails",
-                                as: "view",
-                                in: "$$view.userId",
-                            },
-                        },
-                    },
-
-                    saveAs: 1,
-                    createdAt: 1,
-                    updatedAt: 1,
-                },
+          likes: {
+            count: { $size: "$likesDetails" },
+            users: {
+              $map: {
+                input: "$likesDetails",
+                as: "like",
+                in: "$$like.user",
+              },
             },
-        ];
-        const blog = await Blog.aggregate(pipelines);
-        if (blog.length === 0) {
-            return res.status(404).json({ message: "Blog not found" });
-        }
-        res.status(200).json({
-            message: "Blog retrieved successfully",
-            blog: blog[0],
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Failed to retrieve blog" });
+          },
+
+          comments: {
+            count: { $size: "$commentsDetails" },
+            details: "$commentsDetails",
+          },
+
+          views: {
+            count: { $size: "$viewsDetails" },
+            users: {
+              $map: {
+                input: "$viewsDetails",
+                as: "view",
+                in: "$$view.userId",
+              },
+            },
+          },
+
+          saveAs: 1,
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      },
+    ];
+    const blog = await Blog.aggregate(pipelines);
+    if (blog.length === 0) {
+      return res.status(404).json({ message: "Blog not found" });
     }
+    res.status(200).json({
+      message: "Blog retrieved successfully",
+      blog: blog[0],
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to retrieve blog" });
+  }
 };

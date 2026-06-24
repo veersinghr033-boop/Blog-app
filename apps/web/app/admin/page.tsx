@@ -1,8 +1,6 @@
 "use client"
 
-import { Layout, Table, Popconfirm } from "antd";
-import { useAppSelector } from "@/lib/store/hooks";
-import { useMemo } from "react";
+import { Layout, Table } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
 
@@ -20,20 +18,11 @@ function page() {
     queryKey: ["blogs"],
     queryFn: async () => {
       const response = await api.get("/blogs/all")
-      return response.data.blogs
+      return response.data.stats
     }
   })
-
-  const totalEngagement = useMemo(() => {
-    return blogs.reduce((total: number, b: any) => {
-      return total + (b.likes?.count || 0) + (b.comments?.count || 0)
-    }, 0);
-  }, [blogs]);
-  const totalViews = useMemo(() => {
-    return blogs.reduce((total: number, b: any) => {
-      return total + (b.views && b.views.length > 0 ? b.views[0].count : 0);
-    }, 0);
-  }, [blogs]);
+console.log(blogs)
+  
 
   const {
     data: users = [],
@@ -56,19 +45,19 @@ function page() {
   const cardData = [
     {
       title: "Total Blogs",
-      value: blogs.length,
+      value: blogs.totalBlogs,
       desc: "Published",
       bg: "bg-blue-100",
     },
     {
       title: "Total Views",
-      value: totalViews,
+      value: blogs.totalViews,
       desc: "All time",
       bg: "bg-green-100",
     },
     {
       title: "Engagement",
-      value: totalEngagement,
+      value: blogs.totalComments + blogs.totalLikes,
       desc: "Likes and comments",
       bg: "bg-yellow-100",
     },

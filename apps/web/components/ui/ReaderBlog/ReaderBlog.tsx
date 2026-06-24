@@ -1,30 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { message } from "antd";
 import {
     useMutation,
     useQueryClient,
-    useQuery,
 } from "@tanstack/react-query";
 
 import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
 
-import ReadBlog from "../blogModal/BlogModal";
 import ReaderBlogCard from "./ReaderBlogCard";
 import { useRouter } from "next/navigation";
-
-function ReaderBlog({ data = [] }: { data?: any[] }) {
+interface BlogProps {
+    data: any[];
+    hasNextPage?: boolean;
+    isFetchingNextPage?: boolean;
+    fetchNextPage?: () => void;
+}
+function ReaderBlog({ data, hasNextPage = false,
+    isFetchingNextPage = false,
+    fetchNextPage, }: BlogProps) {
     const user = useAppSelector(
         (state) => state.auth.user?.id
     );
 
     const queryClient = useQueryClient();
     const router = useRouter();
-    const [blogOpen, setBlogOpen] = useState(false);
-    const [selectedBlogData, setSelectedBlogData] =
-        useState<any>(null);
+    const loadMoreRef = useRef<HTMLDivElement | null>(null);
     const [expandedBlogs, setExpandedBlogs] = useState<
         Record<string, boolean>
     >({});
@@ -71,9 +74,30 @@ function ReaderBlog({ data = [] }: { data?: any[] }) {
         viewMutation.mutate(blog._id)
     };
 
+    useEffect(() => {
+        if (!hasNextPage || !fetchNextPage || isFetchingNextPage) return;
 
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const firstEntry = entries[0];
+                if (firstEntry?.isIntersecting) {
+                    fetchNextPage();
+                }
+            },
+            { threshold: 0.2 }
+        );
 
+        const current = loadMoreRef.current;
+        if (current) {
+            observer.observe(current);
+        }
 
+        return () => {
+            if (current) {
+                observer.unobserve(current);
+            }
+        };
+    }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
     return (
         <>
@@ -83,25 +107,24 @@ function ReaderBlog({ data = [] }: { data?: any[] }) {
                         key={blog._id}
                         post={blog}
                         expanded={expandedBlogs[blog._id]}
-
                         onExpand={(id, value) =>
                             setExpandedBlogs((prev) => ({
                                 ...prev,
                                 [id]: value,
                             }))
                         }
-
                         onOpen={openBlogModal}
                     />
                 ))}
-            </div>
 
-            {/* <ReadBlog
-                open={blogOpen}
-                setOpen={setBlogOpen}
-                blog={selectedBlogData}
-                userId={user}
-            /> */}
+                <div ref={loadMoreRef} className="col-span-full h-4" />
+
+                {isFetchingNextPage ? (
+                    <div className="col-span-full text-center py-4 text-sm text-gray-500">
+                        Loading more blogs...
+                    </div>
+                ) : null}
+            </div>
         </>
     );
 }

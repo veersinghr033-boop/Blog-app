@@ -5,36 +5,79 @@ import Blog from "@/components/ui/blog/Blog";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMemo } from "react";
 import api from "@/utills/axios";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 function Blogs() {
     const userId = useAppSelector((state) => state.auth.user?.id);
 
 
-    const { data: blog = [], isLoading } = useQuery({
-        queryKey: ["blogData", userId],
-        enabled: !!userId,
-        queryFn: async () => {
-            const response = await api.get(`/blogs/${userId}`);
-            return response.data.blog || [];
-        },
-    });
+    // const { data: blog = [], isLoading } = useQuery({
 
-    const totalEngagement = useMemo(() => {
-        return blog.reduce((total: number, b: any) => {
-            return total + (b.likes?.count || 0) + (b.comments?.count || 0);
-        }, 0);
-    }, [blog]);
-    const totalViews = useMemo(() => {
-        return blog.reduce((total: number, b: any) => {
-            return total + (b.views && b.views.length > 0 ? b.views[0].count : 0);
-        }, 0);
-    }, [blog]);
+    //     enabled: !!userId,
+    //     queryFn: async () => {
+    //         const response = await api.get(`/blogs/${userId}`);
+    //         return response.data.blog || [];
+    //     },
+    // });
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useInfiniteQuery({
+        queryKey: ["blogData", userId],
+        queryFn: async ({ pageParam }) => {
+            const before = pageParam
+                ? `?before=${pageParam}`
+                : "";
+
+            const res = await api.get(
+                `/blogs/${userId}${before}`
+            );
+
+            return res.data;
+        },
+
+        initialPageParam: null,
+
+        getNextPageParam: (lastPage) =>
+            lastPage.hasMore
+                ? lastPage.nextCursor
+                : undefined,
+    });
+    const blog =
+        data?.pages.flatMap(
+            (page) => page.blog
+        ) ?? [];
+    const stats = data?.pages?.[0]?.stats;
+    // const totalBlogs = blogs.length;
+
+    // const totalEngagement = useMemo(() => {
+    //     return blogs.reduce((total: number, blog: any) => {
+    //         return (
+    //             total +
+    //             (blog.likes?.count || 0) +
+    //             (blog.comments?.count || 0)
+    //         );
+    //     }, 0);
+    // }, [blogs]);
+
+    // const totalViews = useMemo(() => {
+    //     return blogs.reduce((total: number, blog: any) => {
+    //         return total + (blog.views?.count || 0);
+    //     }, 0);
+    // }, [blogs]);
+    const totalBlogs = stats?.totalBlogs ?? 0;
+    const totalLikes = stats?.totalLikes ?? 0;
+    const totalComments = stats?.totalComments ?? 0;
+    const totalViews = stats?.totalViews ?? 0;
+
+    const totalEngagement = totalComments + totalLikes;
 
     const cardData = [
         {
             title: "Total Blogs",
-            value: blog.length,
+            value: totalBlogs,
             desc: "Published",
             bg: "bg-blue-100",
         },
@@ -83,8 +126,12 @@ function Blogs() {
                     ))}
                 </div>
             </header>
+            <div className="h-[66vh] mt-3 overflow-auto ">
 
-            <Blog data={blog}  />
+                <Blog data={blog} hasNextPage={hasNextPage}
+                    isFetchingNextPage={isFetchingNextPage}
+                    fetchNextPage={fetchNextPage} />
+            </div>
         </Layout>
     );
 }

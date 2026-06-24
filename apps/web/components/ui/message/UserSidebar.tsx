@@ -59,7 +59,7 @@ export default function UserSidebar({
   return (
     <Layout.Sider
       width={mobile ? "100%" : 250}
-      className={`flex h-full min-h-0 flex-col overflow-hidden bg-white! shadow-sm border border-gray-200 border-r-0 ${mobile ? "rounded-none" : ""}`}
+      className={`flex h-full min-h-0 flex-col  bg-white! shadow-sm border border-gray-200 border-r-0 ${mobile ? "rounded-none" : ""}`}
     >
       <div className="flex items-center justify-between gap-2 border-b border-gray-300 px-4 py-3">
         <div className="overflow-x-auto text-base font-semibold capitalize">
@@ -84,7 +84,7 @@ export default function UserSidebar({
         />
       </div>
 
-      <div className="z-1 flex-1 overflow-y-auto">
+      <div className="z-1 flex-1 h-[82%] overflow-y-auto">
         {filteredUsers.map((item: any) => {
           console.log()
           const isGroup = item.type === "group";

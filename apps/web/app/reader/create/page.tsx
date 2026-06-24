@@ -3,10 +3,13 @@
 import { Layout, Form, Input, Button, message } from "antd";
 import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 function CreateBlog() {
   const [form] = Form.useForm();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
   const userId = useAppSelector((state) => state.auth.user?.id);
 
@@ -25,8 +28,10 @@ function CreateBlog() {
     },
 
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blogData"] });
       message.success("Blog published successfully");
       form.resetFields();
+      router.push("/reader/blogs");
     },
 
     onError: (error) => {

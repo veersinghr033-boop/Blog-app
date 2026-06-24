@@ -37,6 +37,8 @@ export const registerUser = async (req, res) => {
       user: {
         id: newUser._id,
         userName: newUser.userName,
+        fullName: newUser.fullName || "",
+        bio: newUser.bio || "",
         email: newUser.email,
         role: newUser.role,
       },
@@ -72,12 +74,14 @@ export const loginUser = async (req, res) => {
       sameSite: "lax",
       maxAge: 24 * 60 * 60 * 1000,
     });
-   
+
     res.json({
       message: "Login successful",
       user: {
         id: user._id,
         userName: user.userName,
+        fullName: user.fullName || "",
+        bio: user.bio || "",
         email: user.email,
         role: user.role,
       },
@@ -103,7 +107,7 @@ export const logoutUser = async (req, res) => {
       message: "Logged out successfully",
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).send({ success: false, message: "Server error" });
   }
 };

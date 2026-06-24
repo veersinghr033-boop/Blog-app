@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useAppSelector, useAppDispatch } from "@/lib/store/hooks"
 import { fetchAllBlogs } from "@/lib/store/features/blogThunk"
 import api from "@/utills/axios"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query"
 
 const { Search } = Input
 
@@ -20,14 +20,37 @@ function Blogs() {
     const [statusFilter, setStatusFilter] = useState("")
 
 
-    const { data: blogs = [], isLoading } = useQuery({
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useInfiniteQuery({
         queryKey: ["blogs"],
-        queryFn: async () => {
-            const response = await api.get("/blogs/all")
-            return response.data.blogs
-        }
-    })
 
+        queryFn: async ({ pageParam }) => {
+            const before = pageParam
+                ? `?before=${pageParam}`
+                : "";
+
+            const res = await api.get(
+                `/blogs/all${before}`
+            );
+
+            return res.data;
+        },
+
+        initialPageParam: null,
+
+        getNextPageParam: (lastPage) =>
+            lastPage.hasMore
+                ? lastPage.nextCursor
+                : undefined,
+    });
+    const blogs =
+        data?.pages.flatMap(
+            (page) => page.blogs
+        ) ?? [];
     const filteredBlogs = useMemo(() => {
         return blogs.filter((blog: any) => {
             const matchesSearch =
@@ -67,12 +90,14 @@ function Blogs() {
                         onChange={(e) => setSearchText(e.target.value)}
                     />
 
-                    
+
                 </div>
             </header>
 
-            <div className="p-3">
-                <Blog data={filteredBlogs} />
+            <div className="h-[75vh] overflow-auto ">
+                <Blog data={filteredBlogs} hasNextPage={hasNextPage}
+                    isFetchingNextPage={isFetchingNextPage}
+                    fetchNextPage={fetchNextPage} />
             </div>
         </Layout>
     )
