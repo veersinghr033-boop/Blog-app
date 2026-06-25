@@ -10,11 +10,9 @@ import {
     message,
     Empty,
 } from "antd";
-import ReadBlog from "@/components/ui/blogModal/BlogModal";
 import {
     DeleteOutlined,
     UserOutlined,
-    CalendarOutlined,
     WarningOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
@@ -30,11 +28,9 @@ interface ReportCardProps {
 }
 
 function ReportCard({ data }: ReportCardProps) {
-    const [blogOpen, setBlogOpen] = useState(false)
     const [selectedBlogData, setSelectedBlogData] = useState<any>(null)
     const [expandedBlogs, setExpandedBlogs] = useState<Record<string, boolean>>({})
    const router = useRouter();
-    const user = useAppSelector((state) => state.auth.user?.id)
     const userRole = useAppSelector((state) => state.auth.user?.role)
 
 
@@ -237,12 +233,6 @@ function ReportCard({ data }: ReportCardProps) {
                     ))}
                 </div>
             )}
-            {/* <ReadBlog
-                open={blogOpen}
-                userId={user}
-                setOpen={setBlogOpen}
-                blog={selectedBlogData}
-            /> */}
         </Layout>
     );
 }

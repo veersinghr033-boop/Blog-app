@@ -3,22 +3,12 @@
 import { Layout } from "antd"
 import Blog from "@/components/ui/blog/Blog";
 import { useAppSelector } from "@/lib/store/hooks";
-import { useMemo } from "react";
 import api from "@/utills/axios";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 function Blogs() {
     const userId = useAppSelector((state) => state.auth.user?.id);
 
-
-    // const { data: blog = [], isLoading } = useQuery({
-
-    //     enabled: !!userId,
-    //     queryFn: async () => {
-    //         const response = await api.get(`/blogs/${userId}`);
-    //         return response.data.blog || [];
-    //     },
-    // });
     const {
         data,
         fetchNextPage,
@@ -50,46 +40,23 @@ function Blogs() {
             (page) => page.blog
         ) ?? [];
     const stats = data?.pages?.[0]?.stats;
-    // const totalBlogs = blogs.length;
-
-    // const totalEngagement = useMemo(() => {
-    //     return blogs.reduce((total: number, blog: any) => {
-    //         return (
-    //             total +
-    //             (blog.likes?.count || 0) +
-    //             (blog.comments?.count || 0)
-    //         );
-    //     }, 0);
-    // }, [blogs]);
-
-    // const totalViews = useMemo(() => {
-    //     return blogs.reduce((total: number, blog: any) => {
-    //         return total + (blog.views?.count || 0);
-    //     }, 0);
-    // }, [blogs]);
-    const totalBlogs = stats?.totalBlogs ?? 0;
-    const totalLikes = stats?.totalLikes ?? 0;
-    const totalComments = stats?.totalComments ?? 0;
-    const totalViews = stats?.totalViews ?? 0;
-
-    const totalEngagement = totalComments + totalLikes;
 
     const cardData = [
         {
             title: "Total Blogs",
-            value: totalBlogs,
+            value: stats?.totalBlogs ?? 0,
             desc: "Published",
             bg: "bg-blue-100",
         },
         {
             title: "Total Views",
-            value: totalViews,
+            value: stats?.totalViews ?? 0,
             desc: "All time",
             bg: "bg-green-100",
         },
         {
             title: "Engagement",
-            value: totalEngagement,
+            value: stats?.totalLikes + stats?.totalComments ,
             desc: "Likes and comments",
             bg: "bg-yellow-100",
         },

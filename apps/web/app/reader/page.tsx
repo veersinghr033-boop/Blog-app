@@ -1,15 +1,12 @@
 "use client"
 
 import { Layout} from "antd"
-import { useEffect } from "react"
 import ReaderBlog from "@/components/ui/ReaderBlog/ReaderBlog"
-import { useAppDispatch  ,useAppSelector } from "@/lib/store/hooks"
-import { fetchAllBlogs } from "@/lib/store/features/blogThunk"
+
 import api from "@/utills/axios"
 import { useInfiniteQuery } from "@tanstack/react-query"
 
 function Page() {
-  const dispatch = useAppDispatch()
   
 
   const {
@@ -43,7 +40,9 @@ function Page() {
     data?.pages.flatMap(
       (page) => page.blogs
     ) ?? [];
-  
+  // console.log(blogs, fetchNextPage,
+  //   hasNextPage,
+  //   isFetchingNextPage,)
   return (
     <Layout className="min-h-screen">
       <header className="mb-6">

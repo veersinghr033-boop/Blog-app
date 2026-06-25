@@ -1,69 +1,62 @@
 "use client"
 
-import { Layout, Drawer, notification } from "antd"
+import { Layout, Drawer } from "antd"
 import Navbar from "./navbar"
 import Sidebar from "./sidebar"
-import { useEffect, useRef, useState } from "react"
-import useUserStatus from "../ui/message/useUserStatus"
-import { useAppSelector } from "@/lib/store/hooks"
+import {  useState } from "react"
+
 
 const { Content } = Layout
 
 function MainLayout({ children }: { children: React.ReactNode }) {
     const [open, setOpen] = useState(false)
-    const lastNotificationKeyRef = useRef<string | null>(null)
 
-    const userId = useAppSelector((state) => state.auth.user?.id);
+    //     if (!userStatus.latestNotification) return;
 
-    const userStatus = useUserStatus(userId);
+    //     if (typeof document !== "undefined" && document.hidden) {
+    //         return;
+    //     }
 
-    useEffect(() => {
-        if (!userStatus.latestNotification) return;
+    //     const senderName =
+    //         userStatus.latestNotification?.senderName ||
+    //         userStatus.latestNotification?.sender?.username ||
+    //         userStatus.latestNotification?.sender?.name ||
+    //         "Someone";
+    //     const senderId = userStatus.latestNotification?.senderId
+    //     const fullMsg = userStatus.latestNotification.message || "";
+    //     const first10Words = fullMsg.split(/\s+/).filter(Boolean).slice(0, 7).join(" ") + (fullMsg.split(/\s+/).filter(Boolean).length > 10 ? "..." : "");
+    //     const notificationKey = JSON.stringify({
+    //         senderId: typeof senderId === "string" ? senderId : senderId?._id,
+    //         groupId: userStatus.latestNotification.groupId || null,
+    //         receiverId: userStatus.latestNotification.receiverId || null,
+    //         message: fullMsg,
+    //         timestamp: userStatus.latestNotification.timestamp || null,
+    //         type: userStatus.latestNotification.type || null,
+    //     });
 
-        if (typeof document !== "undefined" && document.hidden) {
-            return;
-        }
+    //     if (lastNotificationKeyRef.current === notificationKey) {
+    //         return;
+    //     }
 
-        const senderName =
-            userStatus.latestNotification?.senderName ||
-            userStatus.latestNotification?.sender?.username ||
-            userStatus.latestNotification?.sender?.name ||
-            "Someone";
-        const senderId = userStatus.latestNotification?.senderId
-        const fullMsg = userStatus.latestNotification.message || "";
-        const first10Words = fullMsg.split(/\s+/).filter(Boolean).slice(0, 7).join(" ") + (fullMsg.split(/\s+/).filter(Boolean).length > 10 ? "..." : "");
-        const notificationKey = JSON.stringify({
-            senderId: typeof senderId === "string" ? senderId : senderId?._id,
-            groupId: userStatus.latestNotification.groupId || null,
-            receiverId: userStatus.latestNotification.receiverId || null,
-            message: fullMsg,
-            timestamp: userStatus.latestNotification.timestamp || null,
-            type: userStatus.latestNotification.type || null,
-        });
+    //     lastNotificationKeyRef.current = notificationKey;
 
-        if (lastNotificationKeyRef.current === notificationKey) {
-            return;
-        }
+    //     if (userStatus.latestNotification.groupId) {
 
-        lastNotificationKeyRef.current = notificationKey;
-
-        if (userStatus.latestNotification.groupId) {
-
-            notification.info({
-                message: `New Message in ${userStatus.latestNotification.groupName || "a group"} sent by ${senderName}`,
-                description: ` ${first10Words} `,
-                placement: "topRight",
-                duration: 1.5,
-            });
-        } else {
-            notification.info({
-                message: "New Message sent by " + senderName,
-                description: `${first10Words}`,
-                placement: "topRight",
-                duration: 1.5,
-            });
-        }
-    }, [userStatus.latestNotification]);
+    //         notification.info({
+    //             message: `New Message in ${userStatus.latestNotification.groupName || "a group"} sent by ${senderName}`,
+    //             description: ` ${first10Words} `,
+    //             placement: "topRight",
+    //             duration: 1.5,
+    //         });
+    //     } else {
+    //         notification.info({
+    //             message: "New Message sent by " + senderName,
+    //             description: `${first10Words}`,
+    //             placement: "topRight",
+    //             duration: 1.5,
+    //         });
+    //     }
+    // }, [userStatus.latestNotification]);
 
     return (
         <Layout className="min-h-screen">

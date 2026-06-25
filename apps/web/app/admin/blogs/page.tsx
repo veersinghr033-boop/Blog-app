@@ -1,21 +1,14 @@
 "use client"
 
-import { Layout, Input, Select } from "antd"
+import { Layout, Input } from "antd"
 import Blog from "@/components/ui/blog/Blog"
-import { useEffect, useMemo, useState } from "react"
-import { useAppSelector, useAppDispatch } from "@/lib/store/hooks"
-import { fetchAllBlogs } from "@/lib/store/features/blogThunk"
+import {  useMemo, useState } from "react"
 import api from "@/utills/axios"
-import { useQuery, useInfiniteQuery } from "@tanstack/react-query"
+import {  useInfiniteQuery } from "@tanstack/react-query"
 
 const { Search } = Input
 
 function Blogs() {
-    const loading = useAppSelector((state) => state.blog.loading)
-    const user = useAppSelector((state) => state.auth.user)
-
-    const dispatch = useAppDispatch()
-
     const [searchText, setSearchText] = useState("")
     const [statusFilter, setStatusFilter] = useState("")
 

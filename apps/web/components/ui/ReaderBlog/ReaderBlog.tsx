@@ -47,12 +47,15 @@ function ReaderBlog({ data, hasNextPage = false,
             queryClient.invalidateQueries({
                 queryKey: ["blogData", user],
             });
+            queryClient.invalidateQueries({
+                queryKey: ["saved"],
+            });
         },
         onError: (error: any) => {
             const status = error?.response?.status;
 
             if (status === 400) {
-                message.warning("Already viewed");
+                console.log("Already viewed");
             } else if (status === 404) {
                 message.error("Blog not found");
             } else if (status === 401) {
@@ -67,11 +70,15 @@ function ReaderBlog({ data, hasNextPage = false,
     });
 
     const openBlogModal = (blog: any) => {
-        console.log("BlogData", blog)
-        router.push(
-            `/reader/blogs/${blog._id}`
-        );
-        viewMutation.mutate(blog._id)
+        const blogId = blog?._id ?? blog?.id;
+        if (!blogId) {
+            console.warn("Missing blog id", blog);
+            return;
+        }
+
+        // console.log("BlogData", blog);
+        router.push(`/reader/blogs/${blogId}`);
+        viewMutation.mutate(blogId);
     };
 
     useEffect(() => {
@@ -102,20 +109,24 @@ function ReaderBlog({ data, hasNextPage = false,
     return (
         <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {data.map((blog) => (
-                    <ReaderBlogCard
-                        key={blog._id}
-                        post={blog}
-                        expanded={expandedBlogs[blog._id]}
-                        onExpand={(id, value) =>
-                            setExpandedBlogs((prev) => ({
-                                ...prev,
-                                [id]: value,
-                            }))
-                        }
-                        onOpen={openBlogModal}
-                    />
-                ))}
+                {data?.map((blog) => {
+                    const blogId = blog?._id ?? blog?.id;
+
+                    return (
+                        <ReaderBlogCard
+                            key={blogId}
+                            post={blog}
+                            expanded={expandedBlogs[blogId]}
+                            onExpand={(id, value) =>
+                                setExpandedBlogs((prev) => ({
+                                    ...prev,
+                                    [id]: value,
+                                }))
+                            }
+                            onOpen={openBlogModal}
+                        />
+                    );
+                })}
 
                 <div ref={loadMoreRef} className="col-span-full h-4" />
 

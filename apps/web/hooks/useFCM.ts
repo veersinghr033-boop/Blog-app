@@ -14,14 +14,12 @@ export const useFCM = ({
 }) => {
     useEffect(() => {
         if (!userId || !messaging) return;
-        console.log("ok", messaging)
         const init = async () => {
             try {
                 if ("serviceWorker" in navigator) {
                     await navigator.serviceWorker.register(
                         "/firebase-messaging-sw.js"
                     );
-                    console.log("ok")
                 }
 
                 const permission =
@@ -40,7 +38,6 @@ export const useFCM = ({
                     }
                 );
 
-                console.log("FCM Token:", token);
 
                 if (token) {
                     await api.post(
@@ -49,7 +46,6 @@ export const useFCM = ({
                             token,
                         }
                     );
-                    console.log("Not ok")
                 }
             } catch (error) {
                 console.log(error);

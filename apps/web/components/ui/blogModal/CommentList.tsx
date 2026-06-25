@@ -3,7 +3,6 @@ import {
     Popconfirm,
     Typography,
     message,
-    Input,
 } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { useAppSelector } from "@/lib/store/hooks";
@@ -31,7 +30,8 @@ export default function CommentList({
 }: Props) {
     const queryClient = useQueryClient();
 
-    const user = useAppSelector((state) => state.auth.user?.id);
+    const currentUser = useAppSelector((state) => state.auth.user);
+    const currentUserId = currentUser?._id || currentUser?.id;
     const deleteCommentMutation = useMutation({
         mutationFn: async (commentId: string) => {
             await api.delete(`/comments/${commentId}`);
@@ -60,6 +60,16 @@ export default function CommentList({
 
     const handleDeleteComment = (commentId: string) => {
         deleteCommentMutation.mutate(commentId);
+    };
+
+    const isCommentOwner = (comment: any) => {
+        const commentUserId = comment?.user?._id || comment?.user?.id;
+
+        return Boolean(
+            currentUserId &&
+            commentUserId &&
+            String(currentUserId) === String(commentUserId)
+        );
     };
 
     if (!comments.length) {
@@ -95,7 +105,7 @@ export default function CommentList({
                             key={comment._id}
                             className="border border-gray-200 rounded-lg p-3 mb-2"
                         >
-                            <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-center justify-between gap-4">
                                 <div className="flex flex-col gap-1 text-start">
                                     <div className="flex items-center gap-2">
                                         <div className="bg-gray-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs uppercase">
@@ -115,6 +125,23 @@ export default function CommentList({
                                         {comment.comment}
                                     </Text>
                                 </div>
+
+                                {isCommentOwner(comment) && (
+                                    <Popconfirm
+                                        title="Delete comment?"
+                                        description="Are you sure you want to delete this comment?"
+                                        onConfirm={() => handleDeleteComment(comment._id)}
+                                        okText="Delete"
+                                        cancelText="Cancel"
+                                    >
+                                        <Button
+                                            type="text"
+                                            danger
+                                            icon={<DeleteOutlined />}
+                                            size="small"
+                                        />
+                                    </Popconfirm>
+                                )}
                             </div>
 
                             <CommentReply

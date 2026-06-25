@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from "react";
 import { useAppSelector } from "@/lib/store/hooks";
 import {
   useMutation,
-  useQuery,
   useQueryClient,
   useInfiniteQuery,
 } from "@tanstack/react-query";

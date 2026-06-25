@@ -2,7 +2,7 @@
 import { message, Button } from "antd";
 import { useEffect, useRef, useState } from "react";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
 interface Props {

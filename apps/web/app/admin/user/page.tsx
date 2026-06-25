@@ -6,7 +6,6 @@ import api from "@/utills/axios"
 import { useMemo, useState, useEffect } from "react"
 
 const { Search } = Input
-
 interface UserType {
     key: string
     name: string
@@ -73,10 +72,6 @@ function Users() {
 
     const handleDelete = (id: string) => {
         deleteMutation.mutate(id)
-    }
-
-    const handleEdit = (id: string) => {
-        console.log("Edit user:", id)
     }
 
     return (

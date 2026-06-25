@@ -1,33 +1,48 @@
 "use client"
 
 import { Layout } from "antd"
-import { useEffect } from "react"
 import ReaderBlog from "@/components/ui/ReaderBlog/ReaderBlog"
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
-import { fetchAllBlogs } from "@/lib/store/features/blogThunk"
-import { useQuery } from "@tanstack/react-query"
+import { useInfiniteQuery } from "@tanstack/react-query"
 import api from "@/utills/axios"
+
 function page() {
-
-  const { data, isError, error } = useQuery({
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["saved"],
-    queryFn: async () => {
-      const response = await api.get("/blogsave/get");
 
+    queryFn: async ({ pageParam }) => {
+      const before = pageParam
+        ? `?before=${encodeURIComponent(String(pageParam))}`
+        : "";
 
-      return response.data.blogs ;
+      const response = await api.get(`/blogsave/get${before}`);
+
+      return response.data;
     },
-  })
-  useEffect(() => {
-    if (isError) {
-      console.error("Error fetching saved blogs:", error);
-    }
-  }, [isError, error])
-  const blogData = data?.map(
-    (item: any) => item.blogDetails
-  ) || []
 
+    initialPageParam: null,
 
+    getNextPageParam: (lastPage) =>
+      lastPage?.hasMore ? lastPage.nextCursor : undefined,
+  });
+
+  const blogs =
+    data?.pages.flatMap((page) => {
+      const items = Array.isArray(page?.blogs)
+        ? page.blogs
+        : Array.isArray(page)
+          ? page
+          : [];
+
+      return items.map((item: any) => item?.blogDetails ?? item);
+    }) ?? [];
+  // console.log(blogs, fetchNextPage,
+  //   hasNextPage,
+  //   isFetchingNextPage,)
   return (
     <Layout className="min-h-screen ">
       <header className="mb-6">
@@ -38,7 +53,9 @@ function page() {
           View and manage your saved blogs
         </p>
       </header>
-      <ReaderBlog data={blogData} />
+      <ReaderBlog data={blogs} hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        fetchNextPage={fetchNextPage} />
     </Layout>
   )
 }

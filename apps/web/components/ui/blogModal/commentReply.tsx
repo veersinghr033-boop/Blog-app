@@ -2,7 +2,7 @@ import { Button, Form, Input, Typography, message } from "antd";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useState, } from "react";
-const { Paragraph, Text } = Typography;
+const {  Text } = Typography;
 
 function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
     const [openReply, setOpenReply] = useState<string | null>(null);

@@ -12,6 +12,7 @@
     "turbo": "^2.0.0"
   },
   "dependencies": {
+    "@next/bundle-analyzer": "^16.2.9",
     "firebase": "^12.15.0",
     "firebase-admin": "^14.0.0"
   }

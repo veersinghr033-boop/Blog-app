@@ -20,9 +20,7 @@ function page() {
       const response = await api.get("/blogs/all")
       return response.data.stats
     }
-  })
-console.log(blogs)
-  
+  })  
 
   const {
     data: users = [],

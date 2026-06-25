@@ -4,7 +4,7 @@ import { Typography, Button } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import {  useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 
 import api from "@/utills/axios";
@@ -24,51 +24,24 @@ interface ReadBlogProps {
 function ReadBlog({ blog }: ReadBlogProps) {
     const router = useRouter();
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
-    const [openReport, setOpenReport] =
-        useState(false);
-    const [commentAdded, setCommentAdded] =
-        useState(false);
+    const [openReport, setOpenReport] = useState(false);
+    const [commentAdded, setCommentAdded] = useState(false);
 
-    // const { data: comments = [] } =
-    //     useQuery({
-    //         queryKey: [
-    //             "comments",
-    //             blog?._id,
-    //         ],
+    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
+        useInfiniteQuery({
+            queryKey: ["comments", blog?._id],
+            queryFn: async ({ pageParam }) => {
+                const before = pageParam ? `?before=${pageParam}` : "";
 
-    //         enabled: !!blog?._id,
+                const res = await api.get(`/comments/${blog._id}${before}`);
 
-    //         queryFn: async () => {
-    //             const res = await api.get(
-    //                 `/comments/${blog._id}`
-    //             );
-
-    //             return res.data.comments;
-    //         },
-    //     });
-
-    const {
-        data,
-        fetchNextPage,
-        hasNextPage,
-        isFetchingNextPage,
-        refetch,
-    } = useInfiniteQuery({
-        queryKey: ["comments", blog?._id],
-        queryFn: async ({ pageParam }) => {
-            const before = pageParam ? `?before=${pageParam}` : "";
-
-            const res = await api.get(
-                `/comments/${blog._id}${before}`
-            );
-
-            return res.data;
-        },
-        initialPageParam: null,
-        getNextPageParam: (lastPage: any) =>
-            lastPage.hasMore ? lastPage.nextCursor : undefined,
-        enabled: !!blog?._id,
-    });
+                return res.data;
+            },
+            initialPageParam: null,
+            getNextPageParam: (lastPage: any) =>
+                lastPage.hasMore ? lastPage.nextCursor : undefined,
+            enabled: !!blog?._id,
+        });
     const commentOpen = async () => {
         const newState = !commentAdded;
 
@@ -86,15 +59,11 @@ function ReadBlog({ blog }: ReadBlogProps) {
             (entries) => {
                 const first = entries[0];
 
-                if (
-                    first.isIntersecting &&
-                    hasNextPage &&
-                    !isFetchingNextPage
-                ) {
+                if (first.isIntersecting && hasNextPage && !isFetchingNextPage) {
                     fetchNextPage();
                 }
             },
-            { threshold: 1 }
+            { threshold: 1 },
         );
 
         const current = loadMoreRef.current;
@@ -116,23 +85,15 @@ function ReadBlog({ blog }: ReadBlogProps) {
         <div className="bg-white rounded-3xl shadow-xl border border-gray-200 p-6 max-w-full mx-auto ">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
                 <div>
-                    <Title level={3}>
-                        Blog Details
-                    </Title>
+                    <Title level={3}>Blog Details</Title>
 
-                    {blog.title && (
-                        <Text type="secondary">
-                            {blog.title}
-                        </Text>
-                    )}
+                    {blog.title && <Text type="secondary">{blog.title}</Text>}
                 </div>
 
                 <Button
                     type="text"
                     icon={<CloseOutlined />}
-                    onClick={() =>
-                        router.back()
-                    }
+                    onClick={() => router.back()}
                 />
             </div>
 
@@ -141,22 +102,14 @@ function ReadBlog({ blog }: ReadBlogProps) {
 
                 <BlogActions
                     blog={blog}
-                    onReport={() =>
-                        setOpenReport(true)
-                    }
+                    onReport={() => setOpenReport(true)}
                     onOpen={commentOpen}
                 />
 
                 <div className="border-t border-t-gray-200 pt-5">
-
-
                     {commentAdded && (
                         <>
-                            <Title level={4}>
-                                Comments (
-                                {blog.comments?.count})
-
-                            </Title>
+                            <Title level={4}>Comments ({blog.comments?.count})</Title>
                             <div className="max-h-72 overflow-y-auto flex flex-col gap-3 mb-4">
                                 <CommentList
                                     comments={comments}
@@ -165,15 +118,11 @@ function ReadBlog({ blog }: ReadBlogProps) {
                                     isFetchingNextPage={isFetchingNextPage}
                                     fetchNextPage={fetchNextPage}
                                 />
-                               
                             </div>
 
-                            <AddCommentForm
-                                blogId={blog._id}
-                            />
+                            <AddCommentForm blogId={blog._id} />
                         </>
                     )}
-
                 </div>
             </div>
 

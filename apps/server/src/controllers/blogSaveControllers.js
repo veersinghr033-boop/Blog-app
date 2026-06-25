@@ -27,13 +27,31 @@ export const SaveBlog = async (req, res) => {
 export const getSavedBlogs = async (req, res) => {
   const userId = req.user.id;
   try {
-    const pipelines = [
+    const { before } = req.query;
+    const limit = 10;
+
+    const pipeline = [];
+    if (before) {
+      pipeline.push({
+        $match: {
+          createdAt: {
+            $lt: new Date(before),
+          },
+        },
+      });
+    }
+    pipeline.push(
       {
         $match: {
           user: new mongoose.Types.ObjectId(userId),
         },
       },
-
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $limit: limit + 1,
+      },
       {
         $lookup: {
           from: "blogs",
@@ -78,7 +96,7 @@ export const getSavedBlogs = async (req, res) => {
       {
         $lookup: {
           from: "views",
-          localField: "_id",
+          localField: "blogDetails._id",
           foreignField: "blogId",
           as: "viewsDetails",
         },
@@ -115,12 +133,26 @@ export const getSavedBlogs = async (req, res) => {
 
             createdAt: "$blogDetails.createdAt",
           },
+          createdAt:1,
         },
       },
-    ];
-    const savedBlogs = await BlogSave.aggregate(pipelines);
+    );
+    const savedBlogs = await BlogSave.aggregate(pipeline);
+    // console.log(savedBlogs);
+    if (savedBlogs.length === 0) {
+      return res.status(404).json({
+        message: "Blog not found",
+      });
+    }
+    const hasMore = savedBlogs.length > limit;
+
+    if (hasMore) {
+      savedBlogs.pop();
+    }
     res.status(200).json({
       blogs: savedBlogs,
+      hasMore,
+      nextCursor: hasMore ? savedBlogs[savedBlogs.length - 1].createdAt : null,
       message: "Saved blogs retrieved successfully",
     });
   } catch (error) {

@@ -271,7 +271,6 @@ export const getBlogById = async (req, res) => {
       (sum, blog) => sum + (blog.views?.length || 0),
       0,
     );
-    console.log(totalBlogs, totalComments, totalLikes, totalViews);
     if (blog.length === 0) {
       return res.status(404).json({
         message: "Blog not found",

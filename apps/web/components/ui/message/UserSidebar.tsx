@@ -4,10 +4,8 @@ import { Layout, Button, Badge } from "antd";
 import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import { useAppSelector } from "@/lib/store/hooks";
-import useUserStatus from "./useUserStatus";
 import AddGroup from "./addGroup";
-import { UserOutlined, TeamOutlined } from "@ant-design/icons";
-import { getSocket } from "@/utills/socket";
+import {  TeamOutlined } from "@ant-design/icons";
 
 
 interface UserType {
@@ -19,7 +17,6 @@ interface UserType {
 export default function UserSidebar({
   selectedUser,
   setSelectedUser,
-  notifications,
   statuses,
   mobile = false,
 }: any) {

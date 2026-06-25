@@ -13,11 +13,7 @@ interface Props {
     onOpen: (blog: any) => void;
 }
 
-export default function BlogActions({
-    blog,
-    onReport,
-    onOpen
-}: Props) {
+export default function BlogActions({ blog, onReport, onOpen }: Props) {
     const queryClient = useQueryClient();
     const router = useRouter();
     const userId = useAppSelector((state) => state.auth.user?.id);
@@ -27,25 +23,22 @@ export default function BlogActions({
         queryKey: ["reportUser", blog?._id],
         enabled: !!blog?._id,
         queryFn: async () => {
-            const res = await api.get(
-                `/reports/user/${blog._id}`
-            );
+            const res = await api.get(`/reports/user/${blog._id}`);
             return res.data.reports;
-
-        }
-    })
+        },
+    });
 
     const alreadyReported =
-        report && report.some((r: any) => r.userId._id === userId && r.blogId._id === blog._id);
-
-    const isLiked =
-        blog.likes?.users?.includes(userId);
-
-    const isCommented =
-        blog.comments?.details?.some(
-            (comment: any) =>
-                comment.user === userId
+        report &&
+        report.some(
+            (r: any) => r.userId._id === userId && r.blogId._id === blog._id,
         );
+
+    const isLiked = blog.likes?.users?.includes(userId);
+
+    const isCommented = blog.comments?.details?.some(
+        (comment: any) => comment.user === userId,
+    );
     const LikeMutation = useMutation({
         mutationFn: async (blogId: string) => {
             const res = await api.post(`/likes/${blogId}`, {
@@ -80,7 +73,6 @@ export default function BlogActions({
         LikeMutation.mutate(blogId);
     };
 
-
     const deleteMutation = useMutation({
         mutationFn: async (blogId: string) => {
             await api.delete(`/blogs/delete/${blogId}`);
@@ -92,27 +84,28 @@ export default function BlogActions({
             queryClient.invalidateQueries({
                 queryKey: ["blogs"],
             });
-
         },
     });
 
     const handleDelete = () => {
         deleteMutation.mutate(blog._id);
 
-        router.back()
-
+        router.back();
     };
-
 
     return (
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-                <Text type="secondary" title={blog?.createdAt ? new Date(blog.createdAt).toLocaleString() : ""}>
-                    {blog?.createdAt &&
-                        new Date(blog.createdAt).toLocaleDateString()}
+                <Text
+                    type="secondary"
+                    title={
+                        blog?.createdAt ? new Date(blog.createdAt).toLocaleString() : ""
+                    }
+                >
+                    {blog?.createdAt && new Date(blog.createdAt).toLocaleDateString()}
                 </Text>
                 <Text
-                    className={`text-sm cursor-pointer hover:text-blue-500  ${isLiked ? "text-blue-500!" : "text-gray-500!"
+                    className={`text-sm cursor-pointer hover:text-blue-500!  ${isLiked ? "text-blue-500!" : "text-gray-500!"
                         }`}
                     onClick={() => handleLike(blog._id)}
                 >
@@ -120,16 +113,14 @@ export default function BlogActions({
                 </Text>
 
                 <Text
-                    className={`flex items-center gap-1 text-sm cursor-pointer hover:text-blue-500 ${isCommented ? "text-green-500!" : "text-gray-500!"
+                    className={`flex items-center gap-1 text-sm cursor-pointer hover:text-green-500! ${isCommented ? "text-green-500!" : "text-gray-500!"
                         }`}
                     onClick={() => onOpen(blog)}
                 >
                     {blog.comments?.count || 0}
                     <CommentOutlined />
                 </Text>
-                <Text
-                    className="text-sm text-gray-500"
-                >
+                <Text className="text-sm text-gray-500">
                     {blog.views && blog.views.length > 0 ? blog.views[0].count : 0} Views
                 </Text>
             </div>
@@ -140,7 +131,6 @@ export default function BlogActions({
                     onConfirm={handleDelete}
                     okText="Yes"
                     cancelText="No"
-
                 >
                     <Button danger type="primary" loading={deleteMutation.isPending}>
                         Delete
@@ -152,11 +142,13 @@ export default function BlogActions({
                     type="primary"
                     onClick={() => onReport()}
                     disabled={alreadyReported}
-                    title={alreadyReported ? "You have already reported this blog" : "Report this blog"}
-
+                    title={
+                        alreadyReported
+                            ? "You have already reported this blog"
+                            : "Report this blog"
+                    }
                 >
                     {alreadyReported ? "Reported" : "Report"}
-
                 </Button>
             )}
         </div>

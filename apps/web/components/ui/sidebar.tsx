@@ -8,12 +8,10 @@ import {
     EditOutlined,
     LoginOutlined,
     AppstoreOutlined,
-     
     MessageOutlined 
 } from "@ant-design/icons"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useState } from "react"
 import { useAppSelector, useAppDispatch } from "@/lib/store/hooks"
 import { logout } from "@/lib/store/features/authThunk"
 import { persistor } from "@/lib/store/store"
@@ -37,7 +35,6 @@ const menuByRole: Record<string, MenuItem[]> = {
         { label: "Users", href: "/admin/user", icon: <UsergroupAddOutlined /> },
         { label: "Blogs", href: "/admin/blogs", icon: <BookOutlined /> },
         { label: "Reports", href: "/admin/reports", icon: <AppstoreOutlined /> },
-        // { label: "Messages", href: "/adm in/messages", icon: <MessageOutlined /> },
     ],
    
     reader: [

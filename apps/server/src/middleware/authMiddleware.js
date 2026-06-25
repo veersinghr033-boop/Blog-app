@@ -35,7 +35,6 @@ export const verifyToken = async (req, res, next) => {
 export const authorizeRoles = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-        console.log(  "role ", req.user.role)
       return res.status(403).json({
         
         message: `Role (${req.user.role}) is not allowed`,

@@ -20,7 +20,7 @@ function AddGroup({
 
     const {
         data: users = [],
-        isLoading,
+        
         isError,
         error,
     } = useQuery<User[]>({

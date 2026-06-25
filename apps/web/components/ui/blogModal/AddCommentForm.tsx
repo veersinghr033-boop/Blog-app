@@ -2,8 +2,6 @@ import { Form, Input, Button, message } from "antd";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 
-
-
 export default function AddCommentForm({ blogId }: { blogId: string }) {
     const [form] = Form.useForm();
 
@@ -46,26 +44,18 @@ export default function AddCommentForm({ blogId }: { blogId: string }) {
     };
 
     return (
-        <Form
-            form={form}
-            layout="vertical"
-            onFinish={handleCommentSubmit}
-        >
+        <Form form={form} layout="vertical" onFinish={handleCommentSubmit}>
             <Form.Item
                 label="Add Comment"
                 name="comment"
                 rules={[
                     {
                         required: true,
-                        message:
-                            "Please enter a comment",
+                        message: "Please enter a comment",
                     },
                 ]}
             >
-                <Input
-                    placeholder="Write your comment..."
-                    required
-                />
+                <Input placeholder="Write your comment..." required />
             </Form.Item>
 
             <Button

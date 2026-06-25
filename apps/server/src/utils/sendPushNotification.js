@@ -1,7 +1,6 @@
 import { getMessaging } from "firebase-admin/messaging";
 import "../config/firebase.js";
 import { getApps } from "firebase-admin/app";
-console.log("Firebase apps:", getApps().length);
 export const sendPushNotification = async ({
   token,
   tokens,
@@ -19,7 +18,6 @@ export const sendPushNotification = async ({
         Object.entries(data).map(([k, v]) => [k, String(v)]),
       ),
     };
-    console.log("payload" ,payload)
 
     if (token) {
       const response = await getMessaging().send({
@@ -27,7 +25,6 @@ export const sendPushNotification = async ({
         ...payload,
       });
 
-      console.log("FCM Success:", response);
       return response;
     }
 
@@ -37,7 +34,6 @@ export const sendPushNotification = async ({
         ...payload,
       });
 
-      console.log("FCM Success   fff:", response);
       return response;
     }
   } catch (error) {

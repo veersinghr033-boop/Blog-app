@@ -98,7 +98,7 @@ const { data: savedBlogs = [] } = useQuery({
     });
 
     return (
-        <Card hoverable className="rounded-2xl border border-gray-200 shadow-sm h-full!" bodyStyle={{ height: "100%" }}>
+        <Card hoverable className="rounded-2xl border border-gray-200 shadow-sm h-full!">
             <div className="flex flex-col h-full gap-4">
                 <div>
                     <Title level={4} className="mb-3 line-clamp-2">
@@ -143,13 +143,13 @@ const { data: savedBlogs = [] } = useQuery({
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-4 text-sm">
                             <Text
-                                className={`cursor-pointer transition-colors ${isLiked ? "text-blue-500!" : "text-gray-500 hover:text-blue-500"}`}
+                                className={`cursor-pointer transition-colors ${isLiked ? "text-blue-500!" : "text-gray-500 hover:text-blue-500!"}`}
                                 onClick={() => LikeMutation.mutate(post._id)}
                             >
                                 {post.likes?.count || 0} <LikeOutlined />
                             </Text>
                             <Text
-                                className={`flex items-center gap-1 cursor-pointer transition-colors ${isCommented ? "text-green-500!" : "text-gray-500 hover:text-blue-500"}`}
+                                className={`flex items-center gap-1 cursor-pointer transition-colors ${isCommented ? "text-green-500!" : "text-gray-500 hover:text-green-500!"}`}
                                 onClick={() => onOpen(post)}
                             >
                                 {post.comments?.count || 0} <CommentOutlined />
@@ -161,7 +161,7 @@ const { data: savedBlogs = [] } = useQuery({
                             </Text>
                         </div>
                         <SaveOutlined
-                            className={`text-lg cursor-pointer transition-colors ${isSaved ? "text-blue-500!" : "text-gray-400 hover:text-blue-500"}`}
+                            className={`text-lg cursor-pointer transition-colors ${isSaved ? "text-blue-500!" : "text-gray-400 hover:text-blue-500!"}`}
                             onClick={() => SaveMutation.mutate(post._id)}
                             title={isSaved ? "Unsave" : "Save"}
                         />
