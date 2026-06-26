@@ -5,7 +5,7 @@ const { Title, Paragraph, Text } = Typography;
 export default function BlogHeader({ blog }: { blog: any }) {
     return (
         <>
-            <Title level={3}>{blog?.title}</Title>
+            <title >{blog?.title}</title>
 
             <Paragraph className="max-h-80 overflow-auto whitespace-pre-line">
                 {blog?.content}
@@ -16,7 +16,7 @@ export default function BlogHeader({ blog }: { blog: any }) {
                     {blog?.author?.userName?.charAt(0)}
                 </div>
 
-                <Text>{blog?.author?.userName}</Text>
+                <text>{blog?.author?.userName}</text>
             </div>
         </>
     );

@@ -5,7 +5,7 @@ const { Title, Paragraph, Text } = Typography;
 export default function BlogContent({ post, expanded, onExpand, onOpen }: any) {
   return (
     <>
-      <Title level={4}>{post.title}</Title>
+      <title >{post.title}</title>
 
       <Paragraph
         ellipsis={{
@@ -17,12 +17,12 @@ export default function BlogContent({ post, expanded, onExpand, onOpen }: any) {
       </Paragraph>
 
       {expanded && (
-        <Text
+        <text
           className="text-blue-500! cursor-pointer"
           onClick={() => onOpen(post)}
         >
           Read more
-        </Text>
+        </text>
       )}
     </>
   );

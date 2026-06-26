@@ -4,17 +4,16 @@ import {
   createComment,
   getCommentsByBlogId,
   deleteComment
-} from "../controllers/commentControllers.js";
+} from "../controllers/commentControllers.ts";
 
-import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
+import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.ts";
 
 const router = e.Router();
 
 router.post(
   "/:blogId",
   verifyToken,
-  createComment,
-);
+  createComment as unknown as e.RequestHandler)
 
 router.get("/:blogId",verifyToken, getCommentsByBlogId);
 router.delete("/:commentId", verifyToken, deleteComment);

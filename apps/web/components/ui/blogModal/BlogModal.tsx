@@ -85,7 +85,7 @@ function ReadBlog({ blog }: ReadBlogProps) {
         <div className="bg-white rounded-3xl shadow-xl border border-gray-200 p-6 max-w-full mx-auto ">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
                 <div>
-                    <Title level={3}>Blog Details</Title>
+                    <title >Blog Details</title>
 
                     {blog.title && <Text type="secondary">{blog.title}</Text>}
                 </div>
@@ -109,7 +109,7 @@ function ReadBlog({ blog }: ReadBlogProps) {
                 <div className="border-t border-t-gray-200 pt-5">
                     {commentAdded && (
                         <>
-                            <Title level={4}>Comments ({blog.comments?.count})</Title>
+                            <title >Comments ({blog.comments?.count})</title>
                             <div className="max-h-72 overflow-y-auto flex flex-col gap-3 mb-4">
                                 <CommentList
                                     comments={comments}

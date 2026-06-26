@@ -6,8 +6,8 @@ import {
     groupDelete,
     updateGroupMembers,
     changeAdmin,
-} from "../controllers/groupControllers.js";
-import { verifyToken } from "../middleware/authMiddleware.js";
+} from "../controllers/groupControllers.ts";
+import { verifyToken } from "../middleware/authMiddleware.ts";
 
 const router = e.Router();
 router.post("/create", verifyToken, createGroup);

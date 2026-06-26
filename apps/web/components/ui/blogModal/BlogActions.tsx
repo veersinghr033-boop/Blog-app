@@ -96,33 +96,31 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
     return (
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-                <Text
+                <text
                     type="secondary"
-                    title={
-                        blog?.createdAt ? new Date(blog.createdAt).toLocaleString() : ""
-                    }
+                    
                 >
                     {blog?.createdAt && new Date(blog.createdAt).toLocaleDateString()}
-                </Text>
-                <Text
+                </text>
+                <text
                     className={`text-sm cursor-pointer hover:text-blue-500!  ${isLiked ? "text-blue-500!" : "text-gray-500!"
                         }`}
                     onClick={() => handleLike(blog._id)}
                 >
                     {blog.likes?.count || 0} <LikeOutlined />
-                </Text>
+                </text>
 
-                <Text
+                <text
                     className={`flex items-center gap-1 text-sm cursor-pointer hover:text-green-500! ${isCommented ? "text-green-500!" : "text-gray-500!"
                         }`}
                     onClick={() => onOpen(blog)}
                 >
                     {blog.comments?.count || 0}
                     <CommentOutlined />
-                </Text>
-                <Text className="text-sm text-gray-500">
+                </text>
+                <text className="text-sm text-gray-500">
                     {blog.views && blog.views.length > 0 ? blog.views[0].count : 0} Views
-                </Text>
+                </text>
             </div>
 
             {isAuthor ? (

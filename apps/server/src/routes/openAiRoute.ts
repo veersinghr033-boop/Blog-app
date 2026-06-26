@@ -1,5 +1,5 @@
 import express from "express";
-import { generateBlog } from "../controllers/openAiControllers.js";
+import { generateBlog } from "../controllers/openAiControllers.ts";
 
 const router = express.Router();
 

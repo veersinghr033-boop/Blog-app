@@ -1,12 +1,16 @@
-import Comment from "../models/CommentModel.js";
-import Blog from "../models/BlogModel.js";
+import Comment from "../models/CommentModel.ts";
+import Blog from "../models/BlogModel.ts";
 import mongoose from "mongoose";
+import { Request, Response } from "express";
 
-export const createComment = async (req, res) => {
+export const createComment = async (
+  req: Request,
+  res: Response,
+) => {
   try {
     const { blogId } = req.params;
     const { comment } = req.body;
-    const userId = req.user.id;
+    const userId = (req as Request & { user?: { id: string } }).user?.id;
     const newComment = new Comment({
       comment,
       user: userId,
@@ -22,19 +26,27 @@ export const createComment = async (req, res) => {
       .json({ message: "Comment created successfully", comment: newComment });
   } catch (error) {
     console.log(error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     res
       .status(500)
-      .json({ message: "Failed to create comment", error: error.message });
+      .json({ message: "Failed to create comment", error: errorMessage });
   }
 };
 
-export const getCommentsByBlogId = async (req, res) => {
+export const getCommentsByBlogId = async (
+  req: Request,
+  res: Response,
+) => {
   try {
-    const { blogId } = req.params;
-    const { before, limit = 6 } = req.query;
-
-    const pipeline = [
-      { $match: { blog: new mongoose.Types.ObjectId(blogId) } },
+    const { blogId } = req.params as { blogId: string };
+    const before = req.query.before as string | undefined;
+    const limit = Number(req.query.limit) || 6;
+    const pipeline: mongoose.PipelineStage[] = [
+      {
+        $match: {
+          blog: new mongoose.Types.ObjectId(blogId),
+        },
+      },
     ];
 
     if (before) {
@@ -95,25 +107,31 @@ export const getCommentsByBlogId = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     res
       .status(500)
-      .json({ message: "Failed to fetch comments", error: error.message });
+      .json({ message: "Failed to fetch comments", error: errorMessage });
   }
 };
 
-export const deleteComment = async (req, res) => {
+export const deleteComment = async (
+  req: Request,
+  res: Response,
+) => {
   try {
-    const { commentId } = req.params;
-    const userId = req.user.id;
+    const { commentId } = req.params as { commentId: string };
+    const userId = (req as Request & { user?: { id: string } }).user?.id;
     const comment = await Comment.findById(commentId);
     if (!comment) {
       return res.status(404).json({ message: "Comment not found" });
     }
-    if (comment.user.toString() !== userId) {
-      return res
-        .status(403)
-        .json({ message: "Unauthorized to delete this comment" });
+    if (comment.user?.toString() !== userId) {
+      res.status(403).json({
+        message: "Unauthorized to delete this comment",
+      });
+      return;
     }
+
     await Comment.findByIdAndDelete(commentId);
     await Blog.findByIdAndUpdate(comment.blog, {
       $pull: { Comments: comment._id },
@@ -121,8 +139,9 @@ export const deleteComment = async (req, res) => {
     res.status(200).json({ message: "Comment deleted successfully" });
   } catch (error) {
     console.log(error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     res
       .status(500)
-      .json({ message: "Failed to delete comment", error: error.message });
+      .json({ message: "Failed to delete comment", error: errorMessage });
   }
 };

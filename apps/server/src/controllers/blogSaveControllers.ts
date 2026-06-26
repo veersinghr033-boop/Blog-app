@@ -1,16 +1,20 @@
-import BlogSave from "../models/BlogSaveModel.js";
+import BlogSave from "../models/BlogSaveModel.ts";
 import mongoose from "mongoose";
+import { Request, Response } from "express";
 
-export const SaveBlog = async (req, res) => {
+export const SaveBlog = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   const { blogId } = req.body;
-  const userId = req.user.id;
+  const userId = (req as Request & { user?: { id: string } }).user?.id;
   console.log(userId, blogId);
   try {
     const existingSave = await BlogSave.findOne({ user: userId, blog: blogId });
     console.log(existingSave);
     if (existingSave) {
       await BlogSave.findByIdAndDelete(existingSave._id);
-      return res.status(200).json({ message: "Blog unsaved successfully" });
+      res.status(200).json({ message: "Blog unsaved successfully" });
     }
     const newSave = new BlogSave({
       user: userId,
@@ -24,13 +28,13 @@ export const SaveBlog = async (req, res) => {
   }
 };
 
-export const getSavedBlogs = async (req, res) => {
-  const userId = req.user.id;
+export const getSavedBlogs = async (req: Request, res: Response) => {
+  const userId = (req as Request & { user?: { id: string } }).user?.id;
   try {
-    const { before } = req.query;
+    const before = req.query.before as string || undefined;
     const limit = 10;
 
-    const pipeline = [];
+    const pipeline: mongoose.PipelineStage[] = [];
     if (before) {
       pipeline.push({
         $match: {
@@ -133,7 +137,7 @@ export const getSavedBlogs = async (req, res) => {
 
             createdAt: "$blogDetails.createdAt",
           },
-          createdAt:1,
+          createdAt: 1,
         },
       },
     );

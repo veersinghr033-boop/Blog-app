@@ -112,18 +112,18 @@ export default function CommentList({
                                             {comment.user?.name?.charAt(0)}
                                         </div>
 
-                                        <Text strong>
+                                        <text >
                                             {comment.user?.name}
-                                        </Text>
+                                        </text>
 
-                                        <Text type="secondary">
+                                        <text type="secondary">
                                             {new Date(comment.createdAt).toLocaleDateString()}
-                                        </Text>
+                                        </text>
                                     </div>
 
-                                    <Text className="text-gray-700! pl-8">
+                                    <text className="text-gray-700! pl-8">
                                         {comment.comment}
-                                    </Text>
+                                    </text>
                                 </div>
 
                                 {isCommentOwner(comment) && (

@@ -1,15 +1,16 @@
-import Blog from "../models/BlogModel.js";
-import Like from "../models/LikeModel.js";
-import Comment from "../models/CommentModel.js";
+import Blog from "../models/BlogModel.ts";
+import Like from "../models/LikeModel.ts";
+import Comment from "../models/CommentModel.ts";
 import mongoose from "mongoose";
+import { Request, Response } from "express";
 
-export const getAllBlogs = async (req, res) => {
+
+export const getAllBlogs = async (req: Request, res: Response) => {
   try {
-    const { before } = req.query;
+    const before = req.query.before as string | undefined;
     const limit = 10;
 
-    const pipeline = [];
-
+    const pipeline: mongoose.PipelineStage[] = [];
     if (before) {
       pipeline.push({
         $match: {
@@ -149,14 +150,12 @@ export const getAllBlogs = async (req, res) => {
     });
   }
 };
-export const getBlogById = async (req, res) => {
+export const getBlogById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
+    const before = req.query.before as string | undefined; const limit = 5;
 
-    const { before } = req.query;
-    const limit = 5;
-
-    const pipeline = [];
+    const pipeline: mongoose.PipelineStage[] = [];
 
     if (before) {
       pipeline.push({
@@ -301,7 +300,7 @@ export const getBlogById = async (req, res) => {
     });
   }
 };
-export const createBlog = async (req, res) => {
+export const createBlog = async (req: Request, res: Response) => {
   try {
     const { title, content, authorId } = req.body;
     const newBlog = new Blog({ title, content, author: authorId });
@@ -316,7 +315,7 @@ export const createBlog = async (req, res) => {
   }
 };
 
-export const deleteBlog = async (req, res) => {
+export const deleteBlog = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const deletedBlog = await Blog.findByIdAndDelete(id);
@@ -333,9 +332,9 @@ export const deleteBlog = async (req, res) => {
   }
 };
 
-export const findByBlogId = async (req, res) => {
+export const findByBlogId = async (req: Request, res: Response) => {
   try {
-    const { blogId } = req.params;
+    const { blogId } = req.params as { blogId: string };
     const pipelines = [
       {
         $match: { _id: new mongoose.Types.ObjectId(blogId) },

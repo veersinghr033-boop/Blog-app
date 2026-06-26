@@ -70,7 +70,8 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                     placement="left"
                     open={open}
                     onClose={() => setOpen(false)}
-                    width={250}
+                    // width={250}
+                    className="w-64!"
 
                 >
                     <Sidebar />

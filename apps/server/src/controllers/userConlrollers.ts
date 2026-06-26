@@ -1,11 +1,12 @@
 import bcrypt from "bcrypt";
-import User from "../models/UsersModel.js";
-import Chat from "../models/chatModel.js";
-import Group from "../models/GroupModel.js";
-import Message from "../models/message.js";
+import User from "../models/UsersModel.ts";
+import Chat from "../models/chatModel.ts";
+import Group from "../models/GroupModel.ts";
+import Message from "../models/message.ts";
+import { Request, Response } from "express";
 
-export const getAllUsers = async(req, res) => {
-    const userId = req.user.id;
+export const getAllUsers = async (req: Request, res: Response) => {
+    const userId = (req as Request & { user?: { id: string } }).user?.id;
     try {
         const users = await User.find({
             _id: { $ne: userId },
@@ -18,7 +19,7 @@ export const getAllUsers = async(req, res) => {
     }
 };
 
-export const getUserById = async(req, res) => {
+export const getUserById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const user = await User.findById(id).select("-password");
@@ -32,8 +33,8 @@ export const getUserById = async(req, res) => {
     }
 };
 
-export const updateUserProfile = async(req, res) => {
-    const userId = req.user.id;
+export const updateUserProfile = async (req: Request, res: Response) => {
+    const userId = (req as Request & { user?: { id: string } }).user?.id;
     const { userName, email, bio } = req.body;
 
     try {
@@ -50,7 +51,7 @@ export const updateUserProfile = async(req, res) => {
             }
         }
 
-        const updateData = {};
+        const updateData: Partial<{ userName: string; email: string; bio: string }> = {};
         if (userName !== undefined) updateData.userName = userName;
         if (email !== undefined) updateData.email = email;
         if (bio !== undefined) updateData.bio = bio;
@@ -74,8 +75,8 @@ export const updateUserProfile = async(req, res) => {
     }
 };
 
-export const changeUserPassword = async(req, res) => {
-    const userId = req.user.id;
+export const changeUserPassword = async (req: Request, res: Response) => {
+    const userId = (req as Request & { user?: { id: string } }).user?.id;
     const { currentPassword, newPassword } = req.body;
 
     try {
@@ -103,7 +104,7 @@ export const changeUserPassword = async(req, res) => {
     }
 };
 
-export const deleteUser = async(req, res) => {
+export const deleteUser = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const user = await User.findByIdAndDelete(id);
@@ -136,7 +137,7 @@ export const emitSortedUsers = async(io, currentUserId) => {
     const groupEntries = await Promise.all(
         groups.map(async(group) => {
             const groupChat = chats.find(
-                (chat) => chat._id.toString() === group.chatId.toString(),
+                (chat) => chat._id.toString() === group.chatId?.toString(),
             );
 
             const messages = await Message.find({
@@ -223,9 +224,10 @@ export const emitSortedUsers = async(io, currentUserId) => {
 
     return result;
 };
-export const getUsersSorted = async(req, res) => {
+export const getUsersSorted = async (req: Request, res: Response) => {
     try {
-        const currentUserId = req.user.id;
+        const currentUserId = (req as Request & { user?: { id: string } }).user?.id;
+
         const io = req.app.get("io");
 
         const result = await emitSortedUsers(io, currentUserId);
@@ -237,9 +239,9 @@ export const getUsersSorted = async(req, res) => {
 };
 
 
-export const saveFcmToken = async (req, res) => {
+export const saveFcmToken = async (req: Request, res: Response) => {
   try {
-    const userId = req.user.id;
+      const userId = (req as Request & { user?: { id: string } }).user?.id;
     const { token } = req.body;
 
     await User.findByIdAndUpdate(userId, {
@@ -251,7 +253,7 @@ export const saveFcmToken = async (req, res) => {
   } catch (error) {
     return res.json({
       success: false,
-      error: error.message,
+        error: "Failed to save FcmToken",
     });
   }
 };

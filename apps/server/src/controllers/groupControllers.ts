@@ -1,9 +1,10 @@
-import Group from "../models/GroupModel.js";
-import Chat from "../models/chatModel.js";
-import Message from "../models/message.js";
-export const createGroup = async(req, res) => {
+import Group from "../models/GroupModel.ts";
+import Chat from "../models/chatModel.ts";
+import Message from "../models/message.ts";
+import { Request, Response } from "express";
+export const createGroup = async (req: Request, res: Response) => {
     try {
-        const userId = req.user.id;
+        const userId = (req as Request & { user?: { id: string } }).user?.id;
         const { groupName, members } = req.body;
 
         if (!userId) {
@@ -14,7 +15,7 @@ export const createGroup = async(req, res) => {
             return res.status(400).json({ message: "Group name is required" });
         }
 
-        const normalizedMembers = members.map((id) => id).filter((id) => id);
+        const normalizedMembers = members.map((id:string) => id).filter((id:string) => id);
 
         const participants = [...new Set([userId, ...normalizedMembers])].sort();
 
@@ -38,7 +39,7 @@ export const createGroup = async(req, res) => {
     }
 };
 
-export const getGroups = async(req, res) => {
+export const getGroups = async (req: Request, res: Response) => {
     try {
         const { groupId } = req.params;
 
@@ -66,10 +67,12 @@ export const getGroups = async(req, res) => {
     }
 };
 
-export const deleteById = async(req, res) => {
+export const deleteById = async (req: Request, res: Response) => {
     try {
-        const currentUserId = req.user.id;
-        const { userId } = req.params;
+        // const currentUserId = req.user?.id;
+        const currentUserId = (req as Request & { user?: { id: string } }).user?.id;
+
+        const userId  = req.params.userId
         const { Groups } = req.body;
         console.log(Groups);
         const group = await Group.findById(Groups);
@@ -80,11 +83,11 @@ export const deleteById = async(req, res) => {
             });
         }
 
-        // if (group.admin.toString() !== currentUserId.toString()) {
-        //     return res.status(403).json({
-        //         message: "Only admin can remove members",
-        //     });
-        // }
+        if (group.admin.toString() !== currentUserId?.toString()) {
+            return res.status(403).json({
+                message: "Only admin can remove members",
+            });
+        }
 
         await Chat.findByIdAndUpdate(group.chatId, {
             $pull: {
@@ -104,15 +107,16 @@ export const deleteById = async(req, res) => {
     }
 };
 
-export const groupDelete = async(req, res) => {
+export const groupDelete = async (req: Request, res: Response) => {
     try {
-        const { groupId } = req.params;
+        const { groupId } = req.params as { groupId: string };
+
         const group = await Group.findByIdAndDelete(groupId);
 
-        const chat = await Chat.findByIdAndDelete(group.chatId);
+        const chat = await Chat.findByIdAndDelete(group?.chatId);
 
         const message = await Message.deleteMany({
-            chatId: chat._id,
+            chatId: chat?._id,
         });
         return res.status(200).json({
             message: "Member removed successfully",
@@ -125,9 +129,9 @@ export const groupDelete = async(req, res) => {
         });
     }
 };
-export const updateGroupMembers = async(req, res) => {
+export const updateGroupMembers = async (req: Request, res: Response) => {
     try {
-        const { groupId } = req.params;
+        const { groupId } = req.params as { groupId: string };
         const { members } = req.body;
 
         const group = await Group.findById(groupId);
@@ -159,9 +163,9 @@ export const updateGroupMembers = async(req, res) => {
         });
     }
 };
-export const changeAdmin = async(req, res) => {
+export const changeAdmin = async (req: Request, res: Response) => {
     try {
-        const { groupId } = req.params;
+        const { groupId } = req.params as { groupId: string };
         const { adminId } = req.body;
 
         console.log(groupId, adminId);

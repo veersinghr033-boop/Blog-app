@@ -1,14 +1,14 @@
 import { Server } from "socket.io";
-import { emitSortedUsers } from "../controllers/userConlrollers.js";
-import User from "../models/UsersModel.js";
-import Chat from "../models/chatModel.js";
-import Group from "../models/GroupModel.js";
-import Message from "../models/message.js";
+import { emitSortedUsers } from "../controllers/userConlrollers.ts";
+import User from "../models/UsersModel.ts";
+import Chat from "../models/chatModel.ts";
+import Group from "../models/GroupModel.ts";
+import Message from "../models/message.ts";
 
 const socketToUser = new Map();
 const userStatus = new Map();
 
-export const initSocket = (server) => {
+export const initSocket = (server: any) => {
   const io = new Server(server, {
     cors: {
       origin: "http://localhost:3000",
@@ -17,7 +17,7 @@ export const initSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    const setUserOffline = (userId) => {
+    const setUserOffline = (userId: string) => {
       if (!userId) return;
 
       userStatus.set(userId, "offline");
@@ -35,7 +35,7 @@ export const initSocket = (server) => {
       socketToUser.set(socket.id, userId);
 
       socket.join(userId);
-     
+
       io.emit("userStatus", {
         userId,
         status: "online",
@@ -159,8 +159,8 @@ export const initSocket = (server) => {
         const payload = {
           chatId,
           reader: {
-            _id: reader._id,
-            userName: reader.userName,
+            _id: reader?._id,
+            userName: reader?.userName,
           },
           messageIds: unreadMessages.map((m) => m._id.toString()),
         };

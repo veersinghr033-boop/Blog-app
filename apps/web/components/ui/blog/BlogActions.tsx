@@ -43,26 +43,26 @@ export default function BlogActions({ post, onOpen }: any) {
   };
   return (
     <>
-      <Text
+      <text
         className={`flex items-center gap-1 text-sm cursor-pointer hover:text-blue-500! ${isLiked ? "text-blue-500!" : "text-gray-500!"
           }`}
         onClick={() => handleLike(post._id)}
       >
         {post.likes?.count || 0}
         <LikeOutlined />
-      </Text>
+      </text>
 
-      <Text
+      <text
         className={`flex items-center gap-1 text-sm cursor-pointer hover:text-green-500! ${isCommented ? "text-green-500!" : "text-gray-500!"
           }`}
         onClick={() => onOpen(post)}
       >
         {post.comments?.count || 0}
         <CommentOutlined />
-      </Text>
-      <Text className="text-sm cursor-pointer hover:text-blue-500 text-gray-500">
+      </text>
+      <text className="text-sm cursor-pointer hover:text-blue-500 text-gray-500">
         {post.views && post.views.length > 0 ? post.views[0].count : 0} Views
-      </Text>
+      </text>
     </>
   );
 }

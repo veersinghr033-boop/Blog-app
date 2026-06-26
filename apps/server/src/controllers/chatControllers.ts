@@ -1,17 +1,48 @@
-import Chat from "../models/chatModel.js";
-import Message from "../models/message.js";
-import Group from "../models/GroupModel.js";
-import User from "../models/UsersModel.js";
-import { emitSortedUsers } from "./userConlrollers.js";
-import { sendPushNotification } from "../utils/sendPushNotification.js";
+import mongoose from "mongoose";
+import Chat from "../models/chatModel.ts";
+import Message from "../models/message.ts";
+import Group from "../models/GroupModel.ts";
+import User from "../models/UsersModel.ts";
+import { emitSortedUsers } from "./userConlrollers.ts";
+import { sendPushNotification } from "../utils/sendPushNotification.ts";
+import { Request, Response } from "express";
 
-export const getMessages = async (req, res) => {
+interface Participant {
+  _id: string;
+  fcmToken?: string;
+}
+
+const normalizeBeforeDate = (value: unknown): Date | undefined => {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const parsedDate = new Date(value);
+  return Number.isNaN(parsedDate.getTime()) ? undefined : parsedDate;
+};
+
+export const getMessages = async (req: Request, res: Response) => {
   try {
-    const senderId = req.user.id;
-    const { receiverId } = req.params;
-    const { before, limit = 20 } = req.query;
+    // const senderId = req.user?.id;
+    const senderId = (req as Request & { user?: { id: string } }).user?.id;
+    
+    const receiverIdParam = req.params.receiverId;
+    const receiverId = Array.isArray(receiverIdParam)
+      ? receiverIdParam[0]
+      : receiverIdParam;
+    const before = normalizeBeforeDate(req.query.before);
+    const limit = Number(req.query.limit ?? 20);
 
-    const participants = [senderId, receiverId].sort();
+    if (!senderId || typeof receiverId !== "string" || !receiverId) {
+      return res.status(400).json({
+        message: "Missing sender or receiver id",
+      });
+    }
+
+    const participants = [
+      new mongoose.Types.ObjectId(senderId),
+      new mongoose.Types.ObjectId(receiverId),
+    ];
 
     const chat = await Chat.findOne({
       participants,
@@ -26,13 +57,18 @@ export const getMessages = async (req, res) => {
       });
     }
 
-    const query = {
+    const query: {
+      chatId: typeof chat._id;
+      timestamp?: {
+        $lt: Date;
+      };
+    } = {
       chatId: chat._id,
     };
 
     if (before) {
       query.timestamp = {
-        $lt: new Date(before),
+        $lt: before,
       };
     }
 
@@ -43,9 +79,7 @@ export const getMessages = async (req, res) => {
       .limit(Number(limit));
 
     const reversedMessages = messages.reverse();
-console.log("before", before);
-console.log("returned", messages.length);
-console.log("nextCursor", reversedMessages[0]?.timestamp);
+
     res.status(200).json({
       messages: reversedMessages,
       hasMore: messages.length === Number(limit),
@@ -60,11 +94,26 @@ console.log("nextCursor", reversedMessages[0]?.timestamp);
     });
   }
 };
-export const createChat = async (req, res) => {
-  try {
-    const { senderId, receiverId, groupId, message } = req.body;
 
-    if (!senderId || !message) {
+export const createChat = async (req: Request, res: Response) => {
+  try {
+    const {
+      senderId,
+      receiverId: receiverIdParam,
+      groupId,
+      message,
+    } = req.body as {
+      senderId?: string;
+      receiverId?: string | string[];
+      groupId?: string;
+      message?: string;
+    };
+
+    const receiverId = Array.isArray(receiverIdParam)
+      ? receiverIdParam[0]
+      : receiverIdParam;
+
+    if (!senderId || !message || (!groupId && typeof receiverId !== "string") || !receiverId) {
       return res.status(400).json({
         message: "Missing required fields",
       });
@@ -80,9 +129,14 @@ export const createChat = async (req, res) => {
           message: "Group not found",
         });
       }
-      const chat = await Chat.findById({
-        _id: group.chatId,
-      });
+
+      const chat = await Chat.findById(group.chatId);
+
+      if (!chat) {
+        return res.status(404).json({
+          message: "Chat not found",
+        });
+      }
 
       const newMsg = await Message.create({
         senderId,
@@ -91,22 +145,24 @@ export const createChat = async (req, res) => {
         isRead: false,
         readBy: [],
       });
+
       await Chat.findByIdAndUpdate(chat._id, {
         lastMessage: newMsg._id,
         updatedAt: new Date(),
       });
-      const allMembers = await Chat.findById(chat._id).populate(
-        "participants",
-        "_id fcmToken",
-      );
+
+      const allMembers = await Chat.findById(chat._id).populate<{
+        participants: Participant[];
+      }>("participants", "_id fcmToken");
 
       const senderUser = await User.findById(senderId).select("userName");
+      const senderName = senderUser?.userName || "Someone";
 
       io.to(groupId).emit("receiveGroupMessage", {
         _id: newMsg._id,
         senderId: {
           _id: senderId,
-          userName: senderUser.userName,
+          userName: senderName,
         },
         chatId: chat._id,
         groupId,
@@ -116,17 +172,14 @@ export const createChat = async (req, res) => {
         readBy: [],
       });
 
-      const receiverIds = (allMembers.participants || [])
+      const receiverIds = (allMembers?.participants || [])
         .map((participant) => participant._id.toString())
-        .filter(
-          (participantId) =>
-            participantId && participantId !== senderId.toString(),
-        );
+        .filter((participantId) => participantId && participantId !== senderId);
 
       receiverIds.forEach(async (receiverId) => {
         io.to(receiverId).emit("newNotification", {
           senderId,
-          senderName: senderUser.userName || "Someone",
+          senderName,
           groupName: group.name || "Group",
           groupId,
           receiverId,
@@ -138,18 +191,16 @@ export const createChat = async (req, res) => {
       });
 
       const groupTokens = [...new Set(
-        (allMembers.participants || [])
-          .filter(
-            (participant) => participant._id.toString() !== senderId.toString(),
-          )
+        (allMembers?.participants || [])
+          .filter((participant) => participant._id.toString() !== senderId)
           .map((participant) => participant.fcmToken)
-          .filter(Boolean),
+          .filter((token): token is string => Boolean(token)),
       )];
 
       if (groupTokens.length) {
         await sendPushNotification({
           tokens: groupTokens,
-          title: `${senderUser.userName || "Someone"} posted in ${group.name || "a group"}`,
+          title: `${senderName} posted in ${group.name || "a group"}`,
           body: message,
           data: {
             type: "group",
@@ -169,7 +220,10 @@ export const createChat = async (req, res) => {
       });
     }
 
-    const participants = [senderId, receiverId].sort();
+    const participants = [
+      new mongoose.Types.ObjectId(senderId),
+      new mongoose.Types.ObjectId(receiverId),
+    ];
 
     let chat = await Chat.findOne({
       participants,
@@ -198,12 +252,13 @@ export const createChat = async (req, res) => {
 
     const room = participants.join("_");
     const senderUser = await User.findById(senderId).select("userName");
+    const senderName = senderUser?.userName || "Someone";
 
     io.to(room).emit("receiveMessage", {
       _id: newMsg._id,
       senderId: {
         _id: senderId,
-        userName: senderUser.userName,
+        userName: senderName,
       },
       receiverId,
       message,
@@ -211,9 +266,10 @@ export const createChat = async (req, res) => {
       isRead: false,
       readBy: [],
     });
+
     io.to(receiverId).emit("newNotification", {
       senderId,
-      senderName: senderUser.userName || "Someone",
+      senderName,
       receiverId,
       message,
       type: "private",
@@ -227,7 +283,7 @@ export const createChat = async (req, res) => {
     if (receiver?.fcmToken) {
       await sendPushNotification({
         token: receiver.fcmToken,
-        title: `New message from ${senderUser.userName || "Someone"}`,
+        title: `New message from ${senderName}`,
         body: message,
         data: {
           type: "private",
@@ -255,7 +311,8 @@ export const createChat = async (req, res) => {
     });
   }
 };
-export const getGroupMessages = async (req, res) => {
+
+export const getGroupMessages = async (req: Request, res: Response) => {
   try {
     const { groupId } = req.params;
     const { before, limit = 20 } = req.query;
@@ -278,13 +335,20 @@ export const getGroupMessages = async (req, res) => {
       });
     }
 
-    const query = {
+    const query: {
+      chatId: typeof chat._id;
+      timestamp?: {
+        $lt: Date;
+      };
+    } = {
       chatId: chat._id,
     };
 
-    if (before) {
+    const beforeDate = normalizeBeforeDate(before);
+
+    if (beforeDate) {
       query.timestamp = {
-        $lt: new Date(before),
+        $lt: beforeDate,
       };
     }
 
@@ -295,9 +359,7 @@ export const getGroupMessages = async (req, res) => {
       .limit(Number(limit));
 
     const reversedMessages = messages.reverse();
-console.log("before", before);
-console.log("returned", messages.length);
-console.log("nextCursor", reversedMessages[0]?.timestamp);
+
     res.status(200).json({
       messages: reversedMessages,
       hasMore: messages.length === Number(limit),
@@ -313,7 +375,7 @@ console.log("nextCursor", reversedMessages[0]?.timestamp);
   }
 };
 
-export const deleteMessage = async (req, res) => {
+export const deleteMessage = async (req: Request, res: Response) => {
   try {
     const { messageId } = req.params;
 
@@ -330,8 +392,7 @@ export const deleteMessage = async (req, res) => {
         message: "Message not found",
       });
     }
-    const io = req.app.get("io");
-    io.to;
+
     res.status(200).json({
       message: "message deleted successfully",
     });

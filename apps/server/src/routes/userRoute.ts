@@ -7,8 +7,8 @@ import {
   saveFcmToken,
   updateUserProfile,
   changeUserPassword,
-} from "../controllers/userConlrollers.js";
-import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
+} from "../controllers/userConlrollers.ts";
+import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.ts";
 
 const router = e.Router();
 

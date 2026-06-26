@@ -2,7 +2,7 @@
 "use client";
 
 import { Virtuoso } from "react-virtuoso";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppSelector } from "@/lib/store/hooks";
 import {
   useMutation,
@@ -62,6 +62,8 @@ export default function ChatMessages({
   const virtuosoRef = useRef<any>(null);
   const selectedChatId = selectedUser.id || selectedUser._id || "";
   const firstItemIndex = useRef(100000);
+  const queryClient = useQueryClient();
+  const lastReadChatRef = useRef<string | null>(null);
   const { data, fetchPreviousPage, hasPreviousPage, isFetchingPreviousPage } =
     useInfiniteQuery<MessagePage>({
       queryKey: ["chatMessages", selectedUser.type, selectedChatId],
@@ -101,7 +103,10 @@ export default function ChatMessages({
       enabled: !!selectedChatId,
     });
 
-  const messages = data?.pages.flatMap((page) => page.messages) ?? [];
+  const messages = useMemo(
+    () => data?.pages.flatMap((page) => page.messages) ?? [],
+    [data?.pages],
+  );
 
   useEffect(() => {
     if (!isFetchingPreviousPage && (data?.pages?.length ?? 0) > 1) {
@@ -111,7 +116,7 @@ export default function ChatMessages({
   useEffect(() => {
     if (!selectedChatId) return;
     clearNotification(selectedChatId);
-  }, [selectedChatId, messages]);
+  }, [selectedChatId, clearNotification]);
 
   useEffect(() => {
     if (!selectedUser || !userId || !socketRef.current) return;
@@ -264,7 +269,7 @@ export default function ChatMessages({
       socketRef.current?.off("userStopTyping", stopTypingHandler);
       socketRef.current?.off("messagesRead", messagesReadHandler);
     };
-  }, [selectedUser, userId, messages.length]);
+  }, [selectedUser?.type, selectedChatId, userId]);
 
   useEffect(() => {
     if (!selectedUser || !socketRef.current || !messages.length) return;
@@ -273,13 +278,17 @@ export default function ChatMessages({
 
     if (!chatId) return;
 
+    const readKey = `${selectedChatId}:${messages.length}:${chatId}`;
+
+    if (lastReadChatRef.current === readKey) return;
+
+    lastReadChatRef.current = readKey;
+
     socketRef.current.emit("readMessages", {
       chatId,
       userId,
     });
-  }, [selectedUser, messages]);
-
-  const queryClient = useQueryClient();
+  }, [selectedUser, selectedChatId, messages.length, messages[0]?.chatId, userId]);
 
   const deleteMessageMutation = useMutation({
     mutationFn: async (messageId: string) => {
@@ -317,16 +326,6 @@ export default function ChatMessages({
     }
   }, [messages.length]);
   useEffect(() => {
-    console.log(
-      data?.pages.map((p, i) => ({
-        page: i,
-        first: p.messages[0]?.message,
-        last: p.messages[p.messages.length - 1]?.message,
-        count: p.messages.length,
-      })),
-    );
-  }, [data]);
-  useEffect(() => {
     if (!selectedChatId) return;
 
     firstLoadRef.current = true;
@@ -357,12 +356,12 @@ export default function ChatMessages({
               ) : null,
           }}
           itemContent={(_, item) => {
-            const isMine = item.senderId._id === userId;
+            const isMine = item.senderId?._id === userId;
             const isReadByReceiver = item.readBy.some(
               (user) => user._id !== userId,
             );
             const groupReadUsers = item.readBy.filter(
-              (user) => user._id !== item.senderId._id,
+              (user) => user._id !== item.senderId?._id,
             );
 
             return (
@@ -371,7 +370,7 @@ export default function ChatMessages({
                   }`}
               >
                 <div className="px-1 text-xs text-gray-400">
-                  {isMine ? null : item.senderId.userName}{" "}
+                  {isMine ? null : item.senderId?.userName}{" "}
                   {new Date(item.timestamp).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",

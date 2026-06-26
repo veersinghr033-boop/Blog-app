@@ -1,6 +1,8 @@
-import groq from "../config/openai.js";
+import groq from "../config/openai.ts";
+import { Request, Response } from "express";
 
-export const generateBlog = async (req, res) => {
+
+export const generateBlog = async (req: Request, res: Response) => {
   try {
     const { prompt } = req.body;
 
@@ -32,10 +34,8 @@ export const generateBlog = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return res.status(500).json({ message: "Failed to AI", error: errorMessage });;
   }
 };

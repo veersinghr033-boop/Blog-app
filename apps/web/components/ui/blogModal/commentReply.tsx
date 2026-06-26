@@ -61,18 +61,18 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
     return (
         <div  >
             <div className="flex items-center gap-4 pl-8 ">
-                <Text type="secondary" className="text-xs cursor-pointer hover:underline"
+                <text type="secondary" className="text-xs cursor-pointer hover:underline"
                     onClick={() => setOpenReply(
                         openReply === comment._id ? null : comment._id
                     )}>
                     reply
-                </Text>
+                </text>
 
-                <Text type="secondary" className="text-xs cursor-pointer hover:underline" onClick={() => setOpenReplyData(
+                <text type="secondary" className="text-xs cursor-pointer hover:underline" onClick={() => setOpenReplyData(
                     openReplyData === comment._id ? null : comment._id
                 )}>
                     {comment.replies?.length || 0} replies
-                </Text>
+                </text>
             </div>
             {openReply === comment._id && (
                 <Form className="pl-8! mt-3! flex gap-2" onFinish={() => {
@@ -123,27 +123,27 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
                                             <div className="bg-gray-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs uppercase">
                                                 {reply.userId?.userName?.charAt(0)}
                                             </div>
-                                            <Text strong>
+                                            <text >
                                                 {reply.userId?.userName}
-                                            </Text>
-                                            <Text type="secondary">
+                                            </text>
+                                            <text type="secondary">
                                                 {new Date(
                                                     reply.createdAt
                                                 ).toLocaleDateString()}
-                                            </Text>
+                                            </text>
                                         </div>
 
-                                        <Text className="text-gray-700! pl-8">
+                                        <text className="text-gray-700! pl-8">
                                             {reply.text}
-                                        </Text>
+                                        </text>
                                     </div>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <Text type="secondary" className="pl-8">
+                        <text type="secondary" className="pl-8">
                             No replies yet
-                        </Text>
+                        </text>
                     )}
                 </div>
             )}

@@ -1,12 +1,12 @@
-import Reply from "../models/replyModel.js";
-import Comment from "../models/CommentModel.js";
-import mongoose from "mongoose";
+import Reply from "../models/replyModel.ts";
+import Comment from "../models/CommentModel.ts";
+import { Request, Response } from "express";
 
-export const createReply = async (req, res) => {
+export const createReply = async (req: Request, res: Response) => {
   try {
     const { commentId } = req.params;
     const { text } = req.body;
-    const userId = req.user.id;
+    const userId = (req as Request & { user?: { id: string } }).user?.id;
 
     const comment = await Comment.findById(commentId);
     if (!comment) {
@@ -23,7 +23,7 @@ export const createReply = async (req, res) => {
     await Comment.findByIdAndUpdate(commentId, {
       $push: { replies: reply._id },
     });
-    res.status(201).json({
+    res.status(200).json({
       message: "Reply created successfully",
       reply,
     });
@@ -33,7 +33,7 @@ export const createReply = async (req, res) => {
   }
 };
 
-export const getRepliesByCommentId = async (req, res) => {
+export const getRepliesByCommentId = async (req: Request, res: Response) => {
   try {
     const { commentId } = req.params;
     const replies = await Reply.find({ commentId }).populate(

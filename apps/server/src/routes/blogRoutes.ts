@@ -6,9 +6,9 @@ import {
   getBlogById,
   deleteBlog,
   findByBlogId,
-} from "../controllers/blogControllers.js";
+} from "../controllers/blogControllers.ts";
 
-import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
+import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.ts";
 
 const router = e.Router();
 

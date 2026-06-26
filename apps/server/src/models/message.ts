@@ -16,6 +16,12 @@ const messageSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Chat",
   },
+
+  isRead: {
+    type: Boolean,
+    default: false,
+  },
+
   readBy: [
     {
       type: mongoose.Schema.Types.ObjectId,

@@ -1,6 +1,6 @@
 import e from "express";
-import { authorizeRoles, verifyToken } from "../middleware/authMiddleware.js";
-import { createReply ,getRepliesByCommentId} from "../controllers/replyControllers.js";
+import { authorizeRoles, verifyToken } from "../middleware/authMiddleware.ts";
+import { createReply ,getRepliesByCommentId} from "../controllers/replyControllers.ts";
 
 const router = e.Router();
 

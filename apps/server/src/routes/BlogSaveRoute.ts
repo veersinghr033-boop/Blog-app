@@ -1,6 +1,6 @@
 import e from "express";
-import { SaveBlog ,getSavedBlogs } from "../controllers/blogSaveControllers.js";
-import {authorizeRoles ,verifyToken} from "../middleware/authMiddleware.js";
+import { SaveBlog ,getSavedBlogs } from "../controllers/blogSaveControllers.ts";
+import {authorizeRoles ,verifyToken} from "../middleware/authMiddleware.ts";
 
 const router = e.Router();
 

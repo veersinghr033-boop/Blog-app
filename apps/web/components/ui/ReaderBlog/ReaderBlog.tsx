@@ -1,55 +1,53 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { message } from "antd";
-import {
-    useMutation,
-    useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
-
 import ReaderBlogCard from "./ReaderBlogCard";
 import { useRouter } from "next/navigation";
+
 interface BlogProps {
     data: any[];
     hasNextPage?: boolean;
     isFetchingNextPage?: boolean;
     fetchNextPage?: () => void;
 }
-function ReaderBlog({ data, hasNextPage = false,
-    isFetchingNextPage = false,
-    fetchNextPage, }: BlogProps) {
-    const user = useAppSelector(
-        (state) => state.auth.user?.id
-    );
 
+function ReaderBlog({ data, hasNextPage = false, isFetchingNextPage = false, fetchNextPage }: BlogProps) {
+    const user = useAppSelector((state) => state.auth.user?.id);
     const queryClient = useQueryClient();
     const router = useRouter();
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
-    const [expandedBlogs, setExpandedBlogs] = useState<
-        Record<string, boolean>
-    >({});
+    const [expandedBlogs, setExpandedBlogs] = useState<Record<string, boolean>>({});
 
+    const { data: savedBlogs = [] } = useQuery({
+        queryKey: ["save"],
+        queryFn: async () => {
+            const response = await api.get("/blogsave/get");
+            return response.data.blogs;
+        },
+        enabled: Boolean(user),
+        staleTime: 5 * 60_000,
+        gcTime: 10 * 60_000,
+        refetchOnWindowFocus: false,
+    });
 
+    const savedIds = useMemo(
+        () => new Set(savedBlogs.map((b: any) => b.blogDetails._id)),
+        [savedBlogs]
+    );
     const viewMutation = useMutation({
         mutationFn: async (blogId: string) => {
-            console.log("blogId", blogId)
-
             const response = await api.post(`/views/${blogId}`);
             return response.data;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: ["blogs"],
-            });
-            queryClient.invalidateQueries({
-                queryKey: ["blogData", user],
-            });
-            queryClient.invalidateQueries({
-                queryKey: ["saved"],
-            });
+            queryClient.invalidateQueries({ queryKey: ["blog"] });
+            queryClient.invalidateQueries({ queryKey: ["blogData", user] });
+            queryClient.invalidateQueries({ queryKey: ["saved"] });
         },
         onError: (error: any) => {
             const status = error?.response?.status;
@@ -61,25 +59,33 @@ function ReaderBlog({ data, hasNextPage = false,
             } else if (status === 401) {
                 message.error("Login required");
             } else {
-                message.error(
-                    error?.response?.data?.message ||
-                    "Something went wrong"
-                );
+                message.error(error?.response?.data?.message || "Something went wrong");
             }
-        }
+        },
     });
 
-    const openBlogModal = (blog: any) => {
-        const blogId = blog?._id ?? blog?.id;
-        if (!blogId) {
-            console.warn("Missing blog id", blog);
-            return;
-        }
+    const openBlogModal = useCallback(
+        (blog: any) => {
+            const blogId = blog?._id ?? blog?.id;
+            if (!blogId) {
+                console.warn("Missing blog id", blog);
+                return;
+            }
 
-        // console.log("BlogData", blog);
-        router.push(`/reader/blogs/${blogId}`);
-        viewMutation.mutate(blogId);
-    };
+            router.prefetch(`/reader/blogs/${blogId}`);
+
+            router.push(`/reader/blogs/${blogId}`);
+
+            requestIdleCallback(() => {
+                viewMutation.mutate(blogId);
+            });
+        },
+        [router, viewMutation]
+    );
+
+    const handleExpand = useCallback((id: string, value: boolean) => {
+        setExpandedBlogs((prev) => ({ ...prev, [id]: value }));
+    }, []);
 
     useEffect(() => {
         if (!hasNextPage || !fetchNextPage || isFetchingNextPage) return;
@@ -107,36 +113,32 @@ function ReaderBlog({ data, hasNextPage = false,
     }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
     return (
-        <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {data?.map((blog) => {
-                    const blogId = blog?._id ?? blog?.id;
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {data?.map((blog) => {
+                const blogId = blog?._id ?? blog?.id;
+                const isLiked = blog.likes?.users?.includes(user);
+                const isCommented = blog.comments?.details?.some((comment: any) => comment.user === user);
 
-                    return (
-                        <ReaderBlogCard
-                            key={blogId}
-                            post={blog}
-                            expanded={expandedBlogs[blogId]}
-                            onExpand={(id, value) =>
-                                setExpandedBlogs((prev) => ({
-                                    ...prev,
-                                    [id]: value,
-                                }))
-                            }
-                            onOpen={openBlogModal}
-                        />
-                    );
-                })}
+                return (
+                    <ReaderBlogCard
+                        key={blogId}
+                        post={blog}
+                        expanded={Boolean(expandedBlogs[blogId])}
+                        onExpand={handleExpand}
+                        onOpen={openBlogModal}
+                        isLiked={Boolean(isLiked)}
+                        isSaved={savedIds.has(blogId)}
+                        isCommented={Boolean(isCommented)}
+                    />
+                );
+            })}
 
-                <div ref={loadMoreRef} className="col-span-full h-4" />
+            <div ref={loadMoreRef} className="col-span-full h-4" />
 
-                {isFetchingNextPage ? (
-                    <div className="col-span-full text-center py-4 text-sm text-gray-500">
-                        Loading more blogs...
-                    </div>
-                ) : null}
-            </div>
-        </>
+            {isFetchingNextPage ? (
+                <div className="col-span-full py-4 text-center text-sm text-gray-500">Loading more blogs...</div>
+            ) : null}
+        </div>
     );
 }
 

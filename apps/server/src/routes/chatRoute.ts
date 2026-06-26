@@ -4,8 +4,8 @@ import {
   getMessages,
   getGroupMessages,
   deleteMessage,
-} from "../controllers/chatControllers.js";
-import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
+} from "../controllers/chatControllers.ts";
+import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.ts";
 
 const router = express.Router();
 
@@ -14,7 +14,7 @@ router.get(
   "/chat/:receiverId",
   verifyToken,
   authorizeRoles("reader"),
-  getMessages,
+  getMessages
 );
 router.get(
   "/chat/group-messages/:groupId",

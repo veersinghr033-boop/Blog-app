@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { message } from "antd";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { message, Typography  } from "antd";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
@@ -25,6 +25,7 @@ function Blog({
 
   const queryClient = useQueryClient();
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const { Paragraph, Text } = Typography;
 
   const [expandedBlogs, setExpandedBlogs] = useState<Record<string, boolean>>(
     {},
@@ -41,8 +42,23 @@ function Blog({
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["blogs"],
+      queryClient.setQueryData(["blogs"], (old: any) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            blogs: page.blogs.map((blog: any) =>
+              blog._id === blog._id
+                ? {
+                  ...blog,
+                  views: blog.views + 1,
+                }
+                : blog
+            ),
+          })),
+        };
       });
 
       queryClient.invalidateQueries({
@@ -65,11 +81,10 @@ function Blog({
     },
   });
 
-  const openBlog = (blog: any) => {
+  const openBlog = useCallback((blog: any) => {
     viewMutation.mutate(blog._id);
-
     router.push(`/${userRole}/blogs/${blog._id}`);
-  };
+  }, [router, userRole, viewMutation]);
   useEffect(() => {
     if (!hasNextPage || !fetchNextPage || isFetchingNextPage) return;
 
@@ -94,6 +109,21 @@ function Blog({
       }
     };
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  const handleExpand = useCallback((id: string, value: boolean) => {
+    setExpandedBlogs(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  }, []);
+  if (!data.length) {
+    return (
+      <div className="text-center py-4">
+        <text type="secondary">
+          No comments yet
+        </text>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col gap-4 pt-4 ">
       {data.map((post) => (
@@ -101,12 +131,8 @@ function Blog({
           key={post._id}
           post={post}
           expanded={expandedBlogs[post._id]}
-          onExpand={(id, value) =>
-            setExpandedBlogs((prev) => ({
-              ...prev,
-              [id]: value,
-            }))
-          }
+          onExpand={handleExpand}
+
           onOpen={openBlog}
         />
       ))}

@@ -1,12 +1,18 @@
 import { getMessaging } from "firebase-admin/messaging";
-import "../config/firebase.js";
-import { getApps } from "firebase-admin/app";
+import "../config/firebase.ts";
+
 export const sendPushNotification = async ({
   token,
   tokens,
   title,
   body,
   data = {},
+}: {
+  token?: string;
+  tokens?: string[];
+  title: string;
+  body: string;
+  data?: Record<string, unknown>;
 }) => {
   try {
     const payload = {

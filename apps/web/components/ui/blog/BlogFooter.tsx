@@ -12,7 +12,7 @@ export default function BlogFooter({ post, onOpen }: any) {
           {post.author?.userName?.charAt(0)}
         </div>
 
-        <Text>{post.author?.userName}</Text>
+        <text>{post.author?.userName}</text>
 
         <BlogActions post={post} onOpen={onOpen} />
       </div>
@@ -24,14 +24,14 @@ export default function BlogFooter({ post, onOpen }: any) {
           onClick={() => onOpen(post)}
         />
 
-        <Text
-          title={
-            post.createdAt ? new Date(post.createdAt).toLocaleString() : ""
-          }
+        <text
+          // title={
+          //   post.createdAt ? new Date(post.createdAt).toLocaleString() : ""
+          // }
           className="text-gray-500 text-xs"
         >
           {new Date(post.createdAt).toLocaleDateString()}
-        </Text>
+        </text>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { Card } from "antd";
 import BlogFooter from "./BlogFooter";
 import BlogContent from "./BlogContent";
+import React from "react";
 
 interface BlogCardProps {
   post: any;
@@ -9,7 +10,7 @@ interface BlogCardProps {
   onOpen: (blog: any) => void;
 }
 
-export default function BlogCard({
+ function BlogCard({
   post,
   expanded,
   onExpand,
@@ -28,3 +29,4 @@ export default function BlogCard({
     </Card>
   );
 }
+export default React.memo(BlogCard);

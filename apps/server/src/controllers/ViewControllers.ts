@@ -1,11 +1,13 @@
-import View from "../models/viewModel.js";
-import Blog from "../models/BlogModel.js";
+import View from "../models/viewModel.ts";
+import Blog from "../models/BlogModel.ts";
+import { Request, Response } from "express";
 
-export const addView = async (req, res) => {
+
+export const addView = async (req: Request, res: Response) => {
   try {
-    const userId = req.user.id;
-    const { blogId } = req.params;
-    console.log(userId , blogId)
+    const userId = (req as Request & { user?: { id: string } }).user?.id;
+    const { blogId } = req.params as { blogId: string };
+    console.log(userId, blogId)
     if (!blogId || !userId) {
       return res.status(400).json({
         message: "Missing required fields",

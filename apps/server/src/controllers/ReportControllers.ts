@@ -1,8 +1,16 @@
-import Report from "../models/ReportModel.js";
+import Report from "../models/ReportModel.ts";
+import { Request, Response } from "express";
 
-export const createReport = async(req, res) => {
+interface Reports {
+    _id: any;
+    reason: string;
+    createdAt: Date;
+    blogId: any;
+    userId: any;
+}
+export const createReport = async (req: Request, res: Response) => {
     try {
-        const userId = req.user.id;
+        const userId = (req as Request & { user?: { id: string } }).user?.id;
 
         const { blogId, reason } = req.body;
 
@@ -29,7 +37,7 @@ export const createReport = async(req, res) => {
             reason,
         });
 
-        res.status(201).json({
+        res.status(200).json({
             report: newReport,
             message: "Report created successfully",
         });
@@ -42,7 +50,7 @@ export const createReport = async(req, res) => {
     }
 };
 
-export const getReports = async(req, res) => {
+export const getReports = async (req: Request, res: Response) => {
     try {
         const reports = await Report.find()
             .populate({
@@ -59,7 +67,7 @@ export const getReports = async(req, res) => {
             select: "userName role",
         });
 
-        const frontendReadyReports = reports.map((report) => ({
+        const frontendReadyReports = reports.map((report: Reports) => ({
             _id: report._id,
             reason: report.reason,
             createdAt: report.createdAt,
@@ -90,9 +98,9 @@ export const getReports = async(req, res) => {
     }
 };
 
-export const getReportById = async(req, res) => {
+export const getReportById = async (req: Request, res: Response) => {
     try {
-        const UserId = req.user.id;
+        const UserId = (req as Request & { user?: { id: string } }).user?.id;
 
         const reports = await Report.find()
             .populate({
@@ -109,7 +117,7 @@ export const getReportById = async(req, res) => {
             select: "userName role",
         });
 
-        const frontendReadyReports = reports.map((report) => ({
+        const frontendReadyReports = reports.map((report:Reports) => ({
             _id: report._id,
             reason: report.reason,
             createdAt: report.createdAt,
@@ -146,7 +154,7 @@ export const getReportById = async(req, res) => {
     }
 };
 
-export const deleteReport = async(req, res) => {
+export const deleteReport = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
@@ -170,9 +178,9 @@ export const deleteReport = async(req, res) => {
     }
 };
 
-export const getByUserId = async(req, res) => {
+export const getByUserId = async (req: Request, res: Response) => {
     try {
-        const userId = req.user.id;
+        const userId = (req as Request & { user?: { id: string } }).user?.id;
         const { blogId } = req.params;
         const reports = await Report.find({ blogId, userId })
             .populate({

@@ -1,10 +1,11 @@
-import Like from "../models/LikeModel.js";
-import Blog from "../models/BlogModel.js";
-import mongoose from "mongoose";
-export const likeBlog = async(req, res) => {
+import Like from "../models/LikeModel.ts";
+import Blog from "../models/BlogModel.ts";
+import { Request, Response } from "express";
+
+export const likeBlog = async (req: Request, res: Response) => {
     try {
-        const { blogId } = req.params;
-        const userId = req.user.id;
+        const { blogId } = req.params as { blogId: string };
+        const userId = (req as Request & { user?: { id: string } }).user?.id;
         const existingLike = await Like.findOne({ user: userId, blog: blogId });
         if (existingLike) {
             await Like.findByIdAndDelete(existingLike._id);
