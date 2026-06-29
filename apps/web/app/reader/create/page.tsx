@@ -31,7 +31,7 @@ function CreateBlog() {
       queryClient.invalidateQueries({ queryKey: ["blogData"] });
       message.success("Blog published successfully");
       form.resetFields();
-      router.push("/reader/blogs");
+      // router.push("/reader/blogs");
     },
 
     onError: (error) => {

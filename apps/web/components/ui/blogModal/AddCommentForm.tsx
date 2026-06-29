@@ -28,9 +28,7 @@ export default function AddCommentForm({ blogId }: { blogId: string }) {
             queryClient.invalidateQueries({
                 queryKey: ["saved"],
             });
-            queryClient.invalidateQueries({
-                queryKey: ["savedBlogs"],
-            });
+           
             queryClient.invalidateQueries({
                 queryKey: ["blog"],
             });

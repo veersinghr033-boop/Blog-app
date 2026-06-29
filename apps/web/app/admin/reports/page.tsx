@@ -1,34 +1,40 @@
-"use client"
+"use client";
 
-import ReportCard from "@/components/ui/ReportCard"
-import { useQuery } from "@tanstack/react-query"
-import api from "@/utills/axios"
-import { useEffect } from "react"
-import { message } from "antd"
+import ReportCard from "@/components/ui/ReportCard";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import api from "@/utills/axios";
 
-export default function page() {
+export default function Page() {
     const {
         data,
-        isLoading,
-        isError,
-        error,
-    } = useQuery({
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useInfiniteQuery({
         queryKey: ["reports"],
-        queryFn: async () => {
-            const response = await api.get("/reports")
-            return response.data.reports
+        queryFn: async ({ pageParam }) => {
+            const res = await api.get("/reports", {
+                params: {
+                    before: pageParam,
+                },
+            });
+
+            return res.data;
         },
-    })
-    useEffect(() => {
-        if (isError) {
-            console.error("Error fetching reports:", error)
-            message.error("Failed to fetch reports")
-        }
-    }, [isError, error])
-    console.log("Reports data:", data)
+        initialPageParam: undefined,
+        getNextPageParam: (lastPage) =>
+            lastPage.nextCursor || undefined,
+    });
+    const reports =
+        data?.pages.flatMap((page) => page.reports) ?? [];
+
     return (
-        <div>
-            <ReportCard data={data} />
-        </div>
-    )
+        <ReportCard
+            data={reports}
+            fetchNextPage={fetchNextPage}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+        />
+    );
 }
+

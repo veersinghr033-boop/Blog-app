@@ -1,12 +1,14 @@
-import { LikeOutlined, CommentOutlined } from "@ant-design/icons";
-import { Typography, message } from "antd";
+// import { LikeOutlined, CommentOutlined } from "@ant-design/icons";
+import LikeOutlined from "@ant-design/icons/LikeOutlined";
+import CommentOutlined from "@ant-design/icons/CommentOutlined";
+import React from "react";
+import {  message } from "antd";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 
-const { Text } = Typography;
 
-export default function BlogActions({ post, onOpen }: any) {
+function BlogActions({ post, onOpen }: any) {
   const user = useAppSelector((state) => state.auth.user?.id);
   const queryClient = useQueryClient();
   const isLiked = post.likes?.users?.includes(user);
@@ -66,3 +68,4 @@ export default function BlogActions({ post, onOpen }: any) {
     </>
   );
 }
+export default React.memo(BlogActions);

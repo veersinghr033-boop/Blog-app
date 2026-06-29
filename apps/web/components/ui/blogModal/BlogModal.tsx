@@ -8,11 +8,24 @@ import {  useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 
 import api from "@/utills/axios";
+import dynamic from "next/dynamic";
 
+const CommentList = dynamic(
+    () => import("./CommentList"),
+    {
+        ssr: false,
+    }
+);
+
+const AddCommentForm = dynamic(
+    () => import("./AddCommentForm"),
+    {
+        ssr: false,
+    }
+);
 import BlogHeader from "./BlogHeader";
 import BlogActions from "./BlogActions";
-import AddCommentForm from "./AddCommentForm";
-import CommentList from "./CommentList";
+
 import ReportModal from "../Report";
 
 const { Title, Text } = Typography;
@@ -40,7 +53,7 @@ function ReadBlog({ blog }: ReadBlogProps) {
             initialPageParam: null,
             getNextPageParam: (lastPage: any) =>
                 lastPage.hasMore ? lastPage.nextCursor : undefined,
-            enabled: !!blog?._id,
+            enabled: !!blog._id && commentAdded
         });
     const commentOpen = async () => {
         const newState = !commentAdded;

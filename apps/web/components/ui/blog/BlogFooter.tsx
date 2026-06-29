@@ -1,10 +1,9 @@
 import { EllipsisOutlined } from "@ant-design/icons";
-import { Button, Typography } from "antd";
+import { Button } from "antd";
 import BlogActions from "./BlogActions";
+import React from "react";
 
-const { Text } = Typography;
-
-export default function BlogFooter({ post, onOpen }: any) {
+ function BlogFooter({ post ,onOpen }: any) {
   return (
     <div className="flex justify-between mt-4">
       <div className="flex items-center gap-2">
@@ -21,7 +20,7 @@ export default function BlogFooter({ post, onOpen }: any) {
         <Button
           type="text"
           icon={<EllipsisOutlined />}
-          onClick={() => onOpen(post)}
+          onClick={() => onOpen(post._id)}
         />
 
         <text
@@ -36,3 +35,4 @@ export default function BlogFooter({ post, onOpen }: any) {
     </div>
   );
 }
+export default React.memo(BlogFooter);

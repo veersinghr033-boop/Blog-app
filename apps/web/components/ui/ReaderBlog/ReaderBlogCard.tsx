@@ -1,34 +1,28 @@
-import { memo } from "react";
-import { Card, Typography, message } from "antd";
+import { memo, useCallback } from "react";
+import {  message } from "antd";
 import { LikeOutlined, CommentOutlined, SaveOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
-
-const {  Paragraph } = Typography;
-
+import { useRouter } from "next/navigation";
 interface ReaderBlogCardProps {
     post: any;
-    onOpen: (blog: any) => void;
-    onExpand: (id: string, value: boolean) => void;
-    expanded: boolean;
-    isLiked: boolean;
+    
     isSaved: boolean;
-    isCommented: boolean;
+  
 }
 
 function ReaderBlogCard({
     post,
-    onOpen,
-    onExpand,
-    expanded,
-    isLiked,
+    
     isSaved,
-    isCommented,
+    
 }: ReaderBlogCardProps) {
-    const queryClient = useQueryClient();
     const userId = useAppSelector((state) => state.auth.user?.id);
-
+    const isLiked = post.likes?.users?.includes(userId);
+    const isCommented = post.comments?.details?.some((comment: any) => comment.user === userId);
+    const queryClient = useQueryClient();
+    const router = useRouter()
     const LikeMutation = useMutation({
         mutationFn: async (blogId: string) => api.post(`/likes/${blogId}`, { userId }),
         onSuccess: () => {
@@ -56,31 +50,69 @@ function ReaderBlogCard({
             queryClient.invalidateQueries({ queryKey: ["blogs"] });
         },
     });
+    const viewMutation = useMutation({
+        mutationFn: async (blogId: string) => {
+            const response = await api.post(`/views/${blogId}`);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["blog"] });
+            queryClient.invalidateQueries({ queryKey: ["blogData", userId] });
+            queryClient.invalidateQueries({ queryKey: ["saved"] });
+        },
+        onError: (error: any) => {
+            const status = error?.response?.status;
+
+            if (status === 400) {
+                console.log("Already viewed");
+            } else if (status === 404) {
+                message.error("Blog not found");
+            } else if (status === 401) {
+                message.error("Login required");
+            } else {
+                message.error(error?.response?.data?.message || "Something went wrong");
+            }
+        },
+    });
+
+    const openBlogModal = useCallback(
+        (blog: any) => {
+            const blogId = blog
+            if (!blogId) {
+                console.warn("Missing blog id", blog);
+                return;
+            }
+
+            router.prefetch(`/reader/blogs/${blogId}`);
+
+            router.push(`/reader/blogs/${blogId}`);
+
+            requestIdleCallback(() => {
+                viewMutation.mutate(blogId);
+            });
+        },
+        [router, viewMutation]
+    );
+    const showReadMore = post.content?.length > 150;
 
     return (
-        <Card hoverable className="h-full rounded-2xl border border-gray-200 shadow-sm">
+        <div className="h-full rounded-lg border bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow border-gray-200 shadow-sm">
             <div className="flex h-full flex-col gap-4">
                 <div>
-                    <title className="mb-3 line-clamp-2">
+                    <h2  className="font-semibold text-2xl mb-2  line-clamp-2">
                         {post.title}
-                    </title>
-                    <Paragraph
-                        ellipsis={{
-                            rows: 3,
-                            expandable: false,
-                            onEllipsis: (ellipsis) => {
-                                onExpand(post._id, ellipsis);
-                            },
-                        }}
-                        className="text-gray-600"
-                    >
+                    </h2>
+                    <p className="line-clamp-3">
                         {post.content}
-                    </Paragraph>
+                    </p>
 
-                    {expanded && (
-                        <text className="cursor-pointer text-blue-500 hover:text-blue-700" onClick={() => onOpen(post)}>
+                    {showReadMore && (
+                        <span
+                            className="text-blue-500 cursor-pointer"
+                            onClick={() => openBlogModal(post._id)}
+                        >
                             Read more
-                        </text>
+                        </span>
                     )}
                 </div>
 
@@ -107,7 +139,7 @@ function ReaderBlogCard({
                             </text>
                             <text
                                 className={`flex items-center gap-1 cursor-pointer transition-colors ${isCommented ? "text-green-500!" : "text-gray-500 hover:text-green-500"}`}
-                                onClick={() => onOpen(post)}
+                                onClick={() => openBlogModal(post)}
                             >
                                 {post.comments?.count || 0} <CommentOutlined />
                             </text>
@@ -121,7 +153,7 @@ function ReaderBlogCard({
                     </div>
                 </div>
             </div>
-        </Card>
+        </div>
     );
 }
 

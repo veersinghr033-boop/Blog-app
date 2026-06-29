@@ -317,12 +317,10 @@ export default function ChatMessages({
     if (firstLoadRef.current) {
       firstLoadRef.current = false;
 
-      setTimeout(() => {
-        virtuosoRef.current?.scrollToIndex({
-          index: messages.length - 1,
-          behavior: "auto",
-        });
-      }, 10);
+      virtuosoRef.current?.scrollToIndex({
+        index: messages.length - 1,
+        behavior: "auto",
+      });
     }
   }, [messages.length]);
   useEffect(() => {
@@ -336,7 +334,7 @@ export default function ChatMessages({
     <>
       <div className="min-h-0 flex-1 overflow-hidden">
         <Virtuoso
-          key={selectedChatId}
+          style={{ height: "80vh" }}
           ref={virtuosoRef}
           data={messages}
           firstItemIndex={firstItemIndex.current}

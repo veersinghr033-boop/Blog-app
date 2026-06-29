@@ -1,6 +1,7 @@
 import Blog from "../models/BlogModel.ts";
 import Like from "../models/LikeModel.ts";
 import Comment from "../models/CommentModel.ts";
+import Report from "../models/ReportModel.ts";
 import mongoose from "mongoose";
 import { Request, Response } from "express";
 
@@ -323,6 +324,8 @@ export const deleteBlog = async (req: Request, res: Response) => {
       await Promise.all([
         Like.deleteMany({ blog: id }),
         Comment.deleteMany({ blog: id }),
+        Report.deleteMany({ blogId: id }),
+
       ]);
     }
     res.status(200).json({ message: "Blog deleted successfully" });

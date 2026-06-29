@@ -1,8 +1,7 @@
-import { Button, Form, Input, Typography, message } from "antd";
+import { Button, Form, Input, message } from "antd";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useState, } from "react";
-const {  Text } = Typography;
 
 function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
     const [openReply, setOpenReply] = useState<string | null>(null);
@@ -61,18 +60,18 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
     return (
         <div  >
             <div className="flex items-center gap-4 pl-8 ">
-                <text type="secondary" className="text-xs cursor-pointer hover:underline"
+                <p  className="text-xs cursor-pointer hover:underline"
                     onClick={() => setOpenReply(
                         openReply === comment._id ? null : comment._id
                     )}>
                     reply
-                </text>
+                </p>
 
-                <text type="secondary" className="text-xs cursor-pointer hover:underline" onClick={() => setOpenReplyData(
+                <p className="text-xs cursor-pointer hover:underline" onClick={() => setOpenReplyData(
                     openReplyData === comment._id ? null : comment._id
                 )}>
                     {comment.replies?.length || 0} replies
-                </text>
+                </p>
             </div>
             {openReply === comment._id && (
                 <Form className="pl-8! mt-3! flex gap-2" onFinish={() => {
@@ -123,27 +122,27 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
                                             <div className="bg-gray-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs uppercase">
                                                 {reply.userId?.userName?.charAt(0)}
                                             </div>
-                                            <text >
+                                            <p >
                                                 {reply.userId?.userName}
-                                            </text>
-                                            <text type="secondary">
+                                            </p>
+                                            <p >
                                                 {new Date(
                                                     reply.createdAt
                                                 ).toLocaleDateString()}
-                                            </text>
+                                            </p>
                                         </div>
 
-                                        <text className="text-gray-700! pl-8">
+                                        <p className="text-gray-700! pl-8">
                                             {reply.text}
-                                        </text>
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <text type="secondary" className="pl-8">
+                        <p  className="pl-8">
                             No replies yet
-                        </text>
+                        </p>
                     )}
                 </div>
             )}

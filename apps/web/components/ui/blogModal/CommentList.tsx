@@ -1,7 +1,6 @@
 import {
     Button,
     Popconfirm,
-    Typography,
     message,
 } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
@@ -11,7 +10,6 @@ import api from "@/utills/axios";
 import CommentReply from "./commentReply";
 import { Virtuoso } from "react-virtuoso";
 
-const { Paragraph, Text } = Typography;
 
 interface Props {
     comments: any[];
@@ -75,9 +73,9 @@ export default function CommentList({
     if (!comments.length) {
         return (
             <div className="text-center py-4">
-                <Text type="secondary">
+                <p >
                     No comments yet
-                </Text>
+                </p>
             </div>
         );
     }
@@ -112,18 +110,18 @@ export default function CommentList({
                                             {comment.user?.name?.charAt(0)}
                                         </div>
 
-                                        <text >
+                                        <p >
                                             {comment.user?.name}
-                                        </text>
+                                        </p>
 
-                                        <text type="secondary">
+                                        <p >
                                             {new Date(comment.createdAt).toLocaleDateString()}
-                                        </text>
+                                        </p>
                                     </div>
 
-                                    <text className="text-gray-700! pl-8">
+                                    <p className="text-gray-700! pl-8">
                                         {comment.comment}
-                                    </text>
+                                    </p>
                                 </div>
 
                                 {isCommentOwner(comment) && (

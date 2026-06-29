@@ -1,11 +1,10 @@
-import { Button, Popconfirm, Typography, message } from "antd";
+import { Button, Popconfirm, message } from "antd";
 import { LikeOutlined, CommentOutlined } from "@ant-design/icons";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useRouter } from "next/navigation";
 
-const { Text } = Typography;
 
 interface Props {
     blog: any;
@@ -57,7 +56,7 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
                 queryKey: ["blogData", userId],
             });
             queryClient.invalidateQueries({
-                queryKey: ["save"],
+                queryKey: ["saved"],
             });
             queryClient.invalidateQueries({
                 queryKey: ["blog"],
@@ -96,31 +95,28 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
     return (
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-                <text
-                    type="secondary"
-                    
-                >
+                <p>
                     {blog?.createdAt && new Date(blog.createdAt).toLocaleDateString()}
-                </text>
-                <text
+                </p>
+                <p
                     className={`text-sm cursor-pointer hover:text-blue-500!  ${isLiked ? "text-blue-500!" : "text-gray-500!"
                         }`}
                     onClick={() => handleLike(blog._id)}
                 >
                     {blog.likes?.count || 0} <LikeOutlined />
-                </text>
+                </p>
 
-                <text
+                <p
                     className={`flex items-center gap-1 text-sm cursor-pointer hover:text-green-500! ${isCommented ? "text-green-500!" : "text-gray-500!"
                         }`}
                     onClick={() => onOpen(blog)}
                 >
                     {blog.comments?.count || 0}
                     <CommentOutlined />
-                </text>
-                <text className="text-sm text-gray-500">
+                </p>
+                <p className="text-sm text-gray-500">
                     {blog.views && blog.views.length > 0 ? blog.views[0].count : 0} Views
-                </text>
+                </p>
             </div>
 
             {isAuthor ? (

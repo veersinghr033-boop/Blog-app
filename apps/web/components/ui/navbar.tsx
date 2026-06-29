@@ -22,7 +22,6 @@ function Navbar({ onMenuClick }: NavbarProps) {
 
     const menuByRole: Record<string, { href: string }> = {
         admin: { href: "/admin/profile" },
-        author: { href: "/author/profile" },
         reader: { href: "/reader/profile" },
     }
 

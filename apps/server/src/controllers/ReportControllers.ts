@@ -52,7 +52,19 @@ export const createReport = async (req: Request, res: Response) => {
 
 export const getReports = async (req: Request, res: Response) => {
     try {
-        const reports = await Report.find()
+        const before = req.query.before as string | undefined;
+        const limit = Number(req.query.limit) || 10;
+
+        const query: any = {};
+
+        if (before) {
+            query.createdAt = {
+                $lt: new Date(before),
+            };
+        }
+        const reports = await Report.find(query)
+            .sort({ createdAt: -1 })
+            .limit(limit)
             .populate({
                 path: "blogId",
                 select: "title content author",
@@ -62,10 +74,11 @@ export const getReports = async (req: Request, res: Response) => {
                 },
             })
 
-        .populate({
-            path: "userId",
-            select: "userName role",
-        });
+            .populate({
+                path: "userId",
+                select: "userName role",
+            }).lean();
+
 
         const frontendReadyReports = reports.map((report: Reports) => ({
             _id: report._id,
@@ -87,6 +100,12 @@ export const getReports = async (req: Request, res: Response) => {
 
         res.status(200).json({
             reports: frontendReadyReports,
+            nextCursor:
+                frontendReadyReports.length > 0
+                    ? frontendReadyReports[
+                        frontendReadyReports.length - 1
+                    ].createdAt
+                    : null,
             message: "Reports fetched successfully",
         });
     } catch (error) {
@@ -101,8 +120,17 @@ export const getReports = async (req: Request, res: Response) => {
 export const getReportById = async (req: Request, res: Response) => {
     try {
         const UserId = (req as Request & { user?: { id: string } }).user?.id;
+        const before = req.query.before as string | undefined;
+        const limit = Number(req.query.limit) || 10;
 
-        const reports = await Report.find()
+        const query: any = {};
+
+        if (before) {
+            query.createdAt = {
+                $lt: new Date(before),
+            };
+        }
+        const reports = await Report.find(query )
             .populate({
                 path: "blogId",
                 select: "title content author",
@@ -112,12 +140,14 @@ export const getReportById = async (req: Request, res: Response) => {
                 },
             })
 
-        .populate({
-            path: "userId",
-            select: "userName role",
-        });
+            .populate({
+                path: "userId",
+                select: "userName role",
+            }).sort({ createdAt: -1 })
+            .limit(limit)
+            .lean();
 
-        const frontendReadyReports = reports.map((report:Reports) => ({
+        const frontendReadyReports = reports.map((report: Reports) => ({
             _id: report._id,
             reason: report.reason,
             createdAt: report.createdAt,
@@ -143,7 +173,12 @@ export const getReportById = async (req: Request, res: Response) => {
 
         res.status(200).json({
             reports: filteredReports,
-            message: "Reports fetched successfully",
+            nextCursor:
+                frontendReadyReports.length > 0
+                    ? frontendReadyReports[
+                          frontendReadyReports.length - 1
+                      ].createdAt
+                    : null,            message: "Reports fetched successfully",
         });
     } catch (error) {
         console.log(error);
