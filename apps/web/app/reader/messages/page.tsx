@@ -1,12 +1,14 @@
-"use client"
+// app/reader/messages/page.tsx
 
-import Message from "@/components/ui/message/Message"
-function page() {
+"use client";
+
+import FCMProvider from "@/components/FCMProvider";
+import Messages from "@/components/ui/message/Message";
+
+export default function Page() {
     return (
-        <div>
-            <Message />
-        </div>
-    )
+        <FCMProvider>
+            <Messages />
+        </FCMProvider>
+    );
 }
-
-export default page

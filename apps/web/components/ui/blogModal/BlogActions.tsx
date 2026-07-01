@@ -1,3 +1,4 @@
+"use client";
 import { Button, Popconfirm, message } from "antd";
 import { LikeOutlined, CommentOutlined } from "@ant-design/icons";
 import { useAppSelector } from "@/lib/store/hooks";

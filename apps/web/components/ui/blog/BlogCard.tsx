@@ -1,3 +1,5 @@
+"use client";
+
 import BlogFooter from "./BlogFooter";
 import BlogContent from "./BlogContent";
 import React, { useCallback } from "react";
@@ -6,17 +8,18 @@ import { useAppSelector } from "@/lib/store/hooks";
 
 interface BlogCardProps {
   post: any;
+  userId?: string;
+  role?: string;
 }
 
-function BlogCard({ post }: BlogCardProps) {
+function BlogCard({ post,role,userId }: BlogCardProps) {
   const router = useRouter();
-  const userRole = useAppSelector((state) => state.auth.user?.role);
 
   const openBlog = useCallback(
     (blogId: string) => {
-      router.push(`/${userRole}/blogs/${blogId}`);
+      router.push(`/${role}/blogs/${blogId}`);
     },
-    [router, userRole]
+    [router, role]
   );
 
   return (
@@ -29,6 +32,7 @@ function BlogCard({ post }: BlogCardProps) {
       <BlogFooter
         post={post}
         onOpen={openBlog}
+        userId={userId}
       />
     </div>
   );

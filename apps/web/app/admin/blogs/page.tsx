@@ -1,18 +1,23 @@
 "use client"
 
-import { Layout, Input } from "antd"
 import Blog from "@/components/ui/blog/Blog"
-import {  useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import api from "@/utills/axios"
-import {  useInfiniteQuery } from "@tanstack/react-query"
+import { useInfiniteQuery } from "@tanstack/react-query"
+import { useAppSelector } from "@/lib/store/hooks";
 
-const { Search } = Input
 
 function Blogs() {
     const [searchText, setSearchText] = useState("")
     const [statusFilter, setStatusFilter] = useState("")
+    
+    const userId = useAppSelector(
+        (state) => state.auth.user?.id
+    );
 
-
+    const role = useAppSelector(
+        (state) => state.auth.user?.role
+    );
     const {
         data,
         fetchNextPage,
@@ -63,7 +68,7 @@ function Blogs() {
     }, [blogs, searchText, statusFilter])
 
     return (
-        <Layout className="min-h-screen bg-white">
+        <div className="min-h-screen ">
             <header className="w-full border-b border-gray-200 px-4 py-4">
                 <div>
                     <h2 className="text-2xl font-semibold">
@@ -75,24 +80,27 @@ function Blogs() {
                     </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row w-full gap-3">
-                    <Search
-                        className="w-full sm:flex-1"
-                        placeholder="Search blogs..."
-                        allowClear
-                        onChange={(e) => setSearchText(e.target.value)}
-                    />
-
-
-                </div>
+                <input
+                    className="w-full p-2 border border-gray-300 outline-0 mt-2 rounded"
+                    placeholder="Search blogs..."
+                    value={searchText}
+                    onChange={(e) =>
+                        setSearchText(e.target.value)
+                    }
+                />
             </header>
 
-            <div className="h-[75vh] overflow-auto ">
-                <Blog data={filteredBlogs} hasNextPage={hasNextPage}
-                    isFetchingNextPage={isFetchingNextPage}
-                    fetchNextPage={fetchNextPage} />
-            </div>
-        </Layout>
+            <Blog
+                data={filteredBlogs}
+                userId={userId}
+                role={role}
+                hasNextPage={hasNextPage}
+                isFetchingNextPage={
+                    isFetchingNextPage
+                }
+                fetchNextPage={fetchNextPage}
+            />
+        </div>
     )
 }
 

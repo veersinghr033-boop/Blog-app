@@ -1,16 +1,19 @@
 "use client";
 
-import { Layout, Form, Input, Button, message } from "antd";
 import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { message } from "antd";
 
 function CreateBlog() {
-  const [form] = Form.useForm();
   const router = useRouter();
   const queryClient = useQueryClient();
-
+  const [formData, setFormData] = useState({
+    title: "",
+    content: "",
+  });
   const userId = useAppSelector((state) => state.auth.user?.id);
 
   const publishMutation = useMutation({
@@ -30,7 +33,10 @@ function CreateBlog() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blogData"] });
       message.success("Blog published successfully");
-      form.resetFields();
+      setFormData({
+        title: "",
+        content: "",
+      });
       // router.push("/reader/blogs");
     },
 
@@ -42,7 +48,7 @@ function CreateBlog() {
 
   const aiMutation = useMutation({
     mutationFn: async () => {
-      const title = form.getFieldValue("title");
+      const title = formData.title;
 
       if (!title) {
         throw new Error("Please enter title first");
@@ -80,11 +86,11 @@ Topic: ${title}
     },
 
     onSuccess: (data) => {
-      form.setFieldsValue({
+      setFormData((current) => ({
+        ...current,
         content: data.content,
-      });
-
-      message.success("AI content generated");
+      }));
+      message.success("AI content generated successfully");
     },
 
     onError: (error: any) => {
@@ -98,15 +104,21 @@ Topic: ${title}
     },
   });
 
-  const handleSubmit = (values: {
-    title: string;
-    content: string;
-  }) => {
-    publishMutation.mutate(values);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    publishMutation.mutate(formData);
   };
 
   return (
-    <Layout className="min-h-screen bg-white">
+    <div className="min-h-screen ">
       <header className="flex flex-col w-full gap-4 border-b border-gray-200">
         <div>
           <h2 className="text-2xl font-semibold">
@@ -119,62 +131,60 @@ Topic: ${title}
         </div>
       </header>
 
-      <Form
-        layout="vertical"
-        form={form}
-        onFinish={handleSubmit}
-        className="p-6!"
-      >
-        <Form.Item
-          label="Title"
-          name="title"
-          rules={[
-            {
-              required: true,
-              message: "Please enter blog title",
-            },
-          ]}
-        >
-          <Input placeholder="Enter blog title" />
-        </Form.Item>
+      <form onSubmit={handleSubmit} className="p-6">
+        <div className="mb-4">
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+            Title
+          </label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            placeholder="Enter blog title"
+            className="mt-1 p-2 outline-0 block w-full rounded-md bg-white border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            required
+          />
+        </div>
 
-        <Form.Item
-          label="Content"
-          name="content"
-          rules={[
-            {
-              required: true,
-              message: "Please enter blog content",
-            },
-          ]}
-        >
-          <Input.TextArea
+        <div className="mb-4">
+          <label htmlFor="content" className="block text-sm font-medium text-gray-700">
+            Content
+          </label>
+          <textarea
+            id="content"
+            name="content"
+            value={formData.content}
+            onChange={handleChange}
             rows={12}
             placeholder="Write your blog content here..."
+            className="mt-1 p-2 outline-0 block bg-white font-medium text-sm  rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 w-full"
+            required
           />
-        </Form.Item>
+        </div>
 
-        <Form.Item>
-          <div className="flex gap-4 flex-wrap">
-            <Button
-              loading={aiMutation.isPending}
-              onClick={() => aiMutation.mutate()}
-            >
-              Generate AI Content
-            </Button>
+        <div className="flex gap-4 flex-wrap">
+          <button
+            type="button"
 
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={publishMutation.isPending}
-              className="bg-black!"
-            >
-              Publish
-            </Button>
-          </div>
-        </Form.Item>
-      </Form>
-    </Layout>
+            disabled={aiMutation.isPending}
+            onClick={() => aiMutation.mutate()}
+            className="bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 disabled:opacity-50"
+          >
+            Generate AI Content
+          </button>
+
+          <button
+            type="submit"
+            disabled={publishMutation.isPending}
+            className="bg-gray-800 text-white py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-black focus:ring-opacity-50 disabled:opacity-50"
+          >
+            Publish
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
 

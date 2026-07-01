@@ -9,9 +9,13 @@ interface BlogProps {
   hasNextPage?: boolean;
   isFetchingNextPage?: boolean;
   fetchNextPage?: () => void;
+  userId?: string;
+  role?: string;
 }
 function Blog({
   data,
+  userId,
+  role,
   hasNextPage = false,
   isFetchingNextPage = false,
   fetchNextPage,
@@ -19,40 +23,11 @@ function Blog({
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-
-
-
-
-  // useEffect(() => {
-  //   if (!hasNextPage || !fetchNextPage || isFetchingNextPage) return;
-
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       const firstEntry = entries[0];
-  //       if (firstEntry?.isIntersecting) {
-  //         fetchNextPage();
-  //       }
-  //     },
-  //     { threshold: 0.2 },
-  //   );
-
-  //   const current = loadMoreRef.current;
-  //   if (current) {
-  //     observer.observe(current);
-  //   }
-
-  //   return () => {
-  //     if (current) {
-  //       observer.unobserve(current);
-  //     }
-  //   };
-  // }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
-
   if (!data.length) {
     return (
       <div className="text-center py-4">
         <text type="secondary">
-          No comments yet
+          No blogs yet
         </text>
       </div>
     );
@@ -70,8 +45,11 @@ function Blog({
         itemContent={(_, post) => (
           <div className="mb-4">
 
-            <BlogCard post={post} />
-          </div>
+            <BlogCard
+              post={post}
+              userId={userId}
+              role={role}
+            />          </div>
         )}
       />
       <div ref={loadMoreRef} className="col-span-full h-4" />

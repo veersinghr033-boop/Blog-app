@@ -71,7 +71,7 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
     };
 
     return (
-        <Layout className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 p-4 md:p-0">
+        <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 p-4 md:p-0">
             <div className="mb-6 rounded-3xl bg-white p-6 shadow-sm border border-gray-200">
                 <div className=" flex items-center justify-between flex-wrap gap-4">
                     <div>
@@ -245,7 +245,7 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
                     )}
                 </div>
             )}
-        </Layout>
+        </div>
     );
 }
 

@@ -1,7 +1,7 @@
 "use client"
 
-import { Layout, Table, Input, Button, message ,Popconfirm  } from "antd"
-import { useQuery, useMutation ,useQueryClient } from "@tanstack/react-query"
+import { Table, Input, Button, message, Popconfirm } from "antd"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/utills/axios"
 import { useMemo, useState, useEffect } from "react"
 
@@ -75,7 +75,7 @@ function Users() {
     }
 
     return (
-        <Layout className="min-h-screen bg-white">
+        <div className="min-h-screen ">
             <header className="flex flex-col gap-4 border-b border-gray-200 px-6 py-4">
                 <div>
                     <h2 className="text-2xl font-semibold">
@@ -87,13 +87,13 @@ function Users() {
                     </p>
                 </div>
 
-                <div className="w-full max-w-md">
-                    <Search
-                        placeholder="Search users..."
-                        allowClear
-                        onChange={(e) => setSearchText(e.target.value)}
-                    />
-                </div>
+                <input
+                    className="w-full sm:flex-1 p-2 bg-white mt-2 rounded-lg "
+
+                    placeholder="Search users..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                />
             </header>
 
             <Table
@@ -119,7 +119,7 @@ function Users() {
                         dataIndex: "role",
                         key: "role",
                     },
-               
+
                     {
                         title: "Joined At",
                         dataIndex: "joined",
@@ -130,7 +130,7 @@ function Users() {
                         key: "actions",
                         render: (_: any, record: UserType) => (
                             <div className="flex gap-2">
-                               
+
 
                                 <Popconfirm
                                     title="Are you sure you want to delete this user?"
@@ -147,7 +147,7 @@ function Users() {
                     },
                 ]}
             />
-        </Layout>
+        </div>
     )
 }
 

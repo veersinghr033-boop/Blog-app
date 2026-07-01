@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { changePassword, updateProfile } from "@/lib/store/features/authThunk";
 
-import { Layout, Form, Card, Avatar, Input, Button, message } from "antd";
+import { Form, Card, Avatar, Input, Button, message } from "antd";
 
 const { TextArea } = Input;
 
@@ -106,7 +106,7 @@ function Profile() {
   };
 
   return (
-    <Layout className="min-h-screen bg-gray-100 ">
+    <div className="min-h-screen  ">
       <header className="mb-8">
         <h1 className="text-3xl font-bold">My Profile</h1>
 
@@ -115,8 +115,8 @@ function Profile() {
         </p>
       </header>
       <div className="md:flex md:flex-row flex-col flex justify-between gap-6">
-        <Card className="mx-auto w-full md:max-w-1/2!">
-          <h2 className="text-xl font-semibold">Profile Information</h2>
+        <div className="mx-auto w-full md:max-w-1/2 bg-white p-4 rounded-lg">
+          <h2 className="text-xl ">Profile Information</h2>
 
           <div className="flex items-center gap-4 mt-4">
             <Avatar size={64}>{userInitial}</Avatar>
@@ -173,8 +173,8 @@ function Profile() {
               <Button onClick={handleCancel}>Cancel</Button>
             </div>
           </Form>
-        </Card>
-        <Card className="mx-auto w-full md:max-w-1/2">
+        </div>
+        <div className="mx-auto w-full md:max-w-1/2 bg-white p-4 rounded-lg">
           <h2 className="text-xl font-semibold">Password Change</h2>
 
           <Form
@@ -218,9 +218,9 @@ function Profile() {
               <Button onClick={handleCancel}>Cancel</Button>
             </div>
           </Form>
-        </Card>
+        </div>
       </div>
-    </Layout>
+    </div>
   );
 }
 

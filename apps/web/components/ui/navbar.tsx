@@ -1,11 +1,10 @@
 "use client"
 
-import { Layout, Avatar, Button } from "antd"
+import {  Avatar, Button } from "antd"
 import { MenuOutlined } from "@ant-design/icons"
 import { useAppSelector } from "@/lib/store/hooks"
 import Link from "next/link"
 
-const { Header } = Layout
 
 interface NavbarProps {
     onMenuClick?: () => void
@@ -29,7 +28,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
         menuByRole[userRole]?.href || "/reader/profile"
 
     return (
-        <Header className="bg-white! sticky top-0 z-50 border-b border-gray-200 px-2! md:px-6 flex items-center justify-between">
+        <header className="bg-white! sticky top-0 z-50 border-b border-gray-200 px-2! py-3 md:px-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
                 <Button
                     type="text"
@@ -60,7 +59,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
                     {userName[0]?.toUpperCase()}
                 </Avatar>
             </Link>
-        </Header>
+        </header>
     )
 }
 

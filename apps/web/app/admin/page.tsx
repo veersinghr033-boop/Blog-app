@@ -61,7 +61,7 @@ function page() {
     },
   ];
   return (
-    <Layout className="min-h-screen bg-white">
+    <div className="min-h-screen ">
       <header className="w-full pb-4 border-b border-gray-200">
         <div className="mb-4">
           <h2 className="text-xl md:text-2xl font-semibold">
@@ -73,7 +73,7 @@ function page() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 bg-white ">
           {cardData.map((card, index) => (
             <div
               key={index}
@@ -133,7 +133,7 @@ function page() {
 
 
 
-    </Layout>
+    </div>
   )
 }
 

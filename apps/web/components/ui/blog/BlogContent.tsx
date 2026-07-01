@@ -1,3 +1,6 @@
+
+"use client";
+
 import React from "react";
 
 
@@ -9,7 +12,7 @@ function BlogContent({ post, onOpen }: any) {
       <h2 className="font-semibold text-2xl mb-2">{post.title}</h2>
 
       <p className="line-clamp-3">
-        {post.content}
+        {post.content.slice(0, 200)}
       </p>
 
       {showReadMore && (

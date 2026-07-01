@@ -7,18 +7,17 @@ import { useAppSelector } from "@/lib/store/hooks";
 import { useRouter } from "next/navigation";
 interface ReaderBlogCardProps {
     post: any;
-    
+    userId: string;
     isSaved: boolean;
   
 }
 
 function ReaderBlogCard({
     post,
-    
+    userId,
     isSaved,
     
 }: ReaderBlogCardProps) {
-    const userId = useAppSelector((state) => state.auth.user?.id);
     const isLiked = post.likes?.users?.includes(userId);
     const isCommented = post.comments?.details?.some((comment: any) => comment.user === userId);
     const queryClient = useQueryClient();

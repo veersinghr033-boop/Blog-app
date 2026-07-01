@@ -1,6 +1,6 @@
 "use client"
 
-import { Button, Drawer, Layout, message } from "antd"
+import { Button, Drawer, message } from "antd"
 import {
     HomeOutlined,
     UsergroupAddOutlined,
@@ -16,7 +16,6 @@ import { useAppSelector, useAppDispatch } from "@/lib/store/hooks"
 import { logout } from "@/lib/store/features/authThunk"
 import { persistor } from "@/lib/store/store"
 
-const { Sider } = Layout
 
 interface SidebarProps {
     mobile?: boolean
@@ -122,11 +121,11 @@ export default function Sidebar({
     }
 
     return (
-        <Sider
-            width={250}
-            className="  bg-white! fixed! left-0 top-16 h-[calc(100vh-64px)] border-r border-gray-200"
+        <div
+            
+            className="w-64  bg-white! fixed! left-0 top-16 h-[calc(100vh-64px)] border-r border-gray-200"
         >
             <div className="p-4 h-full">{SidebarContent}</div>
-        </Sider>
+        </div>
     )
 }

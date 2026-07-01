@@ -44,7 +44,7 @@ function page() {
   //   hasNextPage,
   //   isFetchingNextPage,)
   return (
-    <Layout className="min-h-screen ">
+    <div className="min-h-screen ">
       <header className="mb-6">
         <h2 className="text-2xl font-semibold">
           Saved Blogs
@@ -56,7 +56,7 @@ function page() {
       <ReaderBlog data={blogs} hasNextPage={hasNextPage}
         isFetchingNextPage={isFetchingNextPage}
         fetchNextPage={fetchNextPage} />
-    </Layout>
+    </div>
   )
 }
 

@@ -12,9 +12,10 @@ interface BlogProps {
     hasNextPage?: boolean;
     isFetchingNextPage?: boolean;
     fetchNextPage?: () => void;
+    initialSavedData?: any[];
 }
 
-function ReaderBlog({ data, hasNextPage = false, isFetchingNextPage = false, fetchNextPage }: BlogProps) {
+function ReaderBlog({ data, hasNextPage = false, isFetchingNextPage = false, fetchNextPage, initialSavedData }: BlogProps) {
     const user = useAppSelector((state) => state.auth.user?.id);
    
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -25,6 +26,7 @@ function ReaderBlog({ data, hasNextPage = false, isFetchingNextPage = false, fet
             const response = await api.get("/blogsave/get");
             return response.data.blogs;
         },
+        initialData: initialSavedData,
         enabled: Boolean(user),
         staleTime: 5 * 60_000,
         gcTime: 10 * 60_000,
@@ -40,7 +42,7 @@ function ReaderBlog({ data, hasNextPage = false, isFetchingNextPage = false, fet
     return (
         <div >
             <VirtuosoGrid
-                style={{ height: "80vh" }}
+                style={{ height: "90vh" }}
                 totalCount={data.length}
                 endReached={() => {
                     if (hasNextPage && !isFetchingNextPage) {
@@ -55,6 +57,7 @@ function ReaderBlog({ data, hasNextPage = false, isFetchingNextPage = false, fet
                         <ReaderBlogCard
                             post={blog}
                             isSaved={savedIds.has(blog._id)}
+                            userId={user}
                         />
                     );
                 }}

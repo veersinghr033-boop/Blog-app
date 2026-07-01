@@ -1,3 +1,4 @@
+"use client";
 import { Button, Form, Input, message } from "antd";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";

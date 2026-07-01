@@ -1,7 +1,8 @@
 "use client"
 
 import { Layout } from "antd"
-import Blog from "@/components/ui/blog/Blog";
+import dynamic from "next/dynamic";
+const Blog = dynamic(() => import("@/components/ui/blog/Blog"), { ssr: false });
 import { useAppSelector } from "@/lib/store/hooks";
 import api from "@/utills/axios";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -60,14 +61,14 @@ function Blogs() {
         },
         {
             title: "Engagement",
-            value: stats?.totalLikes + stats?.totalComments ,
+            value: stats?.totalLikes + stats?.totalComments,
             desc: "Likes and comments",
             bg: "bg-yellow-100",
         },
     ];
 
     return (
-        <Layout className="min-h-screen bg-white" >
+        <div className="min-h-screen " >
             <header className="flex flex-col w-full gap-4 border-b border-gray-200 ">
                 <div>
                     <h2 className="text-2xl">My Blogs</h2>
@@ -76,7 +77,7 @@ function Blogs() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 ">
                     {cardData.map((card, index) => (
                         <div
                             key={index}
@@ -103,7 +104,7 @@ function Blogs() {
                     isFetchingNextPage={isFetchingNextPage}
                     fetchNextPage={fetchNextPage} />
             </div>
-        </Layout>
+        </div>
     );
 }
 

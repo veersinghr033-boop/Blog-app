@@ -1,4 +1,4 @@
-// import { LikeOutlined, CommentOutlined } from "@ant-design/icons";
+"use client";
 import LikeOutlined from "@ant-design/icons/LikeOutlined";
 import CommentOutlined from "@ant-design/icons/CommentOutlined";
 import React from "react";
@@ -8,18 +8,17 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 
 
-function BlogActions({ post, onOpen }: any) {
-  const user = useAppSelector((state) => state.auth.user?.id);
+function BlogActions({ post, onOpen ,userId }: any) {
   const queryClient = useQueryClient();
-  const isLiked = post.likes?.users?.includes(user);
-
+  const isLiked = post.likes?.users?.includes(userId);
+console.log(isLiked,userId)
   const isCommented = post.comments?.details?.some(
-    (comment: any) => comment.user === user,
+    (comment: any) => comment.user === userId,
   );
   const LikeMutation = useMutation({
     mutationFn: async (blogId: string) => {
       const res = await api.post(`/likes/${blogId}`, {
-        userId: user,
+        userId: userId,
       });
 
       return res.data;
@@ -31,7 +30,7 @@ function BlogActions({ post, onOpen }: any) {
       });
 
       queryClient.invalidateQueries({
-        queryKey: ["blogData", user],
+        queryKey: ["blogData", userId],
       });
     },
 

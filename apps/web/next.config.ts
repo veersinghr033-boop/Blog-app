@@ -1,15 +1,14 @@
-import type { NextConfig } from "next";
+import bundleAnalyzer from "@next/bundle-analyzer";
 
-const nextConfig: NextConfig = {
-  reactStrictMode: true,
-  poweredByHeader: false,
-  experimental: {
-    optimizePackageImports: ["antd", "lucide-react"],
-  },
-};
-
-const withBundleAnalyzer = require("@next/bundle-analyzer")({
+const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
-export default withBundleAnalyzer(nextConfig);
+export default withBundleAnalyzer({
+  experimental: {
+    optimizePackageImports: [
+      "antd",
+      "@ant-design/icons",
+    ],
+  },
+});
