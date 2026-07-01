@@ -4,9 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { changePassword, updateProfile } from "@/lib/store/features/authThunk";
 
-import { Form, Card, Avatar, Input, Button, message } from "antd";
+import {  Avatar, message } from "antd";
 
-const { TextArea } = Input;
 
 function Profile() {
   const dispatch = useAppDispatch() as any;
@@ -130,94 +129,50 @@ function Profile() {
             </div>
           </div>
 
-          <Form layout="vertical" className="mt-6" onFinish={handleSubmit}>
-            <Form.Item label="userName">
-              <Input
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-                placeholder="Enter your full name"
-                required
-              />
-            </Form.Item>
+          <form className="mt-6" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">userName</label>
+              <input value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="Enter your full name" required className="mt-1 block w-full border p-2 rounded" />
+            </div>
 
-            <Form.Item label="Email">
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                disabled
-              />
-            </Form.Item>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" disabled className="mt-1 block w-full border p-2 rounded bg-gray-50" />
+            </div>
 
-            <Form.Item label="Bio">
-              <TextArea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Enter your bio"
-                rows={2}
-                required
-              />
-            </Form.Item>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Bio</label>
+              <textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Enter your bio" rows={2} required className="mt-1 block w-full border p-2 rounded" />
+            </div>
 
             <div className="flex gap-4">
-              <Button
-                type="primary"
-                htmlType="submit"
-                className="bg-black!"
-                loading={loading}
-              >
-                Save Changes
-              </Button>
+              <button type="submit" className="bg-black text-white px-4 py-2 rounded" disabled={loading}>Save Changes</button>
 
-              <Button onClick={handleCancel}>Cancel</Button>
+              <button type="button" onClick={handleCancel} className="px-4 py-2 border rounded">Cancel</button>
             </div>
-          </Form>
+          </form>
         </div>
         <div className="mx-auto w-full md:max-w-1/2 bg-white p-4 rounded-lg">
           <h2 className="text-xl font-semibold">Password Change</h2>
 
-          <Form
-            layout="vertical"
-            className="mt-6"
-            onFinish={handlePasswordSubmit}
-          >
-            <Form.Item label="Current Password">
-              <Input
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Enter current password"
-              />
-            </Form.Item>
-            <Form.Item label="New Password">
-              <Input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new password"
-              />
-            </Form.Item>
-            <Form.Item label="Confirm New Password">
-              <Input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm new password"
-              />
-            </Form.Item>
-            <div className="flex gap-4">
-              <Button
-                type="primary"
-                htmlType="submit"
-                className="bg-black!"
-                loading={loading}
-              >
-                Change Password
-              </Button>
-              <Button onClick={handleCancel}>Cancel</Button>
+          <form className="mt-6" onSubmit={(e) => { e.preventDefault(); handlePasswordSubmit(); }}>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Current Password</label>
+              <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Enter current password" className="mt-1 block w-full border p-2 rounded" />
             </div>
-          </Form>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">New Password</label>
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Enter new password" className="mt-1 block w-full border p-2 rounded" />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Confirm New Password</label>
+              <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password" className="mt-1 block w-full border p-2 rounded" />
+            </div>
+            <div className="flex gap-4">
+              <button type="submit" className="bg-black text-white px-4 py-2 rounded" disabled={loading}>Change Password</button>
+              <button type="button" onClick={handleCancel} className="px-4 py-2 border rounded">Cancel</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

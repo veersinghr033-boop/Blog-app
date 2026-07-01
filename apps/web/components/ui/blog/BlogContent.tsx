@@ -9,10 +9,10 @@ function BlogContent({ post, onOpen }: any) {
 
   return (
     <>
-      <h2 className="font-semibold text-2xl mb-2">{post.title}</h2>
+      <h2 className="font-normal text-2xl mb-2">{post.title}</h2>
 
       <p className="line-clamp-3">
-        {post.content.slice(0, 200)}
+        {post.content.slice(0, 400)}
       </p>
 
       {showReadMore && (

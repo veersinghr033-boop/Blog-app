@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 
@@ -56,9 +55,7 @@ export default function MessageChat({
             <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6 text-center text-gray-500">
               <div>Select a user or group to start chatting.</div>
               {mobile && onOpenSidebar ? (
-                <Button type="primary" className="bg-black!" onClick={onOpenSidebar}>
-                  Open chats
-                </Button>
+                <button className="bg-black text-white px-3 py-1 rounded" onClick={onOpenSidebar}>Open chats</button>
               ) : null}
             </div>
           )}

@@ -1,7 +1,5 @@
 "use client"
 
-import {  Avatar, Button } from "antd"
-import { MenuOutlined } from "@ant-design/icons"
 import { useAppSelector } from "@/lib/store/hooks"
 import Link from "next/link"
 
@@ -28,14 +26,15 @@ function Navbar({ onMenuClick }: NavbarProps) {
         menuByRole[userRole]?.href || "/reader/profile"
 
     return (
-        <header className="bg-white! sticky top-0 z-50 border-b border-gray-200 px-2! py-3 md:px-6 flex items-center justify-between">
+        <header className="bg-white sticky top-0 z-50 border-b border-gray-200 px-2 py-3 md:px-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
-                <Button
-                    type="text"
-                    icon={<MenuOutlined />}
-                    className="md:hidden!"
+                <button
+                    className="md:hidden text-xl"
                     onClick={onMenuClick}
-                />
+                    aria-label="Open menu"
+                >
+                    ☰
+                </button>
 
                 <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
                     B
@@ -55,9 +54,9 @@ function Navbar({ onMenuClick }: NavbarProps) {
                     {userName}
                 </span>
 
-                <Avatar className="bg-black! ">
+                <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center">
                     {userName[0]?.toUpperCase()}
-                </Avatar>
+                </div>
             </Link>
         </header>
     )

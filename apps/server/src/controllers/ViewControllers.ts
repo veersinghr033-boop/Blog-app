@@ -7,7 +7,7 @@ export const addView = async (req: Request, res: Response) => {
   try {
     const userId = (req as Request & { user?: { id: string } }).user?.id;
     const { blogId } = req.params as { blogId: string };
-    console.log(userId, blogId)
+    // suppressed debug log
     if (!blogId || !userId) {
       return res.status(400).json({
         message: "Missing required fields",
@@ -38,7 +38,7 @@ export const addView = async (req: Request, res: Response) => {
       message: "View added successfully",
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       message: "Internal server error",
     });

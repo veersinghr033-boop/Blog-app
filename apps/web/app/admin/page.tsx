@@ -1,8 +1,9 @@
 "use client"
 
-import { Layout, Table } from "antd";
-import { useQuery } from "@tanstack/react-query";
+import {  Table } from "antd";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
+import { useMemo } from "react";
 
 interface UserType {
   key: string
@@ -10,7 +11,7 @@ interface UserType {
   email: string
   role: string
   status: string
-  joined: string
+  createdAt: Date
 }
 
 function page() {
@@ -23,22 +24,37 @@ function page() {
   })  
 
   const {
-    data: users = [],
+    data,
     isLoading,
-  } = useQuery<UserType[]>({
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["users"],
-    queryFn: async () => {
-      const response = await api.get("/users")
+    queryFn: async ({ pageParam = null }) => {
+      const res = await api.get("/users", {
+        params: {
+          before: pageParam,
+        },
+      });
 
-      return response.data.map((user: any) => ({
-        key: user._id,
-        name: user.userName,
-        email: user.email,
-        role: user.role,
-        joined: new Date(user.createdAt).toLocaleDateString(),
-      }))
+      return res.data;
     },
-  })
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => {
+      return lastPage.hasMore
+        ? lastPage.nextCursor
+        : undefined;
+    },
+  });
+
+  const users = useMemo(() => {
+    return data?.pages.flatMap((page) => page.users) ?? [];
+  }, [data]);
+const  joinAt = (user: UserType) => {
+  const date = new Date(user.createdAt);
+  return date.toLocaleDateString();
+} 
 
   const cardData = [
     {
@@ -101,12 +117,24 @@ function page() {
           dataSource={users}
           rowKey="key"
           scroll={{ x: 800 }}
-          pagination={{ pageSize: 5 }}
+          pagination={{
+            pageSize: 5,
+            onChange: (page) => {
+              const totalLoadedPages = data?.pages.length ?? 0;
+              if (
+                page > totalLoadedPages &&
+                hasNextPage &&
+                !isFetchingNextPage
+              ) {
+                fetchNextPage();
+              }
+            },
+          }}
           columns={[
             {
               title: "Name",
-              dataIndex: "name",
-              key: "name",
+              dataIndex: "userName",
+              key: "userName",
             },
             {
               title: "Email",
@@ -121,9 +149,9 @@ function page() {
 
             {
               title: "Joined At",
-              dataIndex: "joined",
-              key: "joined",
-            },
+              dataIndex: "createdAt",
+              key: "createdAt",
+              render: (value: Date) => joinAt({ createdAt: value } as UserType),}
         
           ]}
         />

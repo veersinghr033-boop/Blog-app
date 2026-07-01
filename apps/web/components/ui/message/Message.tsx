@@ -1,6 +1,6 @@
 "use client";
 
-import { Drawer } from "antd";
+import MobileDrawer from "@/components/ui/MobileDrawer";
 import { useState, useEffect } from "react";
 import { useAppSelector } from "@/lib/store/hooks";
 
@@ -83,22 +83,17 @@ export default function Message() {
         />
       </div>
 
-      <Drawer
-        placement="left"
-        open={isMobile && sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        width="80%"
-        closable
-        bodyStyle={{ padding: 0 }}
-      >
-        <UserSidebar
-          selectedUser={selectedUser}
-          setSelectedUser={handleSelectUser}
-          notifications={userStatus.notifications}
-          statuses={userStatus.statuses}
-          mobile
-        />
-      </Drawer>
+      {isMobile && (
+        <MobileDrawer open={sidebarOpen} onClose={() => setSidebarOpen(false)}>
+          <UserSidebar
+            selectedUser={selectedUser}
+            setSelectedUser={handleSelectUser}
+            notifications={userStatus.notifications}
+            statuses={userStatus.statuses}
+            mobile
+          />
+        </MobileDrawer>
+      )}
 
       <div className="flex min-w-0 flex-1">
         <MessageChat

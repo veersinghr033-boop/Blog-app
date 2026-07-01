@@ -36,4 +36,7 @@ const messageSchema = new mongoose.Schema({
   },
 });
 
+// Add indexes to speed up chat-based queries
+messageSchema.index({ chatId: 1, timestamp: -1 });
+
 export default mongoose.model("Message", messageSchema);

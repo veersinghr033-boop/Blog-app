@@ -1,6 +1,4 @@
 "use client"
-
-import { Layout } from "antd"
 import dynamic from "next/dynamic";
 const Blog = dynamic(() => import("@/components/ui/blog/Blog"), { ssr: false });
 import { useAppSelector } from "@/lib/store/hooks";
@@ -10,7 +8,7 @@ import { useMemo } from "react"
 
 function Blogs() {
     const userId = useAppSelector((state) => state.auth.user?.id);
-
+    const role = useAppSelector((state) => state.auth.user?.role);
     const {
         data,
         fetchNextPage,
@@ -61,7 +59,7 @@ function Blogs() {
         },
         {
             title: "Engagement",
-            value: stats?.totalLikes + stats?.totalComments,
+            value: (stats?.totalLikes ?? 0) + (stats?.totalComments ?? 0),
             desc: "Likes and comments",
             bg: "bg-yellow-100",
         },
@@ -102,7 +100,8 @@ function Blogs() {
 
                 <Blog data={blog} hasNextPage={hasNextPage}
                     isFetchingNextPage={isFetchingNextPage}
-                    fetchNextPage={fetchNextPage} />
+                    fetchNextPage={fetchNextPage} userId={userId} role={role}
+                />
             </div>
         </div>
     );

@@ -8,6 +8,9 @@ import { Request, Response } from "express";
 
 export const getAllBlogs = async (req: Request, res: Response) => {
   try {
+
+    const userId = (req as Request & { user?: { id: string } }).user?.id;
+
     const before = req.query.before as string | undefined;
     const limit = 10;
 
@@ -78,36 +81,45 @@ export const getAllBlogs = async (req: Request, res: Response) => {
 
           likes: {
             count: { $size: "$likesDetails" },
-            users: {
-              $map: {
-                input: "$likesDetails",
-                as: "like",
-                in: "$$like.user",
+          },
+
+          isLiked: {
+            $in: [
+              new mongoose.Types.ObjectId(userId),
+              {
+                $map: {
+                  input: "$likesDetails",
+                  as: "like",
+                  in: "$$like.user",
+                },
               },
-            },
+            ],
           },
 
           comments: {
             count: { $size: "$commentsDetails" },
-            details: "$commentsDetails",
           },
 
+          isCommented: {
+            $in: [
+              new mongoose.Types.ObjectId(userId),
+              {
+                $map: {
+                  input: "$commentsDetails",
+                  as: "comment",
+                  in: "$$comment.user",
+                },
+              },
+            ],
+          },
           views: {
             count: { $size: "$viewsDetails" },
-            users: {
-              $map: {
-                input: "$viewsDetails",
-                as: "view",
-                in: "$$view.userId",
-              },
-            },
           },
 
-          saveAs: 1,
           createdAt: 1,
           updatedAt: 1,
         },
-      },
+      }
     );
 
     const blogs = await Blog.aggregate(pipeline);
@@ -117,6 +129,11 @@ export const getAllBlogs = async (req: Request, res: Response) => {
     if (hasMore) {
       blogs.pop();
     }
+
+    const nextCursor = hasMore
+      ? blogs[blogs.length - 1]?.createdAt
+      : null;
+
     const Blogs = await Blog.find();
     const totalBlogs = Blogs.length;
     const totalLikes = Blogs.reduce(
@@ -144,7 +161,7 @@ export const getAllBlogs = async (req: Request, res: Response) => {
       nextCursor: hasMore ? blogs[blogs.length - 1].createdAt : null,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
     res.status(500).json({
       message: "Failed to retrieve blogs",
@@ -154,6 +171,8 @@ export const getAllBlogs = async (req: Request, res: Response) => {
 export const getBlogById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
+    const userId = (req as Request & { user?: { id: string } }).user?.id;
+
     const before = req.query.before as string | undefined; const limit = 5;
 
     const pipeline: mongoose.PipelineStage[] = [];
@@ -224,36 +243,45 @@ export const getBlogById = async (req: Request, res: Response) => {
 
           likes: {
             count: { $size: "$likesDetails" },
-            users: {
-              $map: {
-                input: "$likesDetails",
-                as: "like",
-                in: "$$like.user",
+          },
+
+          isLiked: {
+            $in: [
+              new mongoose.Types.ObjectId(userId),
+              {
+                $map: {
+                  input: "$likesDetails",
+                  as: "like",
+                  in: "$$like.user",
+                },
               },
-            },
+            ],
           },
 
           comments: {
             count: { $size: "$commentsDetails" },
-            details: "$commentsDetails",
           },
 
+          isCommented: {
+            $in: [
+              new mongoose.Types.ObjectId(userId),
+              {
+                $map: {
+                  input: "$commentsDetails",
+                  as: "comment",
+                  in: "$$comment.user",
+                },
+              },
+            ],
+          },
           views: {
             count: { $size: "$viewsDetails" },
-            users: {
-              $map: {
-                input: "$viewsDetails",
-                as: "view",
-                in: "$$view.userId",
-              },
-            },
           },
 
-          saveAs: 1,
           createdAt: 1,
           updatedAt: 1,
         },
-      },
+      }
     );
     const blog = await Blog.aggregate(pipeline);
     const blogs = await Blog.find({ author: id });
@@ -295,7 +323,7 @@ export const getBlogById = async (req: Request, res: Response) => {
       nextCursor: hasMore ? blog[blog.length - 1].createdAt : null,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       message: "Failed to retrieve blog",
     });
@@ -311,13 +339,14 @@ export const createBlog = async (req: Request, res: Response) => {
       blog: newBlog,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ message: "Failed to create blog" });
   }
 };
 
 export const deleteBlog = async (req: Request, res: Response) => {
   try {
+
     const { id } = req.params;
     const deletedBlog = await Blog.findByIdAndDelete(id);
     if (deletedBlog) {
@@ -330,7 +359,7 @@ export const deleteBlog = async (req: Request, res: Response) => {
     }
     res.status(200).json({ message: "Blog deleted successfully" });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ message: "Failed to delete blog" });
   }
 };
@@ -338,6 +367,8 @@ export const deleteBlog = async (req: Request, res: Response) => {
 export const findByBlogId = async (req: Request, res: Response) => {
   try {
     const { blogId } = req.params as { blogId: string };
+    const userId = (req as Request & { user?: { id: string } }).user?.id;
+
     const pipelines = [
       {
         $match: { _id: new mongoose.Types.ObjectId(blogId) },
@@ -389,36 +420,45 @@ export const findByBlogId = async (req: Request, res: Response) => {
 
           likes: {
             count: { $size: "$likesDetails" },
-            users: {
-              $map: {
-                input: "$likesDetails",
-                as: "like",
-                in: "$$like.user",
+          },
+
+          isLiked: {
+            $in: [
+              new mongoose.Types.ObjectId(userId),
+              {
+                $map: {
+                  input: "$likesDetails",
+                  as: "like",
+                  in: "$$like.user",
+                },
               },
-            },
+            ],
           },
 
           comments: {
             count: { $size: "$commentsDetails" },
-            details: "$commentsDetails",
           },
 
+          isCommented: {
+            $in: [
+              new mongoose.Types.ObjectId(userId),
+              {
+                $map: {
+                  input: "$commentsDetails",
+                  as: "comment",
+                  in: "$$comment.user",
+                },
+              },
+            ],
+          },
           views: {
             count: { $size: "$viewsDetails" },
-            users: {
-              $map: {
-                input: "$viewsDetails",
-                as: "view",
-                in: "$$view.userId",
-              },
-            },
           },
 
-          saveAs: 1,
           createdAt: 1,
           updatedAt: 1,
         },
-      },
+      }
     ];
     const blog = await Blog.aggregate(pipelines);
     if (blog.length === 0) {
@@ -429,7 +469,7 @@ export const findByBlogId = async (req: Request, res: Response) => {
       blog: blog[0],
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ message: "Failed to retrieve blog" });
   }
 };

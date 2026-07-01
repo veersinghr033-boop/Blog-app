@@ -8,10 +8,9 @@ export const SaveBlog = async (
 ): Promise<void> => {
   const { blogId } = req.body;
   const userId = (req as Request & { user?: { id: string } }).user?.id;
-  console.log(userId, blogId);
   try {
     const existingSave = await BlogSave.findOne({ user: userId, blog: blogId });
-    console.log(existingSave);
+    // intentionally not logging existingSave for performance
     if (existingSave) {
       await BlogSave.findByIdAndDelete(existingSave._id);
       res.status(200).json({ message: "Blog unsaved successfully" });
@@ -23,7 +22,7 @@ export const SaveBlog = async (
     await newSave.save();
     res.status(201).json({ newSave, message: "Blog saved successfully" });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -160,7 +159,7 @@ export const getSavedBlogs = async (req: Request, res: Response) => {
       message: "Saved blogs retrieved successfully",
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };

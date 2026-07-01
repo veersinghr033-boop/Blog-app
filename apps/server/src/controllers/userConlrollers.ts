@@ -4,17 +4,42 @@ import Chat from "../models/chatModel.ts";
 import Group from "../models/GroupModel.ts";
 import Message from "../models/message.ts";
 import { Request, Response } from "express";
-
 export const getAllUsers = async (req: Request, res: Response) => {
     const userId = (req as Request & { user?: { id: string } }).user?.id;
+    const before = req.query.before as string | undefined;
+    const limit = 6;
+
     try {
-        const users = await User.find({
+        const query: any = {
             _id: { $ne: userId },
             role: { $ne: "admin" },
-        }).select("-password");
-        res.status(200).json(users);
+        };
+
+        if (before) {
+            query.createdAt = {
+                $lt: new Date(before),
+            };
+        }
+
+        const users = await User.find(query)
+            .sort({ createdAt: -1 })
+            .limit(limit + 1)
+            .select("-password")
+            .lean();
+
+        const hasMore = users.length > limit;
+
+        const result = hasMore ? users.slice(0, limit) : users;
+
+        res.status(200).json({
+            users: result,
+            hasMore,
+            nextCursor: hasMore
+                ? result[result.length - 1].createdAt
+                : null,
+        });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).json({ message: "Failed to fetch users" });
     }
 };
@@ -28,7 +53,7 @@ export const getUserById = async (req: Request, res: Response) => {
         }
         res.status(200).json(user);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).json({ message: "Failed to fetch user" });
     }
 };
@@ -39,9 +64,9 @@ export const updateUserProfile = async (req: Request, res: Response) => {
 
     try {
         if (!userName && !email && bio === undefined) {
-          return res
-            .status(400)
-            .json({ message: "No profile fields provided" });
+            return res
+                .status(400)
+                .json({ message: "No profile fields provided" });
         }
 
         if (email) {
@@ -70,7 +95,7 @@ export const updateUserProfile = async (req: Request, res: Response) => {
             user: updatedUser,
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Failed to update profile" });
     }
 };
@@ -99,7 +124,7 @@ export const changeUserPassword = async (req: Request, res: Response) => {
 
         return res.status(200).json({ message: "Password updated successfully" });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Failed to update password" });
     }
 };
@@ -113,39 +138,41 @@ export const deleteUser = async (req: Request, res: Response) => {
         }
         res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).json({ message: "Failed to delete user" });
     }
 };
 
-export const emitSortedUsers = async(io, currentUserId) => {
+export async function emitSortedUsers(io: any, currentUserId?: string) {
+    if (!currentUserId) {
+        return [];
+    }
     const users = await User.find({
         _id: { $ne: currentUserId },
         role: { $ne: "admin" },
-    });
+    }).select("-password").lean();
 
     const chats = await Chat.find({
         participants: currentUserId,
-    });
+    }).lean();
 
     const groups = await Group.find({
         chatId: { $in: chats.map((c) => c._id) },
-    });
+    }).lean();
 
     let result = [];
 
     const groupEntries = await Promise.all(
-        groups.map(async(group) => {
+        groups.map(async (group) => {
             const groupChat = chats.find(
                 (chat) => chat._id.toString() === group.chatId?.toString(),
             );
 
-            const messages = await Message.find({
+            const unreadCount = await Message.countDocuments({
                 chatId: group.chatId,
                 readBy: { $ne: currentUserId },
                 senderId: { $ne: currentUserId },
             });
-            const unreadCount = Array.isArray(messages) ? messages.length : 0;
 
             return {
                 id: group._id,
@@ -161,20 +188,25 @@ export const emitSortedUsers = async(io, currentUserId) => {
 
     result.push(...groupEntries);
 
+    const seenUserIds = new Set<string>();
     for (const chat of chats) {
         if (chat.isGroupChat) continue;
 
-        const messages = await Message.find({
+        const unreadCount = await Message.countDocuments({
             chatId: chat._id,
             readBy: { $ne: currentUserId },
             senderId: { $ne: currentUserId },
         });
-        const unreadCount = Array.isArray(messages) ? messages.length : 0;
 
         const otherUserId = chat.participants.find(
             (id) => id && id.toString() !== currentUserId.toString(),
         );
 
+        if (!otherUserId) continue;
+
+        const otherUserIdStr = otherUserId.toString();
+        if (seenUserIds.has(otherUserIdStr)) continue;
+        seenUserIds.add(otherUserIdStr);
         if (!otherUserId) continue;
 
         const user = users.find((u) => u._id.toString() === otherUserId.toString());
@@ -240,21 +272,20 @@ export const getUsersSorted = async (req: Request, res: Response) => {
 
 
 export const saveFcmToken = async (req: Request, res: Response) => {
-  try {
-      const userId = (req as Request & { user?: { id: string } }).user?.id;
-    const { token } = req.body;
+    try {
+        const userId = (req as Request & { user?: { id: string } }).user?.id;
+        const { token } = req.body;
 
-    await User.findByIdAndUpdate(userId, {
-      fcmToken: token,
-    });
-    return res.json({
-      success: true,
-    });
-  } catch (error) {
-    return res.json({
-      success: false,
-        error: "Failed to save FcmToken",
-    });
-  }
+        await User.findByIdAndUpdate(userId, {
+            fcmToken: token,
+        });
+        return res.json({
+            success: true,
+        });
+    } catch (error) {
+        return res.json({
+            success: false,
+            error: "Failed to save FcmToken",
+        });
+    }
 };
- 

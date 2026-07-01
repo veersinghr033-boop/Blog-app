@@ -1,10 +1,7 @@
 "use client";
-
-import { Typography, Button } from "antd";
-import { CloseOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {  useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 
 import api from "@/utills/axios";
@@ -28,7 +25,6 @@ import BlogActions from "./BlogActions";
 
 import ReportModal from "../Report";
 
-const { Title, Text } = Typography;
 
 interface ReadBlogProps {
     blog: any;
@@ -95,19 +91,15 @@ function ReadBlog({ blog }: ReadBlogProps) {
     if (!blog) return null;
 
     return (
-        <div className="bg-white rounded-3xl shadow-xl border border-gray-200 p-6 max-w-full mx-auto ">
+        <div className="bg-white rounded shadow-xl border border-gray-200 p-6 max-w-full mx-auto overflow-y-auto" style={{ maxHeight: "90vh" }}>
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
                 <div>
-                    <title >Blog Details</title>
+                    <h3 className="text-lg font-semibold">Blog Details</h3>
 
-                    {blog.title && <Text type="secondary">{blog.title}</Text>}
+                    {blog.title && <div className="text-gray-600">{blog.title}</div>}
                 </div>
 
-                <Button
-                    type="text"
-                    icon={<CloseOutlined />}
-                    onClick={() => router.back()}
-                />
+                <button className="text-gray-600 px-2 py-1" onClick={() => router.back()} aria-label="close">✕</button>
             </div>
 
             <div className="flex flex-col gap-4">

@@ -7,14 +7,17 @@ import ReadBlog from "@/components/ui/blogModal/BlogModal";
 
 export default function BlogDetailsPage() {
     const params = useParams();
+    const rawId = params?.id;
+    const blogId = Array.isArray(rawId) ? rawId[0] : rawId ?? "";
 
-    const { data: blog , error  } = useQuery({
-        queryKey: ["blog", params.id],
+    const { data: blog, error } = useQuery({
+        queryKey: ["blog", blogId],
         queryFn: async () => {
+            if (!blogId) throw new Error("Missing blog id");
             const res = await api.get(
-                `/blogs/find/${params.id}`
+                `/blogs/find/${String(blogId)}`
             );
-           console.log(res.data);
+            console.log(res.data);
             return res.data.blog;
         },
     });

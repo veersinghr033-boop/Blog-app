@@ -1,6 +1,10 @@
 "use client"
 
-import { Button, Drawer, message } from "antd"
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import { useAppSelector, useAppDispatch } from "@/lib/store/hooks"
+import { logout } from "@/lib/store/features/authThunk"
+import { persistor } from "@/lib/store/store"
 import {
     HomeOutlined,
     UsergroupAddOutlined,
@@ -8,14 +12,8 @@ import {
     EditOutlined,
     LoginOutlined,
     AppstoreOutlined,
-    MessageOutlined 
+    MessageOutlined
 } from "@ant-design/icons"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { useAppSelector, useAppDispatch } from "@/lib/store/hooks"
-import { logout } from "@/lib/store/features/authThunk"
-import { persistor } from "@/lib/store/store"
-
 
 interface SidebarProps {
     mobile?: boolean
@@ -35,7 +33,7 @@ const menuByRole: Record<string, MenuItem[]> = {
         { label: "Blogs", href: "/admin/blogs", icon: <BookOutlined /> },
         { label: "Reports", href: "/admin/reports", icon: <AppstoreOutlined /> },
     ],
-   
+
     reader: [
         { label: "Home", href: "/reader", icon: <HomeOutlined /> },
         { label: "Saved Blogs", href: "/reader/save", icon: <BookOutlined /> },
@@ -45,6 +43,7 @@ const menuByRole: Record<string, MenuItem[]> = {
         { label: "Messages", href: "/reader/messages", icon: <MessageOutlined /> }
     ],
 }
+
 
 export default function Sidebar({
     mobile = false,
@@ -61,8 +60,12 @@ export default function Sidebar({
         const resultAction: any = await dispatch(logout() as any)
 
         if (logout.fulfilled.match(resultAction)) {
-            message.success("Logout successful")
-            await persistor.purge()
+            // lightweight notification
+            try {
+                await persistor.purge()
+            } catch (e) {
+                // ignore
+            }
             router.push("/login")
         }
     }
@@ -78,16 +81,15 @@ export default function Sidebar({
                             key={item.href}
                             href={item.href}
                             onClick={onClose}
-                            className="block mb-2"
+                            className="block mb-2 w-11/12"
                         >
                             <div
                                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-700
                                 ${active
                                         ? "bg-gray-700 text-white"
                                         : "hover:bg-gray-100"
-                                    }`}
-                            >
-                                {item.icon}
+                                    }`}>
+                                <span className="w-5">{item.icon}</span>
                                 {item.label}
                             </div>
                         </Link>
@@ -95,36 +97,24 @@ export default function Sidebar({
                 })}
             </div>
 
-            <Button
-                danger
-                icon={<LoginOutlined />}
+            <button
+                className="w-11/12 bg-red-500 text-white px-3 py-2 rounded"
                 onClick={handleLogout}
-                className="w-full"
             >
                 Logout
-            </Button>
+            </button>
         </div>
     )
 
+
     if (mobile) {
         return (
-            <Drawer
-                title="Menu"
-                placement="left"
-                open={open}
-                onClose={onClose}
-                width={250}
-            >
-                {SidebarContent}
-            </Drawer>
+            <div className="w-64 h-full">{SidebarContent}</div>
         )
     }
 
     return (
-        <div
-            
-            className="w-64  bg-white! fixed! left-0 top-16 h-[calc(100vh-64px)] border-r border-gray-200"
-        >
+        <div className="w-64 bg-white fixed left-0 top-16 h-[calc(100vh-64px)] border-r border-gray-200">
             <div className="p-4 h-full">{SidebarContent}</div>
         </div>
     )

@@ -1,12 +1,10 @@
 "use client";
 
-import { Layout, Button, Badge } from "antd";
 import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import { useAppSelector } from "@/lib/store/hooks";
 import AddGroup from "./addGroup";
-import {  TeamOutlined } from "@ant-design/icons";
-
+import { TeamOutlined } from "@ant-design/icons"
 
 interface UserType {
   id: number;
@@ -24,8 +22,13 @@ export default function UserSidebar({
   const socketRef = useRef<any>(null);
   const [sortedUsers, setSortedUsers] = useState<UserType[]>([]);
   const [openAddGroup, setOpenAddGroup] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
   const userName = useAppSelector((state) => state.auth.user?.userName);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   const userId = useAppSelector((state) => state.auth.user?.id);
 
@@ -54,22 +57,16 @@ export default function UserSidebar({
     }));
 
   return (
-    <Layout.Sider
-      width={mobile ? "100%" : 250}
-      className={`flex h-full min-h-0 flex-col  bg-white! shadow-sm border border-gray-200 border-r-0 ${mobile ? "rounded-none" : ""}`}
+    <div
+      style={{ width: mobile ? "100%" : 250 }}
+      className={`flex h-full min-h-0 flex-col bg-white shadow-sm border border-gray-200 border-r-0 ${mobile ? "rounded-none" : ""}`}
     >
       <div className="flex items-center justify-between gap-2 border-b border-gray-300 px-4 py-3">
-        <div className="overflow-x-auto text-base font-semibold capitalize">
-          Welcome to, {userName || "User"}
+        <div className="overflow-x-auto text-base font-semibold capitalize w-1/2">
+          {hydrated ? `Welcome to, ${userName || "User"}` : "Welcome to, User"}
         </div>
 
-        <Button
-          type="primary"
-          className="bg-black!"
-          onClick={() => setOpenAddGroup(true)}
-        >
-          Add Group
-        </Button>
+        <button className="bg-black text-white px-2.5 py-1 rounded" onClick={() => setOpenAddGroup(true)}>Add Group</button>
       </div>
 
       <div className="p-4">
@@ -83,7 +80,6 @@ export default function UserSidebar({
 
       <div className="z-1 flex-1 h-[82%] overflow-y-auto">
         {filteredUsers.map((item: any) => {
-          console.log()
           const isGroup = item.type === "group";
           const chatKey = item.id || item._id;
           const status = !isGroup ? statuses[item.id] || "offline" : null;
@@ -93,41 +89,34 @@ export default function UserSidebar({
             <button
               key={chatKey}
               onClick={() => setSelectedUser(item)}
-              className={`w-full px-4 py-4 flex items-center gap-3 border-y border-gray-200 hover:bg-slate-50
-                ${isSelected ? "bg-slate-100" : ""}`}
+              className={`w-full px-4 py-4 flex items-center gap-3 border-y border-gray-200 hover:bg-slate-50 ${isSelected ? "bg-slate-100" : ""}`}
             >
-              <Badge count={item.unreadCount} overflowCount={99}>
+              <div className="relative">
                 <div className="relative h-12 w-12 rounded-full bg-black text-white flex items-center justify-center capitalize font-semibold">
                   {isGroup ? <TeamOutlined /> : item.name?.[0]}
                 </div>
+                {item.unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">{item.unreadCount > 99 ? '99+' : item.unreadCount}</span>
+                )}
+
                 {!isGroup && (
                   <span
-                    className={`absolute bottom-0 right-0 w-3 h-3 rounded-full
-                      ${status === "online"
-                        ? "bg-green-500"
-                        : status === "away"
-                          ? "bg-yellow-400"
-                          : "bg-red-500"
-                      }`}
+                    className={`absolute bottom-0 right-0 w-3 h-3 rounded-full ${status === "online" ? "bg-green-500" : status === "away" ? "bg-yellow-400" : "bg-red-500"}`}
                   />
                 )}
-              </Badge>
-
-
+              </div>
 
               <div className="text-left">
                 <div className="font-medium capitalize">{item.name}</div>
 
-                <div className="text-sm text-gray-500">
-                  {isGroup ? `Group` : "User"}
-                </div>
+                <div className="text-sm text-gray-500">{isGroup ? `Group` : "User"}</div>
               </div>
             </button>
           );
         })}
-      </div >
+      </div>
 
       <AddGroup open={openAddGroup} onClose={() => setOpenAddGroup(false)} />
-    </Layout.Sider >
+    </div>
   );
 }

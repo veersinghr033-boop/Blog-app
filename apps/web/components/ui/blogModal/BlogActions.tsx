@@ -1,10 +1,10 @@
 "use client";
-import { Button, Popconfirm, message } from "antd";
-import { LikeOutlined, CommentOutlined } from "@ant-design/icons";
+import { message } from "antd"
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useRouter } from "next/navigation";
+import { LikeOutlined, CommentOutlined } from "@ant-design/icons";
 
 
 interface Props {
@@ -100,20 +100,19 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
                     {blog?.createdAt && new Date(blog.createdAt).toLocaleDateString()}
                 </p>
                 <p
-                    className={`text-sm cursor-pointer hover:text-blue-500!  ${isLiked ? "text-blue-500!" : "text-gray-500!"
+                    className={`text-sm cursor-pointer hover:text-blue-500  ${isLiked ? "text-blue-500" : "text-gray-500"
                         }`}
                     onClick={() => handleLike(blog._id)}
                 >
-                    {blog.likes?.count || 0} <LikeOutlined />
+                  <LikeOutlined/>  {blog.likes?.count || 0} 
                 </p>
 
                 <p
-                    className={`flex items-center gap-1 text-sm cursor-pointer hover:text-green-500! ${isCommented ? "text-green-500!" : "text-gray-500!"
+                    className={`flex items-center gap-1 text-sm cursor-pointer hover:text-green-500 ${isCommented ? "text-green-500" : "text-gray-500"
                         }`}
                     onClick={() => onOpen(blog)}
                 >
-                    {blog.comments?.count || 0}
-                    <CommentOutlined />
+                   <CommentOutlined/> {blog.comments?.count || 0} 
                 </p>
                 <p className="text-sm text-gray-500">
                     {blog.views && blog.views.length > 0 ? blog.views[0].count : 0} Views
@@ -121,20 +120,10 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
             </div>
 
             {isAuthor ? (
-                <Popconfirm
-                    title="Delete Blog"
-                    onConfirm={handleDelete}
-                    okText="Yes"
-                    cancelText="No"
-                >
-                    <Button danger type="primary" loading={deleteMutation.isPending}>
-                        Delete
-                    </Button>
-                </Popconfirm>
+                <button onClick={handleDelete} disabled={deleteMutation.isPending} className="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
             ) : (
-                <Button
-                    danger
-                    type="primary"
+                <button
+                    className="bg-red-600 text-white px-3 py-1 rounded"
                     onClick={() => onReport()}
                     disabled={alreadyReported}
                     title={
@@ -144,7 +133,7 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
                     }
                 >
                     {alreadyReported ? "Reported" : "Report"}
-                </Button>
+                </button>
             )}
         </div>
     );

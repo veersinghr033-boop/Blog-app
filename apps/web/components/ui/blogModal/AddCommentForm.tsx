@@ -1,11 +1,10 @@
 
 "use client";
-import { Form, Input, Button, message } from "antd";
+import {  message } from "antd";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 
 export default function AddCommentForm({ blogId }: { blogId: string }) {
-    const [form] = Form.useForm();
 
     const queryClient = useQueryClient();
     const commentMutation = useMutation({
@@ -16,7 +15,6 @@ export default function AddCommentForm({ blogId }: { blogId: string }) {
         },
 
         onSuccess: () => {
-            form.resetFields();
 
             queryClient.invalidateQueries({
                 queryKey: ["comments", blogId],
@@ -39,33 +37,23 @@ export default function AddCommentForm({ blogId }: { blogId: string }) {
         },
     });
 
-    const handleCommentSubmit = (values: any) => {
-        commentMutation.mutate(values);
-    };
+    const handleCommentSubmit = (e: any) => {
+        e.preventDefault();
+        const form = e.target as HTMLFormElement;
+        const data = new FormData(form);
+        const comment = String(data.get("comment") || "").trim();
+        if (!comment) {
+            message.warning("Please enter a comment");
+            return;
+        }
+
+        commentMutation.mutate({ comment });
+        form.reset();    };
 
     return (
-        <Form form={form} layout="vertical" onFinish={handleCommentSubmit}>
-            <Form.Item
-                label="Add Comment"
-                name="comment"
-                rules={[
-                    {
-                        required: true,
-                        message: "Please enter a comment",
-                    },
-                ]}
-            >
-                <Input placeholder="Write your comment..." required />
-            </Form.Item>
-
-            <Button
-                type="primary"
-                htmlType="submit"
-                key="submit"
-                loading={commentMutation.isPending}
-            >
-                Add Comment
-            </Button>
-        </Form>
-    );
+        <form onSubmit={handleCommentSubmit} className="flex gap-2 items-start">
+            <input name="comment" placeholder="Write your comment..." className="flex-1 border p-2 rounded" />
+            <button type="submit" disabled={commentMutation.isPending} className="bg-black text-white px-3 py-2 rounded">Add Comment</button>
+        </form>
+    )
 }

@@ -1,5 +1,5 @@
 "use client";
-import { Button, Form, Input, message } from "antd";
+import { message } from "antd";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useState, } from "react";
@@ -61,7 +61,7 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
     return (
         <div  >
             <div className="flex items-center gap-4 pl-8 ">
-                <p  className="text-xs cursor-pointer hover:underline"
+                <p className="text-xs cursor-pointer hover:underline"
                     onClick={() => setOpenReply(
                         openReply === comment._id ? null : comment._id
                     )}>
@@ -75,7 +75,8 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
                 </p>
             </div>
             {openReply === comment._id && (
-                <Form className="pl-8! mt-3! flex gap-2" onFinish={() => {
+                <form className="pl-8 mt-3 flex gap-2" onSubmit={(e) => {
+                    e.preventDefault();
                     if (!replyText[comment._id]?.trim()) {
                         message.warning("Reply cannot be empty");
                         return;
@@ -86,28 +87,25 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
                         text: replyText[comment._id],
                     });
                 }}>
-                    <Input
+                    <input
                         placeholder="Write a reply..."
-                        value={
-                            replyText[comment._id] || ""
-                        }
+                        value={replyText[comment._id] || ""}
                         onChange={(e: any) =>
                             setReplyText((prev) => ({
                                 ...prev, [comment._id]: e.target.value
                             }))
                         }
+                        className="border p-2 rounded flex-1"
                     />
 
-                    <Button
-                        type="primary"
-                        htmlType="submit"
-                        loading={
-                            replyMutation.isPending
-                        }
+                    <button
+                        type="submit"
+                        className="bg-black text-white px-3 py-1 rounded"
+                        disabled={replyMutation.isPending}
                     >
                         Send
-                    </Button>
-                </Form>
+                    </button>
+                </form>
             )}
             {openReplyData === comment._id && (
                 <div className="pl-8 mt-3 flex flex-col gap-2">
@@ -141,7 +139,7 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
                             </div>
                         ))
                     ) : (
-                        <p  className="pl-8">
+                        <p className="pl-8">
                             No replies yet
                         </p>
                     )}

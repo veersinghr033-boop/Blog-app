@@ -4,7 +4,7 @@ const chatSchema = new mongoose.Schema({
     participants: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-    }, ],
+    },],
     lastMessage: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Message",
@@ -14,7 +14,10 @@ const chatSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     }
-}, { timestamps: true }, );
+}, { timestamps: true },);
+
+// Index participants to speed up lookups by user
+chatSchema.index({ participants: 1, isGroupChat: 1 });
 
 const Chat = mongoose.model("Chat", chatSchema);
 export default Chat;

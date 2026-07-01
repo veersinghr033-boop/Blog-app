@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { login } from "@/lib/store/features/authThunk";
-import { message } from "antd";
+import { message } from "antd"
 
 interface FormData {
     email: string;
@@ -33,7 +33,7 @@ export default function LoginPage() {
         e.preventDefault();
 
         try {
-            const resultAction: any = await dispatch(login(formData)as any);
+            const resultAction: any = await dispatch(login(formData) as any);
             if (login.fulfilled.match(resultAction)) {
                 message.success("Login successful");
                 if (resultAction.payload.user.role === "admin") {

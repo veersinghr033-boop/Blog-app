@@ -25,7 +25,7 @@ export const getMessages = async (req: Request, res: Response) => {
   try {
     // const senderId = req.user?.id;
     const senderId = (req as Request & { user?: { id: string } }).user?.id;
-    
+
     const receiverIdParam = req.params.receiverId;
     const receiverId = Array.isArray(receiverIdParam)
       ? receiverIdParam[0]
@@ -45,7 +45,7 @@ export const getMessages = async (req: Request, res: Response) => {
     ];
 
     const chat = await Chat.findOne({
-      participants,
+      participants: { $all: participants },
       isGroupChat: false,
     });
 
@@ -76,7 +76,8 @@ export const getMessages = async (req: Request, res: Response) => {
       .populate("senderId", "userName")
       .populate("readBy", "userName")
       .sort({ timestamp: -1 })
-      .limit(Number(limit));
+      .limit(Number(limit))
+      .lean();
 
     const reversedMessages = messages.reverse();
 
@@ -112,8 +113,11 @@ export const createChat = async (req: Request, res: Response) => {
     const receiverId = Array.isArray(receiverIdParam)
       ? receiverIdParam[0]
       : receiverIdParam;
-
-    if (!senderId || !message || (!groupId && typeof receiverId !== "string") || !receiverId) {
+    // console.log(senderId,
+    //   receiverId,
+    //   groupId,
+    //   message,)
+    if (!senderId || !message || (!groupId && typeof receiverId !== "string")) {
       return res.status(400).json({
         message: "Missing required fields",
       });
@@ -198,7 +202,7 @@ export const createChat = async (req: Request, res: Response) => {
       )];
 
       if (groupTokens.length) {
-        await sendPushNotification({
+        const pushResult = await sendPushNotification({
           tokens: groupTokens,
           title: `${senderName} posted in ${group.name || "a group"}`,
           body: message,
@@ -211,6 +215,7 @@ export const createChat = async (req: Request, res: Response) => {
             timestamp: newMsg.timestamp,
           },
         });
+        // group push result intentionally not logged in production
       }
 
       return res.status(201).json({
@@ -226,7 +231,7 @@ export const createChat = async (req: Request, res: Response) => {
     ];
 
     let chat = await Chat.findOne({
-      participants,
+      participants: { $all: participants },
       isGroupChat: false,
     });
 
@@ -250,7 +255,7 @@ export const createChat = async (req: Request, res: Response) => {
       updatedAt: new Date(),
     });
 
-    const room = participants.join("_");
+    const room = [senderId, receiverId].map((id) => String(id)).sort().join("_");
     const senderUser = await User.findById(senderId).select("userName");
     const senderName = senderUser?.userName || "Someone";
 
@@ -281,7 +286,7 @@ export const createChat = async (req: Request, res: Response) => {
     const receiver = await User.findById(receiverId).select("fcmToken");
 
     if (receiver?.fcmToken) {
-      await sendPushNotification({
+      const pushRes = await sendPushNotification({
         token: receiver.fcmToken,
         title: `New message from ${senderName}`,
         body: message,
@@ -293,6 +298,7 @@ export const createChat = async (req: Request, res: Response) => {
           timestamp: newMsg.timestamp,
         },
       });
+      // private push result intentionally not logged in production
     }
 
     await emitSortedUsers(io, senderId);
@@ -356,7 +362,8 @@ export const getGroupMessages = async (req: Request, res: Response) => {
       .populate("senderId", "userName")
       .populate("readBy", "userName")
       .sort({ timestamp: -1 })
-      .limit(Number(limit));
+      .limit(Number(limit))
+      .lean();
 
     const reversedMessages = messages.reverse();
 
@@ -367,7 +374,7 @@ export const getGroupMessages = async (req: Request, res: Response) => {
         reversedMessages.length > 0 ? reversedMessages[0].timestamp : null,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
     res.status(500).json({
       message: "server error",
@@ -397,7 +404,7 @@ export const deleteMessage = async (req: Request, res: Response) => {
       message: "message deleted successfully",
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
     res.status(500).json({
       message: "server error",

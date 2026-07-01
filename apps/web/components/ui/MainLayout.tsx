@@ -1,12 +1,11 @@
 "use client";
 
-import { Drawer } from "antd";
 import dynamic from "next/dynamic";
-
-const Sidebar = dynamic(() => import("./sidebar"));
-
-const Navbar = dynamic(() => import("./navbar"));
 import { useState } from "react";
+
+// Load heavy client components only on the client to avoid increasing SSR bundles
+const Sidebar = dynamic(() => import("./sidebar"), { ssr: false });
+const Navbar = dynamic(() => import("./navbar"), { ssr: false });
 
 function MainLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -19,15 +18,25 @@ function MainLayout({ children }: { children: React.ReactNode }) {
         <div className="hidden md:block">
           <Sidebar />
         </div>
-        <Drawer
-          placement="left"
-          open={open}
-          onClose={() => setOpen(false)}
-          // width={250}
-          className="w-64!"
-        >
-          <Sidebar />
-        </Drawer>
+
+        {/* Mobile drawer fallback implemented with lightweight markup (no antd) */}
+        {open && (
+          <div className="fixed inset-0 z-40 md:hidden">
+            <div
+              className="absolute inset-0 bg-black/40"
+              onClick={() => setOpen(false)}
+            />
+            <div className="absolute left-0 top-0 h-full w-64 bg-white p-4">
+              <button
+                className="mb-4 text-gray-600"
+                onClick={() => setOpen(false)}
+              >
+                Close
+              </button>
+              <Sidebar mobile open onClose={() => setOpen(false)} />
+            </div>
+          </div>
+        )}
 
         <div
           className="

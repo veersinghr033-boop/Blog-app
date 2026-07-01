@@ -19,7 +19,7 @@ export const likeBlog = async (req: Request, res: Response) => {
             });
         }
         const like = new Like({ user: userId, blog: blogId });
-        console.log(like)
+        // suppressed debug like output
         await like.save();
 
         await Blog.findByIdAndUpdate(blogId, {
@@ -28,7 +28,7 @@ export const likeBlog = async (req: Request, res: Response) => {
 
         res.status(200).json({ message: "Blog liked" });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).json({ message: "Server error" });
     }
 };

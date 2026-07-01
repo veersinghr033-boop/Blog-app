@@ -42,7 +42,7 @@ function ReaderBlog({ data, hasNextPage = false, isFetchingNextPage = false, fet
     return (
         <div >
             <VirtuosoGrid
-                style={{ height: "90vh" }}
+                style={{ height: "80vh" }}
                 totalCount={data.length}
                 endReached={() => {
                     if (hasNextPage && !isFetchingNextPage) {

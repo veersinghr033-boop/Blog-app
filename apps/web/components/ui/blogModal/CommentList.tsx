@@ -1,10 +1,5 @@
 "use client";
-import {
-    Button,
-    Popconfirm,
-    message,
-} from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { message } from "antd";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
@@ -126,20 +121,17 @@ export default function CommentList({
                                 </div>
 
                                 {isCommentOwner(comment) && (
-                                    <Popconfirm
-                                        title="Delete comment?"
-                                        description="Are you sure you want to delete this comment?"
-                                        onConfirm={() => handleDeleteComment(comment._id)}
-                                        okText="Delete"
-                                        cancelText="Cancel"
+                                    <button
+                                        className="text-red-600"
+                                        onClick={() => {
+                                            if (window.confirm("Delete comment?")) {
+                                                handleDeleteComment(comment._id)
+                                            }
+                                        }}
+                                        aria-label="delete comment"
                                     >
-                                        <Button
-                                            type="text"
-                                            danger
-                                            icon={<DeleteOutlined />}
-                                            size="small"
-                                        />
-                                    </Popconfirm>
+                                        🗑️
+                                    </button>
                                 )}
                             </div>
 

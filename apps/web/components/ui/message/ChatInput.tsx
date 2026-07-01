@@ -1,5 +1,5 @@
 "use client";
-import { message, Button } from "antd";
+import { message } from "antd";
 import { useEffect, useRef, useState } from "react";
 
 import { useMutation } from "@tanstack/react-query";
@@ -29,7 +29,7 @@ export default function ChatInput({
         onSuccess: () => {
             setMessageText("");
         },
-        onError: (error:any) => {
+        onError: (error: any) => {
             message.error(
                 error?.response?.data?.message || "Failed to delete message",
             );
@@ -58,7 +58,7 @@ export default function ChatInput({
             message: messageText,
             timestamp: new Date().toISOString(),
         });
-    }; 
+    };
 
     const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -87,7 +87,7 @@ export default function ChatInput({
     return (
         <form
             onSubmit={handleSend}
-            className="border-t border-gray-300 bg-white p-3 sm:px-4 sm:py-4"
+            className="border-t border-gray-300 bg-white p-3 sm:px-4 sm:py-3.5"
         >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
                 <input
@@ -101,14 +101,13 @@ export default function ChatInput({
                     }
                 />
 
-                <Button
-                    htmlType="submit"
+                <button
+                    type="submit"
                     disabled={!messageText.trim()}
-                    loading={sendMutation.isPending }
-                    className="w-full rounded-2xl! bg-black! py-5! text-white! disabled:opacity-50! sm:w-auto sm:px-6!"
+                    className="bg-black text-white px-4 py-2 rounded disabled:opacity-50"
                 >
-                    Send
-                </Button>
+                    {sendMutation.isPending ? "Sending..." : "Send"}
+                </button>
             </div>
         </form>
     );

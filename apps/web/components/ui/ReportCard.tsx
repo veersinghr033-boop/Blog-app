@@ -2,13 +2,9 @@
 
 import {
     Button,
-    Card,
-    Layout,
-    Tag,
-    Typography,
+   
     Popconfirm,
     message,
-    Empty,
 } from "antd";
 import {
     DeleteOutlined,
@@ -22,7 +18,6 @@ import api from "@/utills/axios";
 import { useRouter } from "next/navigation";
 import { Virtuoso } from "react-virtuoso";
 
-const { Title, Paragraph, Text } = Typography;
 
 interface ReportCardProps {
     data: any[];
@@ -33,7 +28,6 @@ interface ReportCardProps {
 
 function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: ReportCardProps) {
     const [selectedBlogData, setSelectedBlogData] = useState<any>(null)
-    const [expandedBlogs, setExpandedBlogs] = useState<Record<string, boolean>>({})
     const router = useRouter();
     const userRole = useAppSelector((state) => state.auth.user?.role)
 

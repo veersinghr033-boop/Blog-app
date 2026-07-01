@@ -42,7 +42,7 @@ export const createReport = async (req: Request, res: Response) => {
             message: "Report created successfully",
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
 
         res.status(500).json({
             message: "Internal server error",
@@ -109,7 +109,7 @@ export const getReports = async (req: Request, res: Response) => {
             message: "Reports fetched successfully",
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
 
         res.status(500).json({
             message: "Internal server error",
@@ -130,7 +130,7 @@ export const getReportById = async (req: Request, res: Response) => {
                 $lt: new Date(before),
             };
         }
-        const reports = await Report.find(query )
+        const reports = await Report.find(query)
             .populate({
                 path: "blogId",
                 select: "title content author",
@@ -176,12 +176,12 @@ export const getReportById = async (req: Request, res: Response) => {
             nextCursor:
                 frontendReadyReports.length > 0
                     ? frontendReadyReports[
-                          frontendReadyReports.length - 1
-                      ].createdAt
-                    : null,            message: "Reports fetched successfully",
+                        frontendReadyReports.length - 1
+                    ].createdAt
+                    : null, message: "Reports fetched successfully",
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
 
         res.status(500).json({
             message: "Internal server error",
@@ -205,7 +205,7 @@ export const deleteReport = async (req: Request, res: Response) => {
             message: "Report deleted successfully",
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
 
         res.status(500).json({
             message: "Internal server error",
@@ -235,7 +235,7 @@ export const getByUserId = async (req: Request, res: Response) => {
             message: "Reports fetched successfully",
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).json({
             message: "Internal server error",
         });

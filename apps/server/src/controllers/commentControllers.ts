@@ -25,7 +25,7 @@ export const createComment = async (
       .status(201)
       .json({ message: "Comment created successfully", comment: newComment });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     res
       .status(500)
@@ -106,7 +106,7 @@ export const getCommentsByBlogId = async (
       nextCursor,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     res
       .status(500)
@@ -138,7 +138,7 @@ export const deleteComment = async (
     });
     res.status(200).json({ message: "Comment deleted successfully" });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     res
       .status(500)

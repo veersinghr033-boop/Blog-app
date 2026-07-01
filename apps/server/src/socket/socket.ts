@@ -7,6 +7,17 @@ import Message from "../models/message.ts";
 
 const socketToUser = new Map();
 const userStatus = new Map();
+interface Payload {
+  user1: string;
+  user2: string;
+}
+const buildRoomName = (...parts: Array<unknown>) => {
+  return parts
+    .filter((part): part is string | number | { toString(): string } => part !== undefined && part !== null)
+    .map((part) => String(part))
+    .sort()
+    .join("_");
+};
 
 export const initSocket = (server: any) => {
   const io = new Server(server, {
@@ -16,27 +27,27 @@ export const initSocket = (server: any) => {
     },
   });
 
-  io.on("connection", (socket) => {
+  io.sockets.on("connection", (socket:any) => {
     const setUserOffline = (userId: string) => {
       if (!userId) return;
 
       userStatus.set(userId, "offline");
       socketToUser.delete(socket.id);
 
-      io.emit("userStatus", {
+      io.sockets.emit("userStatus", {
         userId,
         status: "offline",
       });
     };
 
-    socket.on("userOnline", async (userId) => {
+    socket.on("userOnline", async (userId:string) => {
 
       userStatus.set(userId, "online");
       socketToUser.set(socket.id, userId);
 
       socket.join(userId);
 
-      io.emit("userStatus", {
+      io.sockets.emit("userStatus", {
         userId,
         status: "online",
       });
@@ -44,40 +55,46 @@ export const initSocket = (server: any) => {
       await emitSortedUsers(io, userId);
     });
 
-    socket.on("userAway", (userId) => {
+    socket.on("userAway", (userId:string) => {
       userStatus.set(userId, "away");
 
-      io.emit("userStatus", {
+      io.sockets.emit("userStatus", {
         userId,
         status: "away",
       });
     });
 
-    socket.on("userOffline", (userId) => {
+    socket.on("userOffline", (userId:string) => {
       setUserOffline(userId);
     });
 
-    socket.on("joinRoom", ({ user1, user2 }) => {
-      const room = [user1, user2].sort().join("_");
+    socket.on("joinRoom", (payload: Payload | string) => {
+      const room =
+        typeof payload === "string"
+          ? payload
+          : buildRoomName(payload?.user1, payload?.user2);
 
       socket.join(room);
     });
 
-    socket.on("leaveRoom", ({ user1, user2 }) => {
-      const room = [user1, user2].sort().join("_");
+    socket.on("leaveRoom", (payload: Payload | string) => {
+      const room =
+        typeof payload === "string"
+          ? payload
+          : buildRoomName(payload?.user1, payload?.user2);
 
       socket.leave(room);
     });
 
-    socket.on("joinGroup", (groupId) => {
+    socket.on("joinGroup", (groupId: string) => {
       socket.join(groupId);
     });
 
-    socket.on("leaveGroup", (groupId) => {
+    socket.on("leaveGroup", (groupId: string) => {
       socket.leave(groupId);
     });
-    socket.on("typing", ({ senderId, receiverId, groupId }) => {
-      if (groupId) {
+    socket.on("typing", ({ senderId, receiverId, groupId }:{senderId: string, receiverId: string, groupId: string}) => {
+      if (groupId && typeof senderId === 'string') {
         socket.to(groupId).emit("userTyping", {
           userId: senderId,
           chatId: groupId,
@@ -85,7 +102,7 @@ export const initSocket = (server: any) => {
         return;
       }
 
-      const room = [senderId, receiverId].sort().join("_");
+      const room = buildRoomName(senderId, receiverId);
 
       socket.to(room).emit("userTyping", {
         userId: senderId,
@@ -93,8 +110,8 @@ export const initSocket = (server: any) => {
       });
     });
 
-    socket.on("stopTyping", ({ senderId, receiverId, groupId }) => {
-      if (groupId) {
+    socket.on("stopTyping", ({ senderId, receiverId, groupId }: { senderId: string, receiverId: string, groupId: string }) => {
+      if (groupId && typeof senderId === 'string') {
         socket.to(groupId).emit("userStopTyping", {
           userId: senderId,
           chatId: groupId,
@@ -102,7 +119,7 @@ export const initSocket = (server: any) => {
         return;
       }
 
-      const room = [senderId, receiverId].sort().join("_");
+      const room = buildRoomName(senderId, receiverId);
 
       socket.to(room).emit("userStopTyping", {
         userId: senderId,
@@ -110,7 +127,7 @@ export const initSocket = (server: any) => {
       });
     });
 
-    socket.on("readMessages", async ({ chatId, userId }) => {
+    socket.on("readMessages", async ({ chatId, userId }:{chatId: string, userId: string}) => {
       try {
         const chat = await Chat.findById(chatId);
 
@@ -143,10 +160,7 @@ export const initSocket = (server: any) => {
         const groupRoom = group && group._id ? group._id.toString() : null;
         const chatRoom =
           groupRoom ||
-          chat.participants
-            .map((participant) => participant.toString())
-            .sort()
-            .join("_");
+          buildRoomName(...chat.participants.map((participant) => participant.toString()));
 
         const senderIds = [
           ...new Set(
@@ -177,8 +191,20 @@ export const initSocket = (server: any) => {
         if (chatRoom) {
           io.to(chatRoom).emit("messagesRead", payload);
         }
+        // Update sorted user lists for the reader and senders so unread counts refresh
+        try {
+          if (payload?.reader?._id) {
+            await emitSortedUsers(io, payload.reader._id.toString());
+          }
+
+          for (const sid of senderIds) {
+            await emitSortedUsers(io, sid);
+          }
+        } catch (err) {
+          console.error('Failed to emit sorted users after readMessages', err);
+        }
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     });
 

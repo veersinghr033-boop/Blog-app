@@ -28,10 +28,12 @@ export const useFCM = ({ userId }: { userId?: string }) => {
                 }
 
                 if ("serviceWorker" in navigator) {
-                    await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+                    const reg = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+                    console.log("FCM: service worker registered", reg.scope);
                 }
 
                 const permission = await Notification.requestPermission();
+                console.log("FCM: notification permission", permission);
 
                 if (permission !== "granted" || !isActive) {
                     return;
@@ -41,8 +43,15 @@ export const useFCM = ({ userId }: { userId?: string }) => {
                     vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
                 });
 
+                console.log("FCM: getToken returned", token);
+
                 if (token && isActive) {
-                    await api.post("/users/save-fcm-token", { token });
+                    try {
+                        const res = await api.post("/users/save-fcm-token", { token });
+                        console.log('FCM: token saved', res?.data);
+                    } catch (err) {
+                        console.error('FCM: failed to save token', err);
+                    }
                 }
 
                 if (!isActive) {

@@ -9,6 +9,7 @@ interface BlogProps {
   hasNextPage?: boolean;
   isFetchingNextPage?: boolean;
   fetchNextPage?: () => void;
+  initialSavedData?: any[];
   userId?: string;
   role?: string;
 }
@@ -19,6 +20,7 @@ function Blog({
   hasNextPage = false,
   isFetchingNextPage = false,
   fetchNextPage,
+  initialSavedData,
 }: BlogProps) {
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -26,16 +28,14 @@ function Blog({
   if (!data.length) {
     return (
       <div className="text-center py-4">
-        <text type="secondary">
-          No blogs yet
-        </text>
+        <p className="text-gray-500">No blogs yet</p>
       </div>
     );
   }
   return (
     <div className="flex flex-col gap-4 pt-4 ">
       <Virtuoso
-        style={{ height: "100vh" }}
+        style={{ height: "70vh" }}
         data={data}
         endReached={() => {
           if (hasNextPage && !isFetchingNextPage && fetchNextPage) {

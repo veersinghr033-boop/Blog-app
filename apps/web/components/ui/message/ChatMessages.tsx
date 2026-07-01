@@ -9,13 +9,38 @@ import {
   useQueryClient,
   useInfiniteQuery,
 } from "@tanstack/react-query";
-import {
-  CheckCircleOutlined,
-  EllipsisOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
 import api from "@/utills/axios";
-import { message, Button, Popover, Tooltip } from "antd";
+import { message} from "antd"
+function MessageMenu({ onDelete, loading }: { onDelete: () => void; loading?: boolean }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="relative inline-block">
+      <button
+        className="text-sm px-2 py-1"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+      >
+        ⋯
+      </button>
+
+      {open && (
+        <div className="absolute right-0 mt-1 bg-white border rounded shadow p-2 z-50">
+          <button
+            className="text-red-600 block px-2 py-1"
+            onClick={() => {
+              setOpen(false);
+              if (confirm("Delete message?")) onDelete();
+            }}
+            disabled={loading}
+          >
+            Delete
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface SelectedUser {
   id?: string;
@@ -115,7 +140,7 @@ export default function ChatMessages({
   }, [data?.pages?.length ?? 0]);
   useEffect(() => {
     if (!selectedChatId) return;
-    clearNotification(selectedChatId);
+    (selectedChatId);
   }, [selectedChatId, clearNotification]);
 
   useEffect(() => {
@@ -126,7 +151,7 @@ export default function ChatMessages({
         return selectedUser.id;
       }
 
-      return [userId, selectedUser.id].sort().join("_");
+      return [String(userId), String(selectedUser.id)].sort().join("_");
     };
 
     const typingHandler = ({ chatId }: { chatId: string }) => {
@@ -221,7 +246,7 @@ export default function ChatMessages({
       };
     }
 
-    const room = [userId, selectedChatId].sort().join("_");
+    const room = [String(userId), String(selectedChatId)].sort().join("_");
 
     if (currentRoomRef.current) {
       socketRef.current.emit("leaveRoom", currentRoomRef.current);
@@ -235,7 +260,7 @@ export default function ChatMessages({
     currentRoomRef.current = room;
 
     const privateHandler = (msg: MessageType) => {
-      const msgRoom = [msg.senderId._id, msg.receiverId].sort().join("_");
+      const msgRoom = [String(msg.senderId._id), String(msg.receiverId)].sort().join("_");
 
       if (room !== msgRoom) return;
 
@@ -334,7 +359,7 @@ export default function ChatMessages({
     <>
       <div className="min-h-0 flex-1 overflow-hidden">
         <Virtuoso
-          style={{ height: "80vh" }}
+          style={{ height: "70vh" }}
           ref={virtuosoRef}
           data={messages}
           firstItemIndex={firstItemIndex.current}
@@ -374,27 +399,10 @@ export default function ChatMessages({
                     minute: "2-digit",
                   })}
                   {isMine && (
-                    <Popover
-                      content={
-                        <div>
-                          <Button
-                            type="text"
-                            danger
-                            size="small"
-                            onClick={() => deleteMessageById(item._id)}
-                            loading={deleteMessageMutation.isPending}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      }
-                      trigger="click"
-                      placement="bottomRight"
-                    >
-                      <Button type="text" size="small">
-                        <EllipsisOutlined />
-                      </Button>
-                    </Popover>
+                    <MessageMenu
+                      onDelete={() => deleteMessageById(item._id)}
+                      loading={deleteMessageMutation.isPending}
+                    />
                   )}
                 </div>
 
@@ -406,47 +414,15 @@ export default function ChatMessages({
                 </div>
 
                 {isMine && selectedUser.type !== "group" && (
-                  <Tooltip
-                    title={isReadByReceiver ? "Seen" : "Send"}
-                    color="white"
-                  >
-                    <div className="text-[11px] text-gray-400">
-                      {isReadByReceiver ? (
-                        <EyeOutlined />
-                      ) : (
-                        <CheckCircleOutlined />
-                      )}
-                    </div>
-                  </Tooltip>
+                  <div className="text-[11px] text-gray-400" title={isReadByReceiver ? "Seen" : "Send"}>
+                    {isReadByReceiver ? '✓✓' : '✓'}
+                  </div>
                 )}
 
                 {isMine && selectedUser.type === "group" && (
-                  <Tooltip
-                    title={
-                      groupReadUsers.length ? (
-                        <div>
-                          {"Seen by :"}
-                          {groupReadUsers.map((user: any) => (
-                            <div key={user.id} className="text-gray-600">
-                              {" "}
-                              {user.userName}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        "Send"
-                      )
-                    }
-                    color="white"
-                  >
-                    <div className="text-[11px] text-gray-400">
-                      {groupReadUsers.length ? (
-                        <EyeOutlined />
-                      ) : (
-                        <CheckCircleOutlined />
-                      )}
-                    </div>
-                  </Tooltip>
+                  <div className="text-[11px] text-gray-400" title={groupReadUsers.length ? `Seen by: ${groupReadUsers.map(u => u.userName).join(', ')}` : 'Send'}>
+                    {groupReadUsers.length ? '✓✓' : '✓'}
+                  </div>
                 )}
               </div>
             );

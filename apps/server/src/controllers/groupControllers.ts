@@ -15,7 +15,7 @@ export const createGroup = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "Group name is required" });
         }
 
-        const normalizedMembers = members.map((id:string) => id).filter((id:string) => id);
+        const normalizedMembers = members.map((id: string) => id).filter((id: string) => id);
 
         const participants = [...new Set([userId, ...normalizedMembers])].sort();
 
@@ -60,7 +60,7 @@ export const getGroups = async (req: Request, res: Response) => {
 
         res.status(200).json(group);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).json({
             message: "Failed to get group",
         });
@@ -72,9 +72,9 @@ export const deleteById = async (req: Request, res: Response) => {
         // const currentUserId = req.user?.id;
         const currentUserId = (req as Request & { user?: { id: string } }).user?.id;
 
-        const userId  = req.params.userId
+        const userId = req.params.userId
         const { Groups } = req.body;
-        console.log(Groups);
+        // suppressing verbose group listing in production
         const group = await Group.findById(Groups);
 
         if (!group) {
@@ -99,7 +99,7 @@ export const deleteById = async (req: Request, res: Response) => {
             message: "Member removed successfully",
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
 
         return res.status(500).json({
             message: "Server error",
@@ -122,7 +122,7 @@ export const groupDelete = async (req: Request, res: Response) => {
             message: "Member removed successfully",
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
 
         return res.status(500).json({
             message: "Server error",
@@ -142,10 +142,10 @@ export const updateGroupMembers = async (req: Request, res: Response) => {
         }
         const chat = await Chat.findByIdAndUpdate(
             group.chatId, {
-                $push: {
-                    participants: members,
-                },
-            }, { new: true },
+            $push: {
+                participants: members,
+            },
+        }, { new: true },
         ).populate({
             path: "participants",
             select: "userName role",
@@ -156,7 +156,7 @@ export const updateGroupMembers = async (req: Request, res: Response) => {
             chat,
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
 
         return res.status(500).json({
             message: "Server error",
@@ -168,7 +168,7 @@ export const changeAdmin = async (req: Request, res: Response) => {
         const { groupId } = req.params as { groupId: string };
         const { adminId } = req.body;
 
-        console.log(groupId, adminId);
+        // debug values suppressed
         const group = await Group.findByIdAndUpdate(
             groupId, { admin: adminId }, { new: true },
         ).populate({
@@ -180,7 +180,7 @@ export const changeAdmin = async (req: Request, res: Response) => {
             message: "Group admin updated successfully",
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
 
         return res.status(500).json({
             message: "Server error",

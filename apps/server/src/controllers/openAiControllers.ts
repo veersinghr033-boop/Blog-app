@@ -33,7 +33,7 @@ export const generateBlog = async (req: Request, res: Response) => {
       content: completion.choices[0].message.content,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
     return res.status(500).json({ message: "Failed to AI", error: errorMessage });;

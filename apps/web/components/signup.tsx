@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { signup } from "@/lib/store/features/authThunk";
-import { message } from "antd";
+import { message } from "antd"
 interface FormData {
     username: string;
     email: string;
@@ -34,14 +34,14 @@ export default function RegisterPage() {
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
-        const data: FormData= {
+        const data: FormData = {
             username: formData.name,
             email: formData.email,
             password: formData.password,
             role: formData.role
         }
         try {
-            const resultAction: any = await dispatch(signup(data)as any);
+            const resultAction: any = await dispatch(signup(data) as any);
             if (signup.fulfilled.match(resultAction)) {
                 message.success("Signup successful");
                 if (resultAction.payload.user.role === "admin") {
@@ -122,7 +122,7 @@ export default function RegisterPage() {
                         />
                     </div>
 
-                    
+
 
                     <button
                         type="submit"

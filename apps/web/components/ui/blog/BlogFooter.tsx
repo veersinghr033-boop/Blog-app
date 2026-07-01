@@ -1,11 +1,9 @@
 
 "use client";
-import { EllipsisOutlined } from "@ant-design/icons";
-import { Button } from "antd";
 import BlogActions from "./BlogActions";
 import React from "react";
 
- function BlogFooter({ post ,userId,onOpen }: any) {
+function BlogFooter({ post, userId, onOpen }: any) {
   return (
     <div className="flex justify-between mt-4">
       <div className="flex items-center gap-2">
@@ -13,24 +11,23 @@ import React from "react";
           {post.author?.userName?.charAt(0)}
         </div>
 
-        <text>{post.author?.userName}</text>
+        <span className="text-gray-800">{post.author?.userName}</span>
 
         <BlogActions post={post} onOpen={onOpen} userId={userId} />
       </div>
 
       <div className="flex flex-col items-center gap-1">
-        <Button
-          type="text"
-          icon={<EllipsisOutlined />}
+        <button
+          className="text-gray-600 px-2 py-1"
+          aria-label="more"
           onClick={() => onOpen(post._id)}
-        />
-
-        <text
-         
-          className="text-gray-500 text-xs"
         >
+          ⋯
+        </button>
+
+        <div className="text-gray-500 text-xs">
           {new Date(post.createdAt).toLocaleDateString()}
-        </text>
+        </div>
       </div>
     </div>
   );

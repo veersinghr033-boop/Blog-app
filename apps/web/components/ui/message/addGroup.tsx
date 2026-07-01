@@ -1,4 +1,4 @@
-import { message ,Modal} from "antd";
+import { message } from "antd";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useEffect, useState } from "react";
@@ -29,8 +29,9 @@ function AddGroup({
         queryKey: ["users"],
         queryFn: async () => {
             const response = await api.get("/users")
+            const usersData = response.data?.users ?? [];
 
-            return response.data.map((user: any) => ({
+            return usersData.map((user: any) => ({
                 id: user._id,
                 name: user.userName,
             }))
@@ -83,83 +84,42 @@ function AddGroup({
         createGroupMutation.mutate({ groupName, members: selectedMembers });
     };
 
+    if (!open) return null
+
     return (
-        <Modal
-            title="Create New Group"
-            open={open}
-            onCancel={onClose}
-            footer={null}
-        >
-            <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label
-                        htmlFor="groupName"
-                        className="block text-sm font-medium text-gray-700"
-                    >
-                        Group Name
-                    </label>
-                    <input
-                        type="text"
-                        id="groupName"
-                        value={groupName}
-                        onChange={(e) => setGroupName(e.target.value)}
-                        placeholder="Enter group name"
-                        className="mt-1 p-2 outline-0 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                        required
-                    />
+        <div className="fixed inset-0 z-40 flex">
+            <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+
+            <div className="relative m-auto w-full max-w-md bg-white rounded shadow-lg p-6">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-medium">Create New Group</h3>
+                    <button onClick={onClose} className="text-gray-600">Close</button>
                 </div>
 
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">
-                        Select Members
-                    </label>
-                    <div className="mt-1 max-h-40 overflow-y-auto space-y-2 border border-gray-100 p-2 rounded-md">
-                        {users.map((u) => (
-                            <div key={u.id} className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    id={`member-${u.id}`}
-                                    value={u.id}
-                                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                                    checked={selectedMembers.includes(
-                                        u.id.toString(),
-                                    )}
-                                    onChange={(e) =>
-                                        setSelectedMembers((prev) =>
-                                            e.target.checked
-                                                ? [...prev, u.id.toString()]
-                                                : prev.filter(
-                                                    (id) => id !== u.id.toString(),
-                                                ),
-                                        )
-                                    }
-                                />
-                                <label
-                                    htmlFor={`member-${u.id}`}
-                                    className="ml-2 block text-sm text-gray-900"
-                                >
-                                    {u.name}
-                                </label>
-                            </div>
-                        ))}
-                        {users.length === 0 && (
-                            <div className="text-center text-gray-500">
-                                No users available
-                            </div>
-                        )}
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-4">
+                        <label htmlFor="groupName" className="block text-sm font-medium text-gray-700">Group Name</label>
+                        <input type="text" id="groupName" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="Enter group name" className="mt-1 p-2 outline-0 block w-full rounded-md border-gray-300 shadow-sm" required />
                     </div>
-                </div>
 
-                <button
-                    type="submit"
-                    disabled={createGroupMutation.isPending}
-                    className="w-full bg-gray-800 text-white py-2 px-4 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-opacity-50 disabled:opacity-50"
-                >
-                    {createGroupMutation.isPending ? "Creating..." : "Create Group"}
-                </button>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700">Select Members</label>
+                        <div className="mt-1 max-h-40 overflow-y-auto space-y-2 border border-gray-100 p-2 rounded-md">
+                            {users.map((u) => (
+                                <div key={u.id} className="flex items-center">
+                                    <input type="checkbox" id={`member-${u.id}`} value={u.id} className="h-4 w-4" checked={selectedMembers.includes(u.id.toString())} onChange={(e) => setSelectedMembers((prev) => e.target.checked ? [...prev, u.id.toString()] : prev.filter((id) => id !== u.id.toString()))} />
+                                    <label htmlFor={`member-${u.id}`} className="ml-2 block text-sm text-gray-900">{u.name}</label>
+                                </div>
+                            ))}
+                            {users.length === 0 && <div className="text-center text-gray-500">No users available</div>}
+                        </div>
+                    </div>
+
+                    <button type="submit" disabled={createGroupMutation.isPending} className="w-full bg-gray-800 text-white py-2 px-4 rounded-md">{createGroupMutation.isPending ? "Creating..." : "Create Group"}</button>
                 </form>
-        </Modal>
-    );
+            </div>
+        </div>
+    )
 }
 
 export default AddGroup;

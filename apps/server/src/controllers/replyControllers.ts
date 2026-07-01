@@ -28,7 +28,7 @@ export const createReply = async (req: Request, res: Response) => {
       reply,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ message: "Failed to create reply" });
   }
 };
@@ -45,7 +45,7 @@ export const getRepliesByCommentId = async (req: Request, res: Response) => {
       replies,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ message: "Failed to retrieve replies" });
   }
 };

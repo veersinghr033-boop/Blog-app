@@ -41,7 +41,7 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
 
     next();
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
     return res.status(401).json({
       message: "Invalid token",
@@ -53,9 +53,9 @@ export const authorizeRoles = (...roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const userRole =
       typeof req.user === "object" &&
-      req.user !== null &&
-      "role" in req.user &&
-      typeof req.user.role === "string"
+        req.user !== null &&
+        "role" in req.user &&
+        typeof req.user.role === "string"
         ? req.user.role
         : undefined;
 

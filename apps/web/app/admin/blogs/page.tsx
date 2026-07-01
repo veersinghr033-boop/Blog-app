@@ -44,11 +44,15 @@ function Blogs() {
             lastPage.hasMore
                 ? lastPage.nextCursor
                 : undefined,
+        staleTime: 60_000,
+        gcTime: 10 * 60_000,
+        refetchOnWindowFocus: false,
     });
     const blogs =
         data?.pages.flatMap(
             (page) => page.blogs
         ) ?? [];
+        console.log(blogs)
     const filteredBlogs = useMemo(() => {
         return blogs.filter((blog: any) => {
             const matchesSearch =

@@ -1,25 +1,24 @@
 import { memo, useCallback } from "react";
-import {  message } from "antd";
-import { LikeOutlined, CommentOutlined, SaveOutlined } from "@ant-design/icons";
+import { message } from "antd"
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
-import { useAppSelector } from "@/lib/store/hooks";
 import { useRouter } from "next/navigation";
+import { LikeOutlined, CommentOutlined, SaveOutlined } from "@ant-design/icons";
 interface ReaderBlogCardProps {
     post: any;
     userId: string;
     isSaved: boolean;
-  
+
 }
 
 function ReaderBlogCard({
     post,
     userId,
     isSaved,
-    
+
 }: ReaderBlogCardProps) {
-    const isLiked = post.likes?.users?.includes(userId);
-    const isCommented = post.comments?.details?.some((comment: any) => comment.user === userId);
+    const isLiked = post.isLiked;
+    const isCommented = post.isCommented;
     const queryClient = useQueryClient();
     const router = useRouter()
     const LikeMutation = useMutation({
@@ -75,10 +74,13 @@ function ReaderBlogCard({
     });
 
     const openBlogModal = useCallback(
-        (blog: any) => {
-            const blogId = blog
+        (blogOrId: any) => {
+            const blogId = typeof blogOrId === "string" || typeof blogOrId === "number"
+                ? blogOrId
+                : blogOrId?._id || blogOrId?.id;
+
             if (!blogId) {
-                console.warn("Missing blog id", blog);
+                console.warn("Missing blog id", blogOrId);
                 return;
             }
 
@@ -98,11 +100,11 @@ function ReaderBlogCard({
         <div className="h-full rounded-lg border bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow border-gray-200 shadow-sm">
             <div className="flex h-full flex-col gap-4">
                 <div>
-                    <h2  className="font-semibold text-2xl mb-2  line-clamp-2">
+                    <h2 className="font-normal text-2xl mb-2  line-clamp-2">
                         {post.title}
                     </h2>
                     <p className="line-clamp-3">
-                        {post.content}
+                        {post.content.slice(0, 200)}
                     </p>
 
                     {showReadMore && (
@@ -121,34 +123,36 @@ function ReaderBlogCard({
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-xs uppercase text-white">
                                 {post.author?.userName?.charAt(0) || "U"}
                             </div>
-                            <text >{post.author?.userName || "Unknown"}</text>
+                            <span>{post.author?.userName || "Unknown"}</span>
                         </div>
-                        <text className="text-xs text-gray-400" >
+                        <span className="text-xs text-gray-400">
                             {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : ""}
-                        </text>
+                        </span>
                     </div>
 
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-4 text-sm">
-                            <text
-                                className={`cursor-pointer transition-colors ${isLiked ? "text-blue-500!" : "text-gray-500 hover:text-blue-500"}`}
+                            <span
+                                className={`cursor-pointer transition-colors ${isLiked ? "text-blue-500" : "text-gray-500 hover:text-blue-500"}`}
                                 onClick={() => LikeMutation.mutate(post._id)}
                             >
-                                {post.likes?.count || 0} <LikeOutlined />
-                            </text>
-                            <text
-                                className={`flex items-center gap-1 cursor-pointer transition-colors ${isCommented ? "text-green-500!" : "text-gray-500 hover:text-green-500"}`}
-                                onClick={() => openBlogModal(post)}
+                                <LikeOutlined /> {post.likes?.count || 0}
+                            </span>
+                            <span
+                                className={`flex items-center gap-1 cursor-pointer transition-colors ${isCommented ? "text-green-500" : "text-gray-500 hover:text-green-500"}`}
+                                onClick={() => openBlogModal(post._id)}
                             >
-                                {post.comments?.count || 0} <CommentOutlined />
-                            </text>
-                            <text>{post.views && post.views.length > 0 ? post.views[0].count : 0} Views</text>
+                                <CommentOutlined /> {post.comments?.count || 0}
+                            </span>
+                            <span>{post.views && post.views.length > 0 ? post.views[0].count : 0} Views</span>
                         </div>
-                        <SaveOutlined
+                        <button
                             className={`cursor-pointer text-lg transition-colors ${isSaved ? "text-blue-500" : "text-gray-400 hover:text-blue-500"}`}
                             onClick={() => SaveMutation.mutate(post._id)}
                             title={isSaved ? "Unsave" : "Save"}
-                        />
+                        >
+                            <SaveOutlined />
+                        </button>
                     </div>
                 </div>
             </div>
