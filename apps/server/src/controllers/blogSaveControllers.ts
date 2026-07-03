@@ -4,26 +4,42 @@ import { Request, Response } from "express";
 
 export const SaveBlog = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
-  const { blogId } = req.body;
-  const userId = (req as Request & { user?: { id: string } }).user?.id;
   try {
-    const existingSave = await BlogSave.findOne({ user: userId, blog: blogId });
-    // intentionally not logging existingSave for performance
+    const { blogId } = req.body;
+    const userId = (req as Request & { user?: { id: string } }).user?.id;
+
+    const existingSave = await BlogSave.findOne({
+      user: userId,
+      blog: blogId,
+    });
+
     if (existingSave) {
       await BlogSave.findByIdAndDelete(existingSave._id);
-      res.status(200).json({ message: "Blog unsaved successfully" });
+
+      return void res.status(200).json({
+        message: "Blog unsaved successfully",
+      });
     }
+
     const newSave = new BlogSave({
       user: userId,
       blog: blogId,
     });
+
     await newSave.save();
-    res.status(201).json({ newSave, message: "Blog saved successfully" });
+
+    return void res.status(201).json({
+      newSave,
+      message: "Blog saved successfully",
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error" });
+
+    return void res.status(500).json({
+      message: "Server error",
+    });
   }
 };
 
@@ -120,10 +136,24 @@ export const getSavedBlogs = async (req: Request, res: Response) => {
               userName: "$authorDetails.userName",
             },
 
+
             likes: {
               count: { $size: "$likeDetails" },
-              users: "$likeDetails.user",
             },
+
+            isLiked: {
+              $in: [
+                new mongoose.Types.ObjectId(userId),
+                {
+                  $map: {
+                    input: "$likeDetails",
+                    as: "like",
+                    in: "$$like.user",
+                  },
+                },
+              ],
+            },
+
             views: {
               count: { $size: "$viewsDetails" },
               users: "$viewsDetails.userId",
@@ -131,7 +161,19 @@ export const getSavedBlogs = async (req: Request, res: Response) => {
 
             comments: {
               count: { $size: "$commentDetails" },
-              details: "$commentDetails",
+            },
+
+            isCommented: {
+              $in: [
+                new mongoose.Types.ObjectId(userId),
+                {
+                  $map: {
+                    input: "$commentDetails",
+                    as: "comment",
+                    in: "$$comment.user",
+                  },
+                },
+              ],
             },
 
             createdAt: "$blogDetails.createdAt",

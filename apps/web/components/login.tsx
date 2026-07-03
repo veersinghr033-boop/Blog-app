@@ -38,8 +38,6 @@ export default function LoginPage() {
                 message.success("Login successful");
                 if (resultAction.payload.user.role === "admin") {
                     router.push("/admin");
-                } if (resultAction.payload.user.role === "author") {
-                    router.push("/author");
                 } else {
                     router.push("/reader");
                 }

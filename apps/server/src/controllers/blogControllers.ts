@@ -331,8 +331,18 @@ export const getBlogById = async (req: Request, res: Response) => {
 };
 export const createBlog = async (req: Request, res: Response) => {
   try {
-    const { title, content, authorId } = req.body;
-    const newBlog = new Blog({ title, content, author: authorId });
+    const { title, content } = req.body;
+    const userId = (req as Request & { user?: { id: string } }).user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    if (!title || !content) {
+      return res.status(400).json({ message: "Title and content are required" });
+    }
+
+    const newBlog = new Blog({ title, content, author: userId });
     await newBlog.save();
     res.status(201).json({
       message: "Blog created successfully",

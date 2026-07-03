@@ -3,12 +3,10 @@
 import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { message } from "antd";
 
 function CreateBlog() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     title: "",
@@ -37,7 +35,6 @@ function CreateBlog() {
         title: "",
         content: "",
       });
-      // router.push("/reader/blogs");
     },
 
     onError: (error) => {
