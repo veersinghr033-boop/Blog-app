@@ -5,7 +5,7 @@ import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { message } from "antd";
-
+import Editor from "@/components/lexical/Editor";
 function CreateBlog() {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
@@ -13,7 +13,7 @@ function CreateBlog() {
     content: "",
   });
   const userId = useAppSelector((state) => state.auth.user?.id);
-
+  const [editorContent, setEditorContent] = useState("");
   const publishMutation = useMutation({
     mutationFn: async (values: {
       title: string;
@@ -42,7 +42,31 @@ function CreateBlog() {
       message.error("Failed to publish blog");
     },
   });
+  const formatContent = (text: string) => {
+    const sections = text
+      .split("\n")
+      .filter((line) => line.trim());
 
+    return sections
+      .map((line, index) => {
+        const value = line.trim();
+
+        if (index === 0) {
+          return `<h1>${value}</h1>`;
+        }
+
+        if (
+          value.length < 40 &&
+          !value.includes(".") &&
+          !value.includes(",")
+        ) {
+          return `<h2>${value}</h2>`;
+        }
+
+        return `<p>${value}</p>`;
+      })
+      .join("");
+  };
   const aiMutation = useMutation({
     mutationFn: async () => {
       const title = formData.title;
@@ -81,13 +105,17 @@ Topic: ${title}
 
       return response.data;
     },
-
     onSuccess: (data) => {
-      setFormData((current) => ({
-        ...current,
-        content: data.content,
+      const html = formatContent(data.content);
+
+      setEditorContent(html);
+
+      setFormData((prev) => ({
+        ...prev,
+        content: html,
       }));
       message.success("AI content generated successfully");
+
     },
 
     onError: (error: any) => {
@@ -146,18 +174,18 @@ Topic: ${title}
         </div>
 
         <div className="mb-4">
-          <label htmlFor="content" className="block text-sm font-medium text-gray-700">
+          <label className="block mb-2">
             Content
           </label>
-          <textarea
-            id="content"
-            name="content"
-            value={formData.content}
-            onChange={handleChange}
-            rows={12}
-            placeholder="Write your blog content here..."
-            className="mt-1 p-2 outline-0 block bg-white font-medium text-sm  rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 w-full"
-            required
+
+          <Editor
+            initialContent={editorContent}
+            onChange={(html) =>
+              setFormData((prev) => ({
+                ...prev,
+                content: html,
+              }))
+            }
           />
         </div>
 

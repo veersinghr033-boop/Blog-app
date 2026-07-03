@@ -109,7 +109,8 @@ export const createChat = async (req: Request, res: Response) => {
       groupId?: string;
       message?: string;
     };
-
+    console.log("REQ BODY MESSAGE:", req.body.message);
+    console.log("TYPE:", typeof req.body.message);
     const receiverId = Array.isArray(receiverIdParam)
       ? receiverIdParam[0]
       : receiverIdParam;

@@ -5,8 +5,11 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
-interface Props {
+import ChatEditor from "@/components/lexical/ChatEditor";
+import { convertMessageToJSON } from "@/lib/messageConverter";
+import { Send } from "lucide-react";
 
+interface Props {
     socketRef: any
     selectedUser: any;
 }
@@ -17,7 +20,8 @@ export default function ChatInput({
 }: Props) {
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const userId = useAppSelector((state) => state.auth.user?.id);
-    const [messageText, setMessageText] = useState("");
+    const [messageText, setMessageText] = useState<any>(null);
+
     useEffect(() => {
         setMessageText("")
     }, [selectedUser])
@@ -39,7 +43,14 @@ export default function ChatInput({
     const handleSend = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!messageText.trim() || !selectedUser || !userId) return;
+        sendMessage();
+    };
+    const sendMessage = () => {
+        if (!messageText || !selectedUser || !userId) return;
+        console.log("messageText:", messageText);
+        
+
+        console.log("Sending:", messageText);
 
         if (selectedUser.type === "group") {
             sendMutation.mutate({
@@ -48,7 +59,6 @@ export default function ChatInput({
                 message: messageText,
                 timestamp: new Date().toISOString(),
             });
-
             return;
         }
 
@@ -59,10 +69,9 @@ export default function ChatInput({
             timestamp: new Date().toISOString(),
         });
     };
+    const handleMessageChange = (json: any) => {
+        setMessageText(json);
 
-    const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setMessageText(value);
 
         if (!socketRef.current || !selectedUser || !userId) return;
 
@@ -84,29 +93,34 @@ export default function ChatInput({
             socketRef.current?.emit("stopTyping", stopTypingPayload);
         }, 1500);
     };
+
+
     return (
         <form
             onSubmit={handleSend}
             className="border-t border-gray-300 bg-white p-3 sm:px-4 sm:py-3.5"
         >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
-                <input
+                <ChatEditor
                     value={messageText}
-                    onChange={handleTyping}
-                    className="w-full flex-1 rounded-full border border-gray-300 px-4 py-3 sm:px-5"
+                    onChange={handleMessageChange}
+                    onEnter={sendMessage}
                     placeholder={
                         selectedUser?.type === "group"
                             ? "Send message to group..."
                             : "Type a message..."
                     }
                 />
-
                 <button
                     type="submit"
-                    disabled={!messageText.trim()}
-                    className="bg-black text-white px-4 py-2 rounded disabled:opacity-50"
+                    disabled={!messageText || sendMutation.isPending}
+                    className="bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center shrink-0"
                 >
-                    {sendMutation.isPending ? "Sending..." : "Send"}
+                    {sendMutation.isPending ? (
+                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                        <Send size={22} />
+                    )}
                 </button>
             </div>
         </form>

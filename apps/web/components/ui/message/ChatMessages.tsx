@@ -10,7 +10,7 @@ import {
   useInfiniteQuery,
 } from "@tanstack/react-query";
 import api from "@/utills/axios";
-import { message} from "antd"
+import { message } from "antd"
 function MessageMenu({ onDelete, loading }: { onDelete: () => void; loading?: boolean }) {
   const [open, setOpen] = useState(false);
 
@@ -63,7 +63,7 @@ interface MessageType {
   };
   receiverId?: string;
   groupId?: string;
-  message: string;
+  message: object;
   timestamp: string;
   isRead: boolean;
   readBy: { _id: string; userName: string }[];
@@ -410,7 +410,12 @@ export default function ChatMessages({
                   className={`h-full max-w-[85%] wrap-break-word rounded-2xl px-4 py-2 sm:max-w-[70%] sm:px-5 ${isMine ? "bg-blue-500 text-white" : "bg-gray-100 text-black"
                     }`}
                 >
-                  {item.message}
+                  {typeof item.message === "string"
+                    ? item.message
+                    : item.message?.root?.children
+                      ?.flatMap((p: any) => p.children || [])
+                      ?.map((c: any) => c.text)
+                      ?.join(" ")}
                 </div>
 
                 {isMine && selectedUser.type !== "group" && (
