@@ -14,18 +14,13 @@ const theme = {
         strikethrough: "line-through",
     },
 
-    code: "bg-gray-100 text-sm font-mono p-1 rounded border",
-    
-    link: "text-blue-500 underline",
-
     list: {
-        ul: "list-disc list-inside mb-4",
-        ol: "list-decimal list-inside mb-4",
-    },
-
-    listItem: {
-        ul: "mb-2",
-        ol: "mb-2",
+        nested: {
+            listitem: "ml-4",
+        },
+        ol: "list-decimal list-inside",
+        ul: "list-disc list-inside",
+        listitem: "",
     },
 };
 

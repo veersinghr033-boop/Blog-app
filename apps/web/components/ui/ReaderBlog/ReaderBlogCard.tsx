@@ -94,7 +94,27 @@ function ReaderBlogCard({
         },
         [router, viewMutation]
     );
-    const showReadMore = post.content?.length > 150;
+    const getTextFromLexical = (content: any): string => {
+        if (!content?.root?.children) return "";
+
+        const extract = (nodes: any[]): string => {
+            return nodes
+                .map((node) => {
+                    if (node.text) return node.text;
+
+                    if (node.children) {
+                        return extract(node.children);
+                    }
+
+                    return "";
+                })
+                .join(" ");
+        };
+
+        return extract(content.root.children);
+    };
+    const textContent = getTextFromLexical(post.content);
+    const showReadMore = textContent.length > 150;
 
     return (
         <div className="h-full rounded-lg border bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow border-gray-200 shadow-sm">
@@ -104,7 +124,7 @@ function ReaderBlogCard({
                         {post.title}
                     </h2>
                     <p className="line-clamp-3">
-                        {post.content.slice(0, 200)}
+                        {textContent.slice(0, 200)}
                     </p>
 
                     {showReadMore && (

@@ -32,7 +32,7 @@ const initialConfig = {
 };
 interface Props {
     initialContent: string;
-    onChange: (html: string) => void;
+    onChange: (value: any) => void;
 }
 
 export default function Editor({
@@ -43,19 +43,20 @@ export default function Editor({
 
     return (
         <LexicalComposer initialConfig={initialConfig}>
-            <div className="border rounded-lg overflow-hidden">
+            <div className="border rounded-lg overflow-hidden bg-white border-gray-300">
                 <Toolbar />
 
                 <div className="p-4 max-h-86 overflow-y-auto">
                     <RichTextPlugin
                         contentEditable={
-                            <ContentEditable className="outline-none min-h-[250px]" />
+                            <ContentEditable className="outline-none min-h-60 " />
                         }
                         placeholder={
                             <div className="text-gray-400">
                                 Write your blog...
                             </div>
                         }
+                        
                         ErrorBoundary={() => null}
                     />
 

@@ -66,7 +66,7 @@ function BlogActions({ post, onOpen, userId }: any) {
       <span
         className={`flex items-center gap-1 text-sm cursor-pointer hover:text-green-500 ${isCommented ? "text-green-500" : "text-gray-500"
           }`}
-        onClick={() => onOpen(post)}
+        onClick={() => onOpen(post._id)}
       >
         <CommentOutlined />{post.comments?.count || 0}
       </span>

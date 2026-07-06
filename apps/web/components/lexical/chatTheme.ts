@@ -1,23 +1,25 @@
-
 const chatTheme = {
-    paragraph: "",
+    paragraph: "mb-2",
+
     heading: {
-        h1: "",
-        h2: "",
-        h3: "",
+        h1: "text-4xl font-bold mb-4",
+        h2: "text-3xl font-semibold mb-3",
+        h3: "text-2xl font-medium mb-2",
     },
+
     text: {
-        bold: "",
-        italic: "",
-        underline: "",
-        strikethrough: "",
+        bold: "font-bold",
+        italic: "italic",
+        underline: "underline",
+        strikethrough: "line-through",
     },
+
     list: {
         nested: {
-            listitem: "",
+            listitem: "ml-4",
         },
-        ol: "",
-        ul: "",
+        ol: "list-decimal list-inside",
+        ul: "list-disc list-inside",
         listitem: "",
     },
 };

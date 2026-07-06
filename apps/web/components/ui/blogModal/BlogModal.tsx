@@ -24,6 +24,7 @@ import BlogHeader from "./BlogHeader";
 import BlogActions from "./BlogActions";
 
 import ReportModal from "../Report";
+import Blog from "../blog/Blog";
 
 
 interface ReadBlogProps {
@@ -89,14 +90,13 @@ function ReadBlog({ blog }: ReadBlogProps) {
     }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
     if (!blog) return null;
-
     return (
         <div className="bg-white rounded shadow-xl border border-gray-200 p-6 max-w-full mx-auto overflow-y-auto" style={{ maxHeight: "90vh" }}>
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
                 <div>
                     <h3 className="text-lg font-semibold">Blog Details</h3>
 
-                    {blog.title && <div className="text-gray-600">{blog.title}</div>}
+                    {blog.title && <div className="text-gray-600 text-6xl">{blog.title}</div>}
                 </div>
 
                 <button className="text-gray-600 px-2 py-1" onClick={() => router.back()} aria-label="close">✕</button>

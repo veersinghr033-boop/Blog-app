@@ -6,7 +6,6 @@ import { useMutation } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
 import ChatEditor from "@/components/lexical/ChatEditor";
-import { convertMessageToJSON } from "@/lib/messageConverter";
 import { Send } from "lucide-react";
 
 interface Props {
@@ -21,8 +20,12 @@ export default function ChatInput({
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const userId = useAppSelector((state) => state.auth.user?.id);
     const [messageText, setMessageText] = useState<any>(null);
+    const [editorKey, setEditorKey] = useState(0);
 
-    useEffect(() => {
+    onSuccess: () => {
+        setMessageText(null);
+        setEditorKey((prev) => prev + 1);
+    };    useEffect(() => {
         setMessageText("")
     }, [selectedUser])
 
@@ -31,7 +34,8 @@ export default function ChatInput({
             return api.post("/chat", payload);
         },
         onSuccess: () => {
-            setMessageText("");
+            setMessageText(null);
+            setEditorKey((prev) => prev + 1);
         },
         onError: (error: any) => {
             message.error(
@@ -48,7 +52,7 @@ export default function ChatInput({
     const sendMessage = () => {
         if (!messageText || !selectedUser || !userId) return;
         console.log("messageText:", messageText);
-        
+        console.log(messageText);
 
         console.log("Sending:", messageText);
 
@@ -102,6 +106,7 @@ export default function ChatInput({
         >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
                 <ChatEditor
+                    key={editorKey}
                     value={messageText}
                     onChange={handleMessageChange}
                     onEnter={sendMessage}

@@ -8,16 +8,21 @@ import { message } from "antd";
 import Editor from "@/components/lexical/Editor";
 function CreateBlog() {
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    content: string | null;
+  }>({
     title: "",
-    content: "",
+    content: null,
   });
+  const [editorKey, setEditorKey] = useState(0);
+  const [plainText, setPlainText] = useState("");
   const userId = useAppSelector((state) => state.auth.user?.id);
   const [editorContent, setEditorContent] = useState("");
   const publishMutation = useMutation({
     mutationFn: async (values: {
       title: string;
-      content: string;
+      content: any;
     }) => {
       const response = await api.post("/blogs/create", {
         title: values.title,
@@ -33,8 +38,10 @@ function CreateBlog() {
       message.success("Blog published successfully");
       setFormData({
         title: "",
-        content: "",
+        content: null,
       });
+      setEditorContent("");
+      setEditorKey((prev) => prev + 1);
     },
 
     onError: (error) => {
@@ -85,7 +92,6 @@ Requirements:
 - Do NOT use markdown headings like # or ##
 - Use plain text headings only
 - Include:
-  - Title
   - Introduction
   - 2 to 3 section headings
   - Conclusion
@@ -131,15 +137,39 @@ Topic: ${title}
 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
+  const isContentEmpty = (content: any) => {
+    if (!content?.root?.children?.length) return true;
 
+    const text = content.root.children
+      .flatMap((node: any) => node.children || [])
+      .map((child: any) => child.text || "")
+      .join("")
+      .trim();
+
+    return text.length === 0;
+  };
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    publishMutation.mutate(formData);
+    const title = formData.title.trim();
+    const content = formData.content;
+    
+    if (!title) {
+      message.warning("Please enter title first");
+      return;
+
+    }
+    if (isContentEmpty(formData.content)) {
+      message.warning("Please enter content first");
+      return;
+    }
+
+    publishMutation.mutate({ title, content });
   };
 
   return (
@@ -179,6 +209,7 @@ Topic: ${title}
           </label>
 
           <Editor
+            key={editorKey}
             initialContent={editorContent}
             onChange={(html) =>
               setFormData((prev) => ({
@@ -186,6 +217,7 @@ Topic: ${title}
                 content: html,
               }))
             }
+            
           />
         </div>
 

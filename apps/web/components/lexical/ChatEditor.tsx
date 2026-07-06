@@ -12,6 +12,8 @@ import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { ListNode, ListItemNode } from "@lexical/list";
 import OnChangePlugin from "./plugins/OnChangePlugin";
 import { useState, useEffect } from "react";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+
 const initialConfig = {
     namespace: "ChatEditor",
     theme: chatTheme,
@@ -27,7 +29,7 @@ const initialConfig = {
 };
 
 interface Props {
-    value: string;
+    value: any;
     onChange: (value: any) => void;
     onEnter?: () => void;
     placeholder?: string;
@@ -40,8 +42,6 @@ export default function ChatEditor({
     placeholder = "Type a message...",
 }: Props) {
     const [showToolbar, setShowToolbar] = useState(false);
-
-  
 
     return (
         <LexicalComposer initialConfig={initialConfig}>
@@ -61,9 +61,12 @@ export default function ChatEditor({
                         ErrorBoundary={() => null}
                     />
                     <HistoryPlugin />
+                    <ListPlugin />
+
                     <OnChangePlugin onChange={onChange} />
                     {onEnter && <KeyboardPlugin onEnter={onEnter} />}
                     <SelectionPlugin onSelectionChange={setShowToolbar} />
+
                 </div>
             </div>
         </LexicalComposer>

@@ -41,11 +41,11 @@ function BlogCard({ post, role, userId }: BlogCardProps) {
     },
   });
   const openBlog = useCallback(
-    (blogId: { _id: string }) => {
-      console.log(blogId)
-      router.push(`/${role}/blogs/${blogId._id}`);
+    (blogId: string) => {
+      console.log("blogId", blogId)
+      router.push(`/${role}/blogs/${blogId}`);
       requestIdleCallback(() => {
-        viewMutation.mutate(blogId._id);
+        viewMutation.mutate(blogId);
       });
     },
     [router, role]

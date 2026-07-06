@@ -10,7 +10,8 @@ import {
   useInfiniteQuery,
 } from "@tanstack/react-query";
 import api from "@/utills/axios";
-import { message } from "antd"
+import MessageViewer from "./MessageViewer";
+import { message , Popconfirm} from "antd"
 function MessageMenu({ onDelete, loading }: { onDelete: () => void; loading?: boolean }) {
   const [open, setOpen] = useState(false);
 
@@ -26,16 +27,15 @@ function MessageMenu({ onDelete, loading }: { onDelete: () => void; loading?: bo
 
       {open && (
         <div className="absolute right-0 mt-1 bg-white border rounded shadow p-2 z-50">
-          <button
-            className="text-red-600 block px-2 py-1"
-            onClick={() => {
-              setOpen(false);
-              if (confirm("Delete message?")) onDelete();
-            }}
-            disabled={loading}
-          >
-            Delete
-          </button>
+         
+         <Popconfirm
+            title="Are you sure to delete this message?"
+            onConfirm={onDelete}
+            okText="Yes"
+            cancelText="No"
+            >
+              <button>Delete</button>
+            </Popconfirm>
         </div>
       )}
     </div>
@@ -410,12 +410,7 @@ export default function ChatMessages({
                   className={`h-full max-w-[85%] wrap-break-word rounded-2xl px-4 py-2 sm:max-w-[70%] sm:px-5 ${isMine ? "bg-blue-500 text-white" : "bg-gray-100 text-black"
                     }`}
                 >
-                  {typeof item.message === "string"
-                    ? item.message
-                    : item.message?.root?.children
-                      ?.flatMap((p: any) => p.children || [])
-                      ?.map((c: any) => c.text)
-                      ?.join(" ")}
+                  <MessageViewer value={item.message} />
                 </div>
 
                 {isMine && selectedUser.type !== "group" && (

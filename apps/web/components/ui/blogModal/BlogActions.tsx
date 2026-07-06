@@ -34,11 +34,8 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
             (r: any) => r.userId._id === userId && r.blogId._id === blog._id,
         );
 
-    const isLiked = blog.likes?.users?.includes(userId);
-
-    const isCommented = blog.comments?.details?.some(
-        (comment: any) => comment.user === userId,
-    );
+    const isLiked = blog.isLiked;
+    const isCommented = blog.isCommented;
     const LikeMutation = useMutation({
         mutationFn: async (blogId: string) => {
             const res = await api.post(`/likes/${blogId}`, {
@@ -84,6 +81,16 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
             queryClient.invalidateQueries({
                 queryKey: ["blogs"],
             });
+            queryClient.invalidateQueries({
+                queryKey: ["blogData", userId],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["saved"],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["blog"],
+            });
+
         },
     });
 
@@ -104,7 +111,7 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
                         }`}
                     onClick={() => handleLike(blog._id)}
                 >
-                  <LikeOutlined/>  {blog.likes?.count || 0} 
+                    <LikeOutlined />  {blog.likes?.count || 0}
                 </p>
 
                 <p
@@ -112,7 +119,7 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
                         }`}
                     onClick={() => onOpen(blog)}
                 >
-                   <CommentOutlined/> {blog.comments?.count || 0} 
+                    <CommentOutlined /> {blog.comments?.count || 0}
                 </p>
                 <p className="text-sm text-gray-500">
                     {blog.views && blog.views.length > 0 ? blog.views[0].count : 0} Views

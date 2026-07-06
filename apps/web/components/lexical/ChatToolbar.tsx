@@ -4,7 +4,9 @@ import {
     FORMAT_TEXT_COMMAND,
     $getSelection,
     $isRangeSelection,
-    TextFormatType
+    TextFormatType,
+    SELECTION_CHANGE_COMMAND,
+    COMMAND_PRIORITY_LOW,
 } from "lexical";
 import {
     INSERT_UNORDERED_LIST_COMMAND,
@@ -21,7 +23,11 @@ export default function ChatToolbar({ isVisible }: Props) {
     const [editor] = useLexicalComposerContext();
     const [position, setPosition] = useState({ top: 0, left: 0 });
     const toolbarRef = useRef<HTMLDivElement>(null);
-
+    const [formats, setFormats] = useState({
+        bold: false,
+        italic: false,
+        underline: false,
+    });
     useEffect(() => {
         if (!isVisible) return;
 
@@ -45,11 +51,36 @@ export default function ChatToolbar({ isVisible }: Props) {
             window.removeEventListener("selectionchange", updatePosition);
         };
     }, [isVisible]);
+    const updateFormats = () => {
+        editor.getEditorState().read(() => {
+            const selection = $getSelection();
 
+            if ($isRangeSelection(selection)) {
+                setFormats({
+                    bold: selection.hasFormat("bold"),
+                    italic: selection.hasFormat("italic"),
+                    underline: selection.hasFormat("underline"),
+                });
+            }
+        });
+    };
     const handleFormat = (format: TextFormatType) => {
         editor.dispatchCommand(FORMAT_TEXT_COMMAND, format);
-    };
 
+        setTimeout(() => {
+            updateFormats();
+        }, 0);
+    };
+    useEffect(() => {
+        return editor.registerCommand(
+            SELECTION_CHANGE_COMMAND,
+            () => {
+                updateFormats();
+                return false;
+            },
+            COMMAND_PRIORITY_LOW
+        );
+    }, [editor]);
     const insertList = (listType: "bullet" | "number") => {
         editor.dispatchCommand(
             listType === "bullet"
@@ -58,7 +89,6 @@ export default function ChatToolbar({ isVisible }: Props) {
             undefined
         );
     };
-
     const buttonClass =
         "p-2 rounded hover:bg-gray-700 transition-colors border border-gray-500 bg-gray-600 text-white hover:bg-gray-700 text-sm flex items-center justify-center";
 
@@ -81,8 +111,9 @@ export default function ChatToolbar({ isVisible }: Props) {
                     e.preventDefault();
                     handleFormat("bold");
                 }}
-                className={buttonClass}
                 title="Bold"
+                className={`${buttonClass} ${formats.bold ? "bg-blue-500! border-blue-500!" : ""
+                    }`}
             >
                 <Bold size={16} />
             </button>
@@ -93,8 +124,9 @@ export default function ChatToolbar({ isVisible }: Props) {
                     e.preventDefault();
                     handleFormat("italic");
                 }}
-                className={buttonClass}
                 title="Italic"
+                className={`${buttonClass} ${formats.italic ? "bg-blue-500! border-blue-500!" : ""
+                    }`}
             >
                 <Italic size={16} />
             </button>
@@ -105,7 +137,8 @@ export default function ChatToolbar({ isVisible }: Props) {
                     e.preventDefault();
                     handleFormat("underline");
                 }}
-                className={buttonClass}
+                className={`${buttonClass} ${formats.underline ? "bg-blue-500! border-blue-500!" : ""
+                    }`}
                 title="Underline"
             >
                 <Underline size={16} />
