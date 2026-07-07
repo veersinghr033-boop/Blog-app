@@ -107,7 +107,7 @@ export const createChat = async (req: Request, res: Response) => {
       senderId?: string;
       receiverId?: string | string[];
       groupId?: string;
-      message?: string;
+      message?: any;
     };
     console.log("REQ BODY MESSAGE:", req.body.message);
     console.log("TYPE:", typeof req.body.message);
@@ -125,7 +125,19 @@ export const createChat = async (req: Request, res: Response) => {
     }
 
     const io = req.app.get("io");
+    function extractText(node: any): string {
+      if (!node) return "";
 
+      if (node.text) return node.text;
+
+      if (Array.isArray(node.children)) {
+        return node.children.map(extractText).join(" ");
+      }
+
+      return "";
+    }
+
+    const notificationBody = extractText(message.root);
     if (groupId) {
       const group = await Group.findById(groupId);
 
@@ -206,7 +218,7 @@ export const createChat = async (req: Request, res: Response) => {
         const pushResult = await sendPushNotification({
           tokens: groupTokens,
           title: `${senderName} posted in ${group.name || "a group"}`,
-          body: message,
+          body: notificationBody,
           data: {
             type: "group",
             senderId,
@@ -216,7 +228,6 @@ export const createChat = async (req: Request, res: Response) => {
             timestamp: newMsg.timestamp,
           },
         });
-        // group push result intentionally not logged in production
       }
 
       return res.status(201).json({
@@ -290,7 +301,7 @@ export const createChat = async (req: Request, res: Response) => {
       const pushRes = await sendPushNotification({
         token: receiver.fcmToken,
         title: `New message from ${senderName}`,
-        body: message,
+        body: notificationBody,
         data: {
           type: "private",
           senderId,
@@ -299,7 +310,6 @@ export const createChat = async (req: Request, res: Response) => {
           timestamp: newMsg.timestamp,
         },
       });
-      // private push result intentionally not logged in production
     }
 
     await emitSortedUsers(io, senderId);

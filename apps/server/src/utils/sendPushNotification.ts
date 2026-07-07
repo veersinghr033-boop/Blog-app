@@ -48,7 +48,6 @@ export const sendPushNotification = async ({
             try {
               console.error(`FCM multicast failed for token: ${tokens[idx]} code=${err?.code} message=${err?.message}`);
 
-              // If the token is no longer registered, remove it from the user record
               if (err?.code === "messaging/registration-token-not-registered") {
                 try {
                   const tokenToRemove = tokens[idx];
