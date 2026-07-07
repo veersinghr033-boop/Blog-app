@@ -130,7 +130,7 @@ export default function CommentList({
                                         }}
                                         aria-label="delete comment"
                                     >
-                                        🗑️
+                                        delete
                                     </button>
                                 )}
                             </div>

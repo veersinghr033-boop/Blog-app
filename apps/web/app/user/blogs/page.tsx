@@ -96,7 +96,7 @@ function Blogs() {
                     ))}
                 </div>
             </header>
-            <div className="h-[66vh] mt-3 overflow-auto ">
+            <div className="h-[67vh] mt-3 overflow-auto ">
 
                 <Blog data={blog} hasNextPage={hasNextPage}
                     isFetchingNextPage={isFetchingNextPage}

@@ -8,7 +8,7 @@ import { useMemo } from "react";
 function Page() {
    const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
       useInfiniteQuery({
-        queryKey: ["blogs"],
+        queryKey: ["blog"],
         queryFn: async ({ pageParam }) => {
           const before = pageParam ? `?before=${pageParam}` : "";
           const res = await api.get(`/blogs/all${before}`);
@@ -18,7 +18,7 @@ function Page() {
   
   
         getNextPageParam: (lastPage) =>
-          lastPage.hasMore ? lastPage.nextCursor : undefined,
+          lastPage?.hasMore ? lastPage?.nextCursor : undefined,
         staleTime: 60_000,
         gcTime: 10 * 60_000,
         refetchOnWindowFocus: false,

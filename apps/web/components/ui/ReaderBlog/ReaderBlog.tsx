@@ -34,7 +34,7 @@ function ReaderBlog({ data, hasNextPage = false, isFetchingNextPage = false, fet
     });
 
     const savedIds = useMemo(
-        () => new Set(savedBlogs.map((b: any) => b.blogDetails._id)),
+        () => new Set(savedBlogs.map((b: any) => b.blogDetails?._id)),
         [savedBlogs]
     );
    

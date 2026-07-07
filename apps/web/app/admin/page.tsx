@@ -1,12 +1,12 @@
 "use client"
 
-import {  Table } from "antd";
+import { Table } from "antd";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useMemo } from "react";
 
 interface UserType {
-  key: string
+  _id: string
   name: string
   email: string
   role: string
@@ -16,12 +16,12 @@ interface UserType {
 
 function page() {
   const { data: blogs = [] } = useQuery({
-    queryKey: ["blogs"],
+    queryKey: ["blogDatas"],
     queryFn: async () => {
-      const response = await api.get("/blogs/all")
+      const response = await api.get("/blogs/all-data")
       return response.data.stats
     }
-  })  
+  })
 
   const {
     data,
@@ -42,7 +42,7 @@ function page() {
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => {
-      return lastPage.hasMore
+      return lastPage?.hasMore
         ? lastPage.nextCursor
         : undefined;
     },
@@ -51,11 +51,10 @@ function page() {
   const users = useMemo(() => {
     return data?.pages.flatMap((page) => page.users) ?? [];
   }, [data]);
-const  joinAt = (user: UserType) => {
-  const date = new Date(user.createdAt);
-  return date.toLocaleDateString();
-} 
-
+  const joinAt = (user: UserType) => {
+    const date = new Date(user.createdAt);
+    return date.toLocaleDateString();
+  }
   const cardData = [
     {
       title: "Total Blogs",
@@ -100,7 +99,7 @@ const  joinAt = (user: UserType) => {
               </h3>
 
               <p className="text-2xl font-bold">
-                {card.value}
+                {card?.value}
               </p>
 
               <p className="text-gray-500">
@@ -115,7 +114,7 @@ const  joinAt = (user: UserType) => {
         <Table
           loading={isLoading}
           dataSource={users}
-          rowKey="key"
+          rowKey="_id"
           scroll={{ x: 800 }}
           pagination={{
             pageSize: 5,
@@ -151,8 +150,9 @@ const  joinAt = (user: UserType) => {
               title: "Joined At",
               dataIndex: "createdAt",
               key: "createdAt",
-              render: (value: Date) => joinAt({ createdAt: value } as UserType),}
-        
+              render: (value: Date) => joinAt({ createdAt: value } as UserType),
+            }
+
           ]}
         />
 

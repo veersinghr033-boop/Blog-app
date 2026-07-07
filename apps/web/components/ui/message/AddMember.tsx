@@ -19,7 +19,7 @@ function AddMember({ group, onClose }: PropType) {
   const { data: users = [] } = useQuery<User[]>({
     queryKey: ["users"],
     queryFn: async () => {
-      const response = await api.get("/users");
+      const response = await api.get("/users/all-data");
 
       return response.data.map((user: any) => ({
         id: user._id,

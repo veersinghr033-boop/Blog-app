@@ -3,9 +3,8 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 
-// Load heavy client components only on the client to avoid increasing SSR bundles
-const Sidebar = dynamic(() => import("./sidebar"), { ssr: false });
-const Navbar = dynamic(() => import("./navbar"), { ssr: false });
+import Sidebar from "./sidebar";
+import Navbar from "./navbar";
 
 function MainLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -19,7 +18,6 @@ function MainLayout({ children }: { children: React.ReactNode }) {
           <Sidebar />
         </div>
 
-        {/* Mobile drawer fallback implemented with lightweight markup (no antd) */}
         {open && (
           <div className="fixed inset-0 z-40 md:hidden">
             <div
@@ -45,7 +43,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                         p-2
                         md:py-3
                         md:px-6
-                        md:ml-[250px]
+                        md:ml-62.5
                         md:w-[calc(100%-250px)]
                         w-full
                     "

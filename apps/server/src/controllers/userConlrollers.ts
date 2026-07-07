@@ -4,6 +4,26 @@ import Chat from "../models/chatModel.ts";
 import Group from "../models/GroupModel.ts";
 import Message from "../models/message.ts";
 import { Request, Response } from "express";
+
+export const getAllUsersData = async (req: Request, res: Response) => {
+    try {
+        const userId = (req as Request & { user?: { id: string } }).user?.id;
+
+        const users = await User.find({_id: {$ne: userId}}).select("-password");
+      
+        res.status(200).json({
+            users,
+        });
+    }
+    catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            message: "Failed to retrieve users",
+        });
+    }
+}
+
 export const getAllUsers = async (req: Request, res: Response) => {
     const userId = (req as Request & { user?: { id: string } }).user?.id;
     const before = req.query.before as string | undefined;
@@ -12,7 +32,6 @@ export const getAllUsers = async (req: Request, res: Response) => {
     try {
         const query: any = {
             _id: { $ne: userId },
-            role: { $ne: "admin" },
         };
 
         if (before) {
@@ -149,7 +168,6 @@ export async function emitSortedUsers(io: any, currentUserId?: string) {
     }
     const users = await User.find({
         _id: { $ne: currentUserId },
-        role: { $ne: "admin" },
     }).select("-password").lean();
 
     const chats = await Chat.find({

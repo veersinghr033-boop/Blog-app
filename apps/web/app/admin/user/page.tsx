@@ -10,7 +10,7 @@ import api from "@/utills/axios";
 import { useMemo, useState } from "react";
 
 interface UserType {
-  key: string;
+  _id: string;
   name: string;
   email: string;
   role: string;
@@ -101,7 +101,7 @@ function Users() {
         className="p-6"
         loading={isLoading}
         dataSource={filteredUsers}
-        rowKey="key"
+        rowKey="_id"
         scroll={{ x: 800 }}
         pagination={{
           pageSize: 5,
@@ -143,7 +143,7 @@ function Users() {
               <div className="flex gap-2">
                 <Popconfirm
                   title="Are you sure you want to delete this user?"
-                  onConfirm={() => handleDelete(record.key)}
+                  onConfirm={() => handleDelete(record._id)}
                   okText="Yes"
                   cancelText="No"
                 >

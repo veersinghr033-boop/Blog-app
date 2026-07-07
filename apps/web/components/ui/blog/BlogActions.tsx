@@ -15,29 +15,14 @@ function BlogActions({ post, onOpen, userId }: any) {
       const res = await api.post(`/likes/${blogId}`, {
         userId: userId,
       });
-
+console.log(res.data)
       return res.data;
     },
 
     onSuccess: () => {
-      queryClient.setQueryData(["blogs"], (oldData: any) => {
-          if (!oldData) return oldData
-          const updatedBlogs = oldData.map((blog: any) => {
-            if (blog._id === post._id) {
-              return {
-                ...blog,
-                isLiked: !blog.isLiked,
-                likes: {
-                  ...blog.likes,
-                  count: blog.isLiked ? blog.likes.count - 1 : blog.likes.count + 1,
-                },
-              };
-            
-            }
-            return blog;
-          });
-          return updatedBlogs;
-        })
+      queryClient.invalidateQueries({
+        queryKey: ["blogs"],
+      });
      
 
       queryClient.invalidateQueries({
@@ -51,7 +36,7 @@ function BlogActions({ post, onOpen, userId }: any) {
   });
 
   const handleLike = (blogId: string) => {
-    LikeMutation.mutate(blogId);
+      LikeMutation.mutate(blogId);
   };
   return (
     <>

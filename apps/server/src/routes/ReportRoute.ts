@@ -10,10 +10,10 @@ import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = e.Router();
 
-router.post("/", verifyToken, authorizeRoles("reader", "admin"), createReport);
+router.post("/", verifyToken, authorizeRoles("user", "admin"), createReport);
 router.get("/", verifyToken, authorizeRoles("admin"), getReports);
-router.get("/report", verifyToken, authorizeRoles("reader"), getReportById);
-router.delete("/:id", verifyToken, authorizeRoles("admin", "reader"), deleteReport);
-router.get("/user/:blogId", verifyToken, authorizeRoles("reader", "admin"), getByUserId);
+router.get("/report", verifyToken, authorizeRoles("user"), getReportById);
+router.delete("/:id", verifyToken, authorizeRoles("admin", "user"), deleteReport);
+router.get("/user/:blogId", verifyToken, authorizeRoles("user", "admin"), getByUserId);
 
 export default router;

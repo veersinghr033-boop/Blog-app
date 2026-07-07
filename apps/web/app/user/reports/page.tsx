@@ -4,7 +4,7 @@ import ReportCard from "@/components/ui/ReportCard";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
 
-export default function Page() {
+ function Page() {
     const {
         data,
         fetchNextPage,
@@ -38,3 +38,4 @@ export default function Page() {
     );
 }
 
+export default Page

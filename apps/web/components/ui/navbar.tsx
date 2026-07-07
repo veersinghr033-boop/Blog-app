@@ -1,6 +1,7 @@
 "use client"
 
-import { useAppSelector } from "@/lib/store/hooks"
+import { useAppSelector, useAppDispatch} from "@/lib/store/hooks"
+import { setActiveRole } from "@/lib/store/features/auth"
 import Link from "next/link"
 
 
@@ -13,17 +14,17 @@ function Navbar({ onMenuClick }: NavbarProps) {
         (state) => state.auth.user?.userName || "User"
     )
 
-    const userRole = useAppSelector(
-        (state) => state.auth.user?.role || "reader"
-    )
+    const roles = useAppSelector(
+        (state: any) => state.auth.user?.roles || []
+    );
 
-    const menuByRole: Record<string, { href: string }> = {
-        admin: { href: "/admin/profile" },
-        reader: { href: "/reader/profile" },
-    }
+    const activeRole = useAppSelector(
+        (state: any) => state.auth.activeRole
+    );
 
-    const profilePath =
-        menuByRole[userRole]?.href || "/reader/profile"
+    const dispatch = useAppDispatch();
+
+    const profilePath = roles.includes("admin") ? "/admin/profile" : "/user/profile"
 
     return (
         <header className="bg-white sticky top-0 z-50 border-b border-gray-200 px-2 py-3 md:px-6 flex items-center justify-between">
@@ -44,7 +45,17 @@ function Navbar({ onMenuClick }: NavbarProps) {
                     BlogPlatform
                 </h2>
             </div>
-
+            {/* {roles.length > 1 && (
+                <select
+                    value={activeRole}
+                    onChange={(e) =>
+                        dispatch(setActiveRole(e.target.value))
+                    }
+                >
+                    <option value="admin">Admin</option>
+                    <option value="user">User</option>
+                </select>
+            )} */}
             <Link
                 href={profilePath}
                 className="flex items-center gap-2 md:gap-3"

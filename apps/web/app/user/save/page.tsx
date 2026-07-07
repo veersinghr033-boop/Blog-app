@@ -3,7 +3,7 @@ import ReaderBlog from "@/components/ui/ReaderBlog/ReaderBlog"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import api from "@/utills/axios"
 
-function page() {
+function Page() {
   const {
     data,
     fetchNextPage,
@@ -58,4 +58,4 @@ function page() {
   )
 }
 
-export default page
+export default Page

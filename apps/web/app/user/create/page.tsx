@@ -20,10 +20,7 @@ function CreateBlog() {
   const userId = useAppSelector((state) => state.auth.user?.id);
   const [editorContent, setEditorContent] = useState("");
   const publishMutation = useMutation({
-    mutationFn: async (values: {
-      title: string;
-      content: any;
-    }) => {
+    mutationFn: async (values: { title: string; content: any }) => {
       const response = await api.post("/blogs/create", {
         title: values.title,
         content: values.content,
@@ -50,29 +47,77 @@ function CreateBlog() {
     },
   });
   const formatContent = (text: string) => {
-    const sections = text
+    const lines = text
       .split("\n")
-      .filter((line) => line.trim());
+      .map((line) => line.trim())
+      .filter(Boolean);
 
-    return sections
-      .map((line, index) => {
-        const value = line.trim();
+    let html = "";
+    let inUl = false;
+    let inOl = false;
 
-        if (index === 0) {
-          return `<h1>${value}</h1>`;
+    lines.forEach((line, index) => {
+      if (index === 0) {
+        html += `<h2>${line}</h2>`;
+        return;
+      }
+      if (line.startsWith("- ") || line.startsWith("* ")) {
+        if (!inUl) {
+          html += "<ul>";
+          inUl = true;
         }
 
-        if (
-          value.length < 40 &&
-          !value.includes(".") &&
-          !value.includes(",")
-        ) {
-          return `<h2>${value}</h2>`;
+        if (inOl) {
+          html += "</ol>";
+          inOl = false;
         }
 
-        return `<p>${value}</p>`;
-      })
-      .join("");
+        html += `<li>${line.replace(/^[-*]\s/, "")}</li>`;
+        return;
+      }
+
+      if (/^\d+\./.test(line)) {
+        if (!inOl) {
+          html += "<ol>";
+          inOl = true;
+        }
+
+        if (inUl) {
+          html += "</ul>";
+          inUl = false;
+        }
+
+        html += `<li>${line.replace(/^\d+\.\s*/, "")}</li>`;
+        return;
+      }
+
+      if (inUl) {
+        html += "</ul>";
+        inUl = false;
+      }
+
+      if (inOl) {
+        html += "</ol>";
+        inOl = false;
+      }
+
+      if (
+        line.length < 60 &&
+        !line.endsWith(".") &&
+        !line.endsWith(",") &&
+        !line.endsWith(":")
+      ) {
+        html += `<h3>${line}</h3>`;
+        return;
+      }
+
+      html += `<p>${line}</p>`;
+    });
+
+    if (inUl) html += "</ul>";
+    if (inOl) html += "</ol>";
+
+    return html;
   };
   const aiMutation = useMutation({
     mutationFn: async () => {
@@ -94,6 +139,8 @@ Requirements:
 - Include:
   - Introduction
   - 2 to 3 section headings
+  - ordered or unordered lists if necessary in advantages or disadvantages sections
+  - Main content
   - Conclusion
 - Keep paragraphs short
 - Make the article informative and engaging
@@ -121,7 +168,6 @@ Topic: ${title}
         content: html,
       }));
       message.success("AI content generated successfully");
-
     },
 
     onError: (error: any) => {
@@ -135,9 +181,9 @@ Topic: ${title}
     },
   });
 
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -158,11 +204,10 @@ Topic: ${title}
     event.preventDefault();
     const title = formData.title.trim();
     const content = formData.content;
-    
+
     if (!title) {
       message.warning("Please enter title first");
       return;
-
     }
     if (isContentEmpty(formData.content)) {
       message.warning("Please enter content first");
@@ -176,19 +221,18 @@ Topic: ${title}
     <div className="min-h-screen ">
       <header className="flex flex-col w-full gap-4 border-b border-gray-200">
         <div>
-          <h2 className="text-2xl font-semibold">
-            Create Blog
-          </h2>
+          <h2 className="text-2xl font-semibold">Create Blog</h2>
 
-          <p className="text-gray-500">
-            Write and publish your blog posts
-          </p>
+          <p className="text-gray-500">Write and publish your blog posts</p>
         </div>
       </header>
 
       <form onSubmit={handleSubmit} className="p-6">
         <div className="mb-4">
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="title"
+            className="block text-sm font-medium text-gray-700"
+          >
             Title
           </label>
           <input
@@ -204,9 +248,7 @@ Topic: ${title}
         </div>
 
         <div className="mb-4">
-          <label className="block mb-2">
-            Content
-          </label>
+          <label className="block mb-2">Content</label>
 
           <Editor
             key={editorKey}
@@ -217,14 +259,12 @@ Topic: ${title}
                 content: html,
               }))
             }
-            
           />
         </div>
 
         <div className="flex gap-4 flex-wrap">
           <button
             type="button"
-
             disabled={aiMutation.isPending}
             onClick={() => aiMutation.mutate()}
             className="bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 disabled:opacity-50"

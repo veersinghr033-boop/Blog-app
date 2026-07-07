@@ -36,12 +36,12 @@ export default function LoginPage() {
             const resultAction: any = await dispatch(login(formData) as any);
             if (login.fulfilled.match(resultAction)) {
                 message.success("Login successful");
-                if (resultAction.payload.user.role === "admin") {
+                const roles = resultAction.payload.user?.roles || [resultAction.payload.user?.role];
+                if (roles.includes("admin")) {
                     router.push("/admin");
                 } else {
-                    router.push("/reader");
+                    router.push("/user");
                 }
-                router.push("/");
             } else {
                 message.error(resultAction.payload || "Login failed");
             }

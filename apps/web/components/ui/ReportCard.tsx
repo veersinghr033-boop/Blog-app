@@ -63,10 +63,29 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
     const handleDelete = (id: string) => {
         deleteMutation.mutate(id);
     };
+    const getTextFromLexical = (content: any): string => {
+        if (!content?.root?.children) return "";
 
+        const extract = (nodes: any[]): string => {
+            return nodes
+                .map((node) => {
+                    if (node.text) return node.text;
+
+                    if (node.children) {
+                        return extract(node.children);
+                    }
+
+                    return "";
+                })
+                .join(" ");
+        };
+
+        return extract(content.root.children);
+    };
+   
     return (
         <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 p-4 md:p-0">
-            <div className="mb-6 rounded-3xl bg-white p-6 shadow-sm border border-gray-200">
+            <div className="mb-6 rounded-lg bg-white p-6 shadow-sm border border-gray-200">
                 <div className=" flex items-center justify-between flex-wrap gap-4">
                     <div>
                         <h2 className="mb-1! text-lg! md:text-2xl! font-semibold text-gray-800!">
@@ -120,8 +139,9 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
                             ),
                         }}
                         itemContent={(_, report) => {
-                            const showReadMore = report.blogDetails?.content?.length > 150;
-
+                            // const showReadMore = report.blogDetails?.content?.length > 150;
+                            const textContent = getTextFromLexical(report.blogDetails?.content);
+                            const showReadMore = textContent.length > 150;
                             return (
                                 <div
                                     key={report._id}
@@ -174,7 +194,7 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
                                     <div className="bg-gray-100 rounded-lg p-4 mb-6">
 
                                         <p className="line-clamp-3">
-                                            {report.blogDetails?.content}
+                                            {textContent.slice(0, 400)}
                                         </p>
 
                                         {showReadMore && (

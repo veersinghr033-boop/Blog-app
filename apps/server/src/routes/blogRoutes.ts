@@ -6,6 +6,7 @@ import {
   getBlogById,
   deleteBlog,
   findByBlogId,
+  getAllBlogsData
 } from "../controllers/blogControllers.ts";
 
 import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.ts";
@@ -13,12 +14,12 @@ import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.ts";
 const router = e.Router();
 
 router.get("/all", verifyToken, getAllBlogs);
+router.get("/all-data", verifyToken, getAllBlogsData);
+router.post("/create", verifyToken, authorizeRoles("user"), createBlog);
 
-router.post("/create", verifyToken, authorizeRoles("reader"), createBlog);
+router.get("/:id", verifyToken, authorizeRoles("user"), getBlogById);
 
-router.get("/:id", verifyToken, authorizeRoles("reader"), getBlogById);
-
-router.delete("/delete/:id", verifyToken, authorizeRoles("reader"), deleteBlog);
+router.delete("/delete/:id", verifyToken, authorizeRoles("user"), deleteBlog);
 router.get("/find/:blogId", verifyToken, findByBlogId);
 
 export default router;

@@ -27,7 +27,6 @@ function BlogContent({ post, onOpen }: any) {
   const textContent = getTextFromLexical(post.content);
 
   const showReadMore = textContent.length > 150;
-  console.log(post._id)
 
   return (
     <>

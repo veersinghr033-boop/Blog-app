@@ -4,12 +4,14 @@ import { login, signup, logout, updateProfile, changePassword } from "./authThun
 interface AuthState {
   token: string | null;
   user: any | null;
+  activeRole: string | null;
   loading: boolean;
   error?: string | null;
 }
 const initialState: AuthState = {
   token: null,
   user: null,
+  activeRole: null,
   loading: false,
   error: null,
 };
@@ -17,7 +19,11 @@ const initialState: AuthState = {
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {},
+  reducers: {
+    setActiveRole: (state, action) => {
+      state.activeRole = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(login.pending, (state) => {
@@ -27,6 +33,12 @@ const authSlice = createSlice({
         state.loading = false;
         state.token = action.payload.token;
         state.user = action.payload.user;
+
+        state.activeRole =
+          action.payload.user.roles?.includes("admin")
+            ? "admin"
+            : "user";
+
         state.error = null;
       })
       .addCase(login.rejected, (state, action: any) => {
@@ -40,6 +52,11 @@ const authSlice = createSlice({
         state.loading = false;
         state.token = action.payload.token;
         state.user = action.payload.user;
+        state.activeRole =
+          action.payload.user.roles?.includes("admin")
+            ? "admin"
+            : "user";
+
         state.error = null;
       })
       .addCase(signup.rejected, (state, action: any) => {
@@ -76,5 +93,5 @@ const authSlice = createSlice({
       });
   },
 });
-
+export const { setActiveRole } = authSlice.actions;
 export default authSlice.reducer;

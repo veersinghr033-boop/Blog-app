@@ -35,7 +35,7 @@ function Blog({
   return (
     <div className="flex flex-col gap-4 pt-4 ">
       <Virtuoso
-        style={{ height: "70vh" }}
+        style={{ height: "67vh" }}
         data={data}
         endReached={() => {
           if (hasNextPage && !isFetchingNextPage && fetchNextPage) {

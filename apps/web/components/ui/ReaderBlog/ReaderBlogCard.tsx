@@ -24,12 +24,10 @@ function ReaderBlogCard({
     const LikeMutation = useMutation({
         mutationFn: async (blogId: string) => api.post(`/likes/${blogId}`, { userId }),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["blogs"] });
-            queryClient.invalidateQueries({ queryKey: ["save"] });
+            queryClient.invalidateQueries({ queryKey: ["blog"] });
             queryClient.invalidateQueries({ queryKey: ["saved"] });
         },
     });
-
     const SaveMutation = useMutation({
         mutationFn: async (blogId: string) => {
             const alreadySaved = isSaved;
@@ -43,9 +41,10 @@ function ReaderBlogCard({
                 message.success("Blog saved");
             }
 
-            queryClient.invalidateQueries({ queryKey: ["save"] });
             queryClient.invalidateQueries({ queryKey: ["saved"] });
-            queryClient.invalidateQueries({ queryKey: ["blogs"] });
+            queryClient.invalidateQueries({ queryKey: ["blog"] });
+            queryClient.invalidateQueries({ queryKey: ["save"] });
+
         },
     });
     const viewMutation = useMutation({
@@ -54,9 +53,8 @@ function ReaderBlogCard({
             return response.data;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["blog"] });
-            queryClient.invalidateQueries({ queryKey: ["blogData", userId] });
             queryClient.invalidateQueries({ queryKey: ["saved"] });
+            queryClient.invalidateQueries({ queryKey: ["blog"] });
         },
         onError: (error: any) => {
             const status = error?.response?.status;
@@ -84,9 +82,9 @@ function ReaderBlogCard({
                 return;
             }
 
-            router.prefetch(`/reader/blogs/${blogId}`);
+            router.prefetch(`/user/blogs/${blogId}`);
 
-            router.push(`/reader/blogs/${blogId}`);
+            router.push(`/user/blogs/${blogId}`);
 
             requestIdleCallback(() => {
                 viewMutation.mutate(blogId);

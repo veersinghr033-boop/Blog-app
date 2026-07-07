@@ -22,9 +22,8 @@ function BlogCard({ post, role, userId }: BlogCardProps) {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["blog"] });
+      queryClient.invalidateQueries({ queryKey: ["blogs"] });
       queryClient.invalidateQueries({ queryKey: ["blogData", userId] });
-      queryClient.invalidateQueries({ queryKey: ["saved"] });
     },
     onError: (error: any) => {
       const status = error?.response?.status;

@@ -52,7 +52,6 @@ function Blogs() {
         data?.pages.flatMap(
             (page) => page.blogs
         ) ?? [];
-        console.log(blogs)
     const filteredBlogs = useMemo(() => {
         return blogs.filter((blog: any) => {
             const matchesSearch =

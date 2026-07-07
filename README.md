@@ -12,6 +12,7 @@ This repository contains a full-stack blogging application in a Turbo repo with 
 - Comments, likes, saved blogs, and reporting
 - OpenAI/Groq integration routes for AI-related features
 - Rate limiting on the server to protect API endpoints
+-chat 
 
 ## Getting started
 

@@ -88,8 +88,6 @@ export default function LexicalContentRenderer({
                                 }
 
 
-
-
                                 return (
                                     <React.Fragment key={index}>
                                         {content}

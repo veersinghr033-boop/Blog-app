@@ -28,7 +28,7 @@ function AddGroup({
     } = useQuery<User[]>({
         queryKey: ["users"],
         queryFn: async () => {
-            const response = await api.get("/users")
+            const response = await api.get("/users/all-data")
             const usersData = response.data?.users ?? [];
 
             return usersData.map((user: any) => ({

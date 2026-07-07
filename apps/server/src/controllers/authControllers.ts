@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { Request, Response } from "express";
 import User from "../models/UsersModel";
+import { getPrimaryRole, normalizeRoles } from "../utils/roles";
 
 dotenv.config();
 
@@ -11,7 +12,7 @@ export const registerUser = async (
   res: Response,
 ) => {
   try {
-    const { userName, email, password, role } = req.body;
+    const { userName, email, password, role, roles } = req.body;
 
     const existingUser = await User.findOne({ email });
 
@@ -23,12 +24,15 @@ export const registerUser = async (
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const normalizedRoles = normalizeRoles(roles ?? role);
+    const primaryRole = getPrimaryRole(normalizedRoles);
 
     const newUser = new User({
       userName,
       email,
       password: hashedPassword,
-      role,
+      role: primaryRole,
+      roles: normalizedRoles,
     });
 
     await newUser.save();
@@ -37,6 +41,7 @@ export const registerUser = async (
       {
         id: newUser._id,
         role: newUser.role,
+        roles: newUser.roles,
       },
       process.env.JWT_SECRET as string,
       {
@@ -61,6 +66,7 @@ export const registerUser = async (
         bio: newUser.bio || "",
         email: newUser.email,
         role: newUser.role,
+        roles: newUser.roles,
       },
       token,
     });
@@ -102,6 +108,7 @@ export const loginUser = async (
       {
         id: user._id,
         role: user.role,
+        roles: user.roles,
       },
       process.env.JWT_SECRET as string,
       {
@@ -126,6 +133,7 @@ export const loginUser = async (
         bio: user.bio || "",
         email: user.email,
         role: user.role,
+        roles: user.roles,
       },
       token,
     });

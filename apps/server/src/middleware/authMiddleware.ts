@@ -1,5 +1,6 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
+import { normalizeRoles } from "../utils/roles";
 
 declare global {
   namespace Express {
@@ -51,15 +52,15 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
 
 export const authorizeRoles = (...roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const userRole =
-      typeof req.user === "object" &&
-        req.user !== null &&
-        "role" in req.user &&
-        typeof req.user.role === "string"
-        ? req.user.role
-        : undefined;
+    const userRoles = normalizeRoles(
+      typeof req.user === "object" && req.user !== null
+        ? (req.user as JwtPayload).roles ?? (req.user as JwtPayload).role
+        : undefined,
+    );
 
-    if (typeof userRole !== "string" || !roles.includes(userRole)) {
+    const userRole = userRoles[0];
+
+    if (!userRoles.some((role) => roles.includes(role))) {
       return res.status(403).json({
         message: `Role (${userRole ?? "unknown"}) is not allowed`,
       });

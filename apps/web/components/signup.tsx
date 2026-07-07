@@ -21,7 +21,7 @@ export default function RegisterPage() {
         name: "",
         email: "",
         password: "",
-        role: "reader"
+        role: "user"
     });
 
 
@@ -44,14 +44,12 @@ export default function RegisterPage() {
             const resultAction: any = await dispatch(signup(data) as any);
             if (signup.fulfilled.match(resultAction)) {
                 message.success("Signup successful");
-                if (resultAction.payload.user.role === "admin") {
+                const roles = resultAction.payload.user?.roles || [resultAction.payload.user?.role];
+                if (roles.includes("admin")) {
                     router.push("/admin");
-                } if (resultAction.payload.user.role === "author") {
-                    router.push("/author");
                 } else {
-                    router.push("/reader");
+                    router.push("/user");
                 }
-                router.push("/login");
             } else {
                 message.error(resultAction.payload || "Signup failed");
             }

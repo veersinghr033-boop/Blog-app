@@ -10,11 +10,11 @@ import {
     UsergroupAddOutlined,
     BookOutlined,
     EditOutlined,
-    LoginOutlined,
     AppstoreOutlined,
     MessageOutlined
 } from "@ant-design/icons"
-
+import { setActiveRole } from "@/lib/store/features/auth";
+import { useEffect } from "react"
 interface SidebarProps {
     mobile?: boolean
     open?: boolean
@@ -34,13 +34,13 @@ const menuByRole: Record<string, MenuItem[]> = {
         { label: "Reports", href: "/admin/reports", icon: <AppstoreOutlined /> },
     ],
 
-    reader: [
-        { label: "Home", href: "/reader", icon: <HomeOutlined /> },
-        { label: "Saved Blogs", href: "/reader/save", icon: <BookOutlined /> },
-        { label: "Reports", href: "/reader/reports", icon: <AppstoreOutlined /> },
-        { label: "Create Blog", href: "/reader/create", icon: <EditOutlined /> },
-        { label: "My Blogs", href: "/reader/blogs", icon: <BookOutlined /> },
-        { label: "Messages", href: "/reader/messages", icon: <MessageOutlined /> }
+    user: [
+        { label: "Home", href: "/user", icon: <HomeOutlined /> },
+        { label: "Saved Blogs", href: "/user/save", icon: <BookOutlined /> },
+        { label: "Reports", href: "/user/reports", icon: <AppstoreOutlined /> },
+        { label: "Create Blog", href: "/user/create", icon: <EditOutlined /> },
+        { label: "My Blogs", href: "/user/blogs", icon: <BookOutlined /> },
+        { label: "Messages", href: "/user/messages", icon: <MessageOutlined /> }
     ],
 }
 
@@ -54,8 +54,31 @@ export default function Sidebar({
     const dispatch = useAppDispatch()
     const router = useRouter()
 
-    const role = useAppSelector((state: any) => state.auth.user?.role)
+    const roles = useAppSelector((state: any) => state.auth.user?.roles || [state.auth.user?.role])
+    const activeRole = useAppSelector(
+        (state: any) => state.auth.activeRole
+    );
+    console.log("pathname:", pathname)
+    const menu =
+        activeRole === "admin"
+            ? menuByRole.admin
+            : menuByRole.user;
+    useEffect(() => {
+        console.log("Sidebar Mounted");
 
+        return () => {
+            console.log("Sidebar Unmounted");
+        };
+    }, []);
+    const handleRoleChange = (role: string) => {
+        dispatch(setActiveRole(role));
+
+        if (role === "admin") {
+            router.push("/admin");
+        } else {
+            router.push("/user");
+        }
+    };
     const handleLogout = async () => {
         const resultAction: any = await dispatch(logout() as any)
 
@@ -73,7 +96,28 @@ export default function Sidebar({
     const SidebarContent = (
         <div className="h-full flex flex-col">
             <div className="flex-1">
-                {menuByRole[role]?.map((item: any) => {
+                {roles.length > 1 && (
+                    <select
+                        value={activeRole}
+                        onChange={(e) =>
+                            handleRoleChange(e.target.value)
+                        }
+                        className="w-11/12 mb-4 border rounded-lg px-3 py-2"
+                    >
+                        {roles.includes("admin") && (
+                            <option value="admin">
+                                Admin
+                            </option>
+                        )}
+
+                        {roles.includes("user") && (
+                            <option value="user">
+                                User
+                            </option>
+                        )}
+                    </select>
+                )}
+                {menu?.map((item) => {
                     const active = pathname === item.href
 
                     return (
