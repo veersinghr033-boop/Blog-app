@@ -1,5 +1,3 @@
-// app/reader/messages/page.tsx
-
 "use client";
 
 import FCMProvider from "@/components/FCMProvider";

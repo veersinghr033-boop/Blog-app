@@ -6,7 +6,7 @@ import {
   deleteComment
 } from "../controllers/commentControllers.ts";
 
-import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.ts";
+import { verifyToken } from "../middleware/authMiddleware.ts";
 
 const router = e.Router();
 

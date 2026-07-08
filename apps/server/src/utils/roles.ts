@@ -29,6 +29,6 @@ export const getPrimaryRole = (roles: UserRole[]): UserRole => {
     return "user";
 };
 
-export const hasRole = (value: unknown, targetRole: UserRole): boolean => {
-    return normalizeRoles(value).includes(targetRole);
-};
+// export const hasRole = (value: unknown, targetRole: UserRole): boolean => {
+//     return normalizeRoles(value).includes(targetRole);
+// };

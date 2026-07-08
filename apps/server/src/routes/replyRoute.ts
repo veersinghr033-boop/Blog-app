@@ -1,5 +1,5 @@
 import e from "express";
-import { authorizeRoles, verifyToken } from "../middleware/authMiddleware.ts";
+import { verifyToken } from "../middleware/authMiddleware.ts";
 import { createReply ,getRepliesByCommentId} from "../controllers/replyControllers.ts";
 
 const router = e.Router();

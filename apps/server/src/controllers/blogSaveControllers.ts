@@ -183,7 +183,6 @@ export const getSavedBlogs = async (req: Request, res: Response) => {
       },
     );
     const savedBlogs = await BlogSave.aggregate(pipeline);
-    // console.log(savedBlogs);
     if (savedBlogs.length === 0) {
       return res.status(404).json({
         message: "Blog not found",

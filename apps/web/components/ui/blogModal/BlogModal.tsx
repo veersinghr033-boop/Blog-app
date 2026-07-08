@@ -24,7 +24,6 @@ import BlogHeader from "./BlogHeader";
 import BlogActions from "./BlogActions";
 
 import ReportModal from "../Report";
-import Blog from "../blog/Blog";
 
 
 interface ReadBlogProps {

@@ -23,7 +23,6 @@ const normalizeBeforeDate = (value: unknown): Date | undefined => {
 
 export const getMessages = async (req: Request, res: Response) => {
   try {
-    // const senderId = req.user?.id;
     const senderId = (req as Request & { user?: { id: string } }).user?.id;
 
     const receiverIdParam = req.params.receiverId;
@@ -114,10 +113,7 @@ export const createChat = async (req: Request, res: Response) => {
     const receiverId = Array.isArray(receiverIdParam)
       ? receiverIdParam[0]
       : receiverIdParam;
-    // console.log(senderId,
-    //   receiverId,
-    //   groupId,
-    //   message,)
+
     if (!senderId || !message || (!groupId && typeof receiverId !== "string")) {
       return res.status(400).json({
         message: "Missing required fields",
@@ -171,7 +167,12 @@ export const createChat = async (req: Request, res: Response) => {
       const allMembers = await Chat.findById(chat._id).populate<{
         participants: Participant[];
       }>("participants", "_id fcmToken");
-
+      console.log(
+        allMembers?.participants.map((p) => ({
+          id: p._id,
+          token: p.fcmToken,
+        }))
+      );
       const senderUser = await User.findById(senderId).select("userName");
       const senderName = senderUser?.userName || "Someone";
 
@@ -192,7 +193,7 @@ export const createChat = async (req: Request, res: Response) => {
       const receiverIds = (allMembers?.participants || [])
         .map((participant) => participant._id.toString())
         .filter((participantId) => participantId && participantId !== senderId);
-
+console.log(receiverIds)
       receiverIds.forEach(async (receiverId) => {
         io.to(receiverId).emit("newNotification", {
           senderId,
@@ -213,7 +214,7 @@ export const createChat = async (req: Request, res: Response) => {
           .map((participant) => participant.fcmToken)
           .filter((token): token is string => Boolean(token)),
       )];
-
+      console.log(groupTokens)
       if (groupTokens.length) {
         const pushResult = await sendPushNotification({
           tokens: groupTokens,
@@ -228,6 +229,7 @@ export const createChat = async (req: Request, res: Response) => {
             timestamp: newMsg.timestamp,
           },
         });
+        console.log("hi",pushResult)
       }
 
       return res.status(201).json({

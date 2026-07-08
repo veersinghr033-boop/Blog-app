@@ -16,7 +16,6 @@ const chatSchema = new mongoose.Schema({
     }
 }, { timestamps: true },);
 
-// Index participants to speed up lookups by user
 chatSchema.index({ participants: 1, isGroupChat: 1 });
 
 const Chat = mongoose.model("Chat", chatSchema);

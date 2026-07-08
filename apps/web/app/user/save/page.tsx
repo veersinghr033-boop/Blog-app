@@ -38,9 +38,7 @@ function Page() {
 
       return items.map((item: any) => item?.blogDetails ?? item);
     }) ?? [];
-  // console.log(blogs, fetchNextPage,
-  //   hasNextPage,
-  //   isFetchingNextPage,)
+
   return (
     <div className="min-h-screen ">
       <header className="mb-6">

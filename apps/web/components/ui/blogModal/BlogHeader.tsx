@@ -5,7 +5,6 @@ import LexicalContentRenderer from "../../lexical/LexicalContentRenderer";
 export default function BlogHeader({ blog }: { blog: any }) {
     return (
         <>
-            {/* <h1 className="font-semibold text-5xl mb-2">{blog.title}</h1> */}
 
             <div className="max-h-80 overflow-auto whitespace-pre-line">
                 <LexicalContentRenderer content={blog.content} />

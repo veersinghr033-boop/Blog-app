@@ -1,6 +1,6 @@
 "use client"
 import dynamic from "next/dynamic";
-const Blog = dynamic(() => import("@/components/ui/blog/Blog"), { ssr: false });
+const Blog = dynamic(() => import("@/components/ui/blog/Blog"));
 import { useAppSelector } from "@/lib/store/hooks";
 import api from "@/utills/axios";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -35,10 +35,7 @@ function Blogs() {
                 ? lastPage.nextCursor
                 : undefined,
     });
-    // const blog =
-    //     data?.pages.flatMap(
-    //         (page) => page.blog
-    //     ) ?? [];
+  
     const blog = useMemo(() => {
         return data?.pages.flatMap(page => page.blog) ?? [];
     }, [data]);

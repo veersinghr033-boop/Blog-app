@@ -1,7 +1,9 @@
 "use client";
 
+import { Users } from "lucide-react";
 import ViewGroup from "./ViewGroup";
 import { useState } from "react";
+
 interface MessageHeaderProps {
   selectedUser: any;
   userStatuses: Record<string, string>;
@@ -37,7 +39,7 @@ export default function MessageHeader({
         <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4 cursor-pointer" onClick={handleView}>
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-black text-white font-semibold uppercase relative">
             {selectedUser?.type === "group" ? (
-              "👥"
+              <Users size={19} />
             ) : (
               selectedUser?.name?.[0] || "U"
             )}

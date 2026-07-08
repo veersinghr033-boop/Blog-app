@@ -6,17 +6,17 @@ const groupSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
-    admin: {
+    admin: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,
-    },
+    }],
     chatId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Chat"
     }
 
-}, { timestamps: true }, );
+}, { timestamps: true },);
 
 const Group = mongoose.model("Group", groupSchema);
 

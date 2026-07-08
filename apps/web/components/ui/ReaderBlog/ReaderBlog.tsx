@@ -1,6 +1,6 @@
 "use client";
 
-import {  useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import {  useQuery } from "@tanstack/react-query";
 import { VirtuosoGrid } from "react-virtuoso";
 import api from "@/utills/axios";

@@ -1,4 +1,4 @@
-import express from "express";
+import e from "express";
 import {
   createChat,
   getMessages,
@@ -7,7 +7,7 @@ import {
 } from "../controllers/chatControllers.ts";
 import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.ts";
 
-const router = express.Router();
+const router = e.Router();
 
 router.post("/chat", verifyToken, authorizeRoles("user"), createChat);
 router.get(

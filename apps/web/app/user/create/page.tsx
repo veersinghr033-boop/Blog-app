@@ -16,7 +16,6 @@ function CreateBlog() {
     content: null,
   });
   const [editorKey, setEditorKey] = useState(0);
-  const [plainText, setPlainText] = useState("");
   const userId = useAppSelector((state) => state.auth.user?.id);
   const [editorContent, setEditorContent] = useState("");
   const publishMutation = useMutation({

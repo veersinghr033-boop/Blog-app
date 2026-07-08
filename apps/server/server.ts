@@ -32,7 +32,6 @@ app.set("io", io);
 
 app.use(express.json());
 app.use(cookieParser());
-// enable gzip/Brotli compression for responses
 app.use(compression());
 app.use(apiLimiter);
 app.use(

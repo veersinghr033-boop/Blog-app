@@ -7,7 +7,6 @@ export const addView = async (req: Request, res: Response) => {
   try {
     const userId = (req as Request & { user?: { id: string } }).user?.id;
     const { blogId } = req.params as { blogId: string };
-    // suppressed debug log
     if (!blogId || !userId) {
       return res.status(400).json({
         message: "Missing required fields",

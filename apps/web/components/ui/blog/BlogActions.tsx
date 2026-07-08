@@ -1,9 +1,9 @@
 "use client";
 import React from "react";
 import { message } from "antd"
-import { LikeOutlined, CommentOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
+import { ThumbsUp, MessageCircle } from "lucide-react";
 
 
 function BlogActions({ post, onOpen, userId }: any) {
@@ -45,7 +45,7 @@ console.log(res.data)
           }`}
         onClick={() => handleLike(post._id)}
       >
-        <LikeOutlined /> {post.likes?.count || 0}
+        <ThumbsUp size={15} /> {post.likes?.count || 0}
       </span>
 
       <span
@@ -53,7 +53,7 @@ console.log(res.data)
           }`}
         onClick={() => onOpen(post._id)}
       >
-        <CommentOutlined />{post.comments?.count || 0}
+        <MessageCircle size={15} />{post.comments?.count || 0}
       </span>
       <span className="text-sm cursor-pointer hover:text-blue-500 text-gray-500">
         {post.views && post.views.length > 0 ? post.views[0].count : 0} Views

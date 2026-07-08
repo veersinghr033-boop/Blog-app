@@ -4,7 +4,7 @@ import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useRouter } from "next/navigation";
-import { LikeOutlined, CommentOutlined } from "@ant-design/icons";
+import { ThumbsUp, MessageCircle } from "lucide-react";
 
 
 interface Props {
@@ -107,11 +107,11 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
                     {blog?.createdAt && new Date(blog.createdAt).toLocaleDateString()}
                 </p>
                 <p
-                    className={`text-sm cursor-pointer hover:text-blue-500  ${isLiked ? "text-blue-500" : "text-gray-500"
+                    className={`flex items-center gap-1 text-sm cursor-pointer hover:text-blue-500  ${isLiked ? "text-blue-500" : "text-gray-500"
                         }`}
                     onClick={() => handleLike(blog._id)}
                 >
-                    <LikeOutlined />  {blog.likes?.count || 0}
+                    <ThumbsUp size={15} />  {blog.likes?.count || 0}
                 </p>
 
                 <p
@@ -119,7 +119,7 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
                         }`}
                     onClick={() => onOpen(blog)}
                 >
-                    <CommentOutlined /> {blog.comments?.count || 0}
+                    <MessageCircle size={15} /> {blog.comments?.count || 0}
                 </p>
                 <p className="text-sm text-gray-500">
                     {blog.views && blog.views.length > 0 ? blog.views[0].count : 0} Views

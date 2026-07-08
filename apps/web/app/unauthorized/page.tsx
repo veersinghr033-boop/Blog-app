@@ -1,11 +1,6 @@
 import Link from "next/link";
 import {  Result } from 'antd';
 
-// export const metadata: Metadata = {
-//     title: "Unauthorized",
-//     description: "You do not have permission to access this page.",
-// };
-
 export default function UnauthorizedPage() {
     return (
             <Result

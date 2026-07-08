@@ -4,22 +4,16 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useAppSelector, useAppDispatch } from "@/lib/store/hooks"
 import { logout } from "@/lib/store/features/authThunk"
-import { persistor } from "@/lib/store/store"
-import {
-    HomeOutlined,
-    UsergroupAddOutlined,
-    BookOutlined,
-    EditOutlined,
-    AppstoreOutlined,
-    MessageOutlined
-} from "@ant-design/icons"
+import { persistor } from "@/lib/store/store"   
 import { setActiveRole } from "@/lib/store/features/auth";
 import { useEffect } from "react"
+import { House , UsersRound, NotebookText , LayoutGrid , PenLine, MessageCircleMore} from "lucide-react"
 interface SidebarProps {
     mobile?: boolean
     open?: boolean
     onClose?: () => void
 }
+
 interface MenuItem {
     label: string
     href: string
@@ -28,19 +22,19 @@ interface MenuItem {
 
 const menuByRole: Record<string, MenuItem[]> = {
     admin: [
-        { label: "Dashboard", href: "/admin", icon: <HomeOutlined /> },
-        { label: "Users", href: "/admin/user", icon: <UsergroupAddOutlined /> },
-        { label: "Blogs", href: "/admin/blogs", icon: <BookOutlined /> },
-        { label: "Reports", href: "/admin/reports", icon: <AppstoreOutlined /> },
+        { label: "Dashboard", href: "/admin", icon: <House size={19} /> },
+        { label: "Users", href: "/admin/user", icon: <UsersRound size={19} /> },
+        { label: "Blogs", href: "/admin/blogs", icon: <NotebookText size={19} /> },
+        { label: "Reports", href: "/admin/reports", icon: <LayoutGrid size={19} /> },
     ],
 
     user: [
-        { label: "Home", href: "/user", icon: <HomeOutlined /> },
-        { label: "Saved Blogs", href: "/user/save", icon: <BookOutlined /> },
-        { label: "Reports", href: "/user/reports", icon: <AppstoreOutlined /> },
-        { label: "Create Blog", href: "/user/create", icon: <EditOutlined /> },
-        { label: "My Blogs", href: "/user/blogs", icon: <BookOutlined /> },
-        { label: "Messages", href: "/user/messages", icon: <MessageOutlined /> }
+        { label: "Home", href: "/user", icon: <House size={19} /> },
+        { label: "Saved Blogs", href: "/user/save", icon: <NotebookText size={19} /> },
+        { label: "Reports", href: "/user/reports", icon: <LayoutGrid size={19} /> },
+        { label: "Create Blog", href: "/user/create", icon: <PenLine size={19} /> },
+        { label: "My Blogs", href: "/user/blogs", icon: <NotebookText size={19} /> },
+        { label: "Messages", href: "/user/messages", icon: <MessageCircleMore size={19} /> }
     ],
 }
 
@@ -83,11 +77,10 @@ export default function Sidebar({
         const resultAction: any = await dispatch(logout() as any)
 
         if (logout.fulfilled.match(resultAction)) {
-            // lightweight notification
             try {
                 await persistor.purge()
             } catch (e) {
-                // ignore
+                console.log(e)
             }
             router.push("/login")
         }

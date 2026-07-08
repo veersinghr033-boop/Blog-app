@@ -23,9 +23,9 @@ function MainLayout({ children }: { children: React.ReactNode }) {
               className="absolute inset-0 bg-black/40"
               onClick={() => setOpen(false)}
             />
-            <div className="absolute left-0 top-0 h-full w-64 bg-white p-4">
+            <div className="absolute left-0 top-16 h-full w-64 bg-white p-4 pt-10">
               <button
-                className="mb-4 text-gray-600"
+                className=" text-gray-600 absolute right-3 top-3"
                 onClick={() => setOpen(false)}
               >
                 Close
@@ -37,7 +37,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
 
         <div
           className="
-                    fixed left-0 top-16 h-[calc(100vh-64px)]
+                    fixed left-0 top-16 h-[calc(100vh-64px)] 
                     bg-stone-100
                         p-2
                         md:py-3

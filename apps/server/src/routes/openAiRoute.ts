@@ -1,7 +1,7 @@
-import express from "express";
+import e from "express";
 import { generateBlog } from "../controllers/openAiControllers.ts";
 
-const router = express.Router();
+const router = e.Router();
 
 router.post("/generate", generateBlog);
 

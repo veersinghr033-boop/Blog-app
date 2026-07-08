@@ -1,5 +1,5 @@
 "use client";
-import { message } from "antd";
+import { message,Popconfirm } from "antd";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
@@ -121,17 +121,18 @@ export default function CommentList({
                                 </div>
 
                                 {isCommentOwner(comment) && (
+                                    <Popconfirm
+                                        title="Are you sure you want to delete this comment?"
+                                        onConfirm={() => handleDeleteComment(comment._id)}
+                                        okText="Yes"
+                                        cancelText="No"
+                                    >
                                     <button
                                         className="text-red-600"
-                                        onClick={() => {
-                                            if (window.confirm("Delete comment?")) {
-                                                handleDeleteComment(comment._id)
-                                            }
-                                        }}
-                                        aria-label="delete comment"
                                     >
                                         delete
                                     </button>
+                                    </Popconfirm>
                                 )}
                             </div>
 

@@ -43,7 +43,7 @@ function page() {
     initialPageParam: null,
     getNextPageParam: (lastPage) => {
       return lastPage?.hasMore
-        ? lastPage.nextCursor
+        ? lastPage.nextCursor || undefined
         : undefined;
     },
   });
@@ -157,9 +157,6 @@ function page() {
         />
 
       </div>
-
-
-
 
     </div>
   )

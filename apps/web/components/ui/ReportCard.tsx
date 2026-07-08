@@ -6,17 +6,14 @@ import {
     Popconfirm,
     message,
 } from "antd";
-import {
-    DeleteOutlined,
-    UserOutlined,
-    WarningOutlined,
-} from "@ant-design/icons";
+
 import { useState } from "react";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useRouter } from "next/navigation";
 import { Virtuoso } from "react-virtuoso";
+import { Trash2, UserRound, TriangleAlert, User } from "lucide-react";
 
 
 interface ReportCardProps {
@@ -98,7 +95,7 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
                     </div>
 
                     <div className="flex items-center gap-2 rounded-2xl bg-red-50 px-4 py-3">
-                        <WarningOutlined className="text-red-500 text-xl" />
+                        <TriangleAlert size={20} className="text-red-500 text-xl" />
 
                         <div>
                             <p className="block text-gray-500 text-base">
@@ -156,7 +153,7 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
                                         </h2>
 
                                         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 transition-all duration-300 group-hover:bg-red-100">
-                                            <WarningOutlined className="text-lg text-red-500" />
+                                            <TriangleAlert size={20} className="text-lg text-red-500" />
                                         </div>
                                     </div>
 
@@ -215,7 +212,7 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
                                     </div>
                                     <div className="mb-4 flex items-center justify-between">
                                         <div className="flex items-center gap-2 text-gray-600">
-                                            <UserOutlined />
+                                            <UserRound size={15}/>
 
                                             <span>
                                                 {report.userDetails?.userName || "Unknown User"}
@@ -242,7 +239,7 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
                                         >
                                             <Button
                                                 danger
-                                                icon={<DeleteOutlined />}
+                                                icon={<Trash2 size={15} />}
                                                 className="rounded-xl"
                                             >
                                                 Delete

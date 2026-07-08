@@ -28,7 +28,7 @@ export const createGroup = async (req: Request, res: Response) => {
 
         const group = await Group.create({
             name: groupName.trim(),
-            admin: userId,
+            admin: [userId],
             chatId: chat._id,
         });
 
@@ -69,23 +69,32 @@ export const getGroups = async (req: Request, res: Response) => {
 
 export const deleteById = async (req: Request, res: Response) => {
     try {
-        // const currentUserId = req.user?.id;
         const currentUserId = (req as Request & { user?: { id: string } }).user?.id;
 
         const userId = req.params.userId
         const { Groups } = req.body;
-        // suppressing verbose group listing in production
         const group = await Group.findById(Groups);
-
+console.log(currentUserId, userId,Groups , group)
         if (!group) {
             return res.status(404).json({
                 message: "Group not found",
             });
         }
+        const isAdmin = group.admin.some(
+            (adminId) => adminId.toString() === userId
+        );
 
-        if (group.admin.toString() !== currentUserId?.toString()) {
-            return res.status(403).json({
-                message: "Only admin can remove members",
+        if (isAdmin && group.admin.length === 1) {
+            return res.status(400).json({
+                message: "Assign another admin before leaving the group.",
+            });
+        }
+
+        if (isAdmin) {
+            await Group.findByIdAndUpdate(Groups, {
+                $pull: {
+                    admin: userId,
+                },
             });
         }
 
@@ -119,7 +128,7 @@ export const groupDelete = async (req: Request, res: Response) => {
             chatId: chat?._id,
         });
         return res.status(200).json({
-            message: "Member removed successfully",
+            message: "group deleted successfully",
         });
     } catch (error) {
         console.error(error);
@@ -168,18 +177,50 @@ export const changeAdmin = async (req: Request, res: Response) => {
         const { groupId } = req.params as { groupId: string };
         const { adminId } = req.body;
 
-        // debug values suppressed
         const group = await Group.findByIdAndUpdate(
-            groupId, { admin: adminId }, { new: true },
+            groupId,
+            { $push: { admin: adminId } },
+            {
+                returnDocument: "after",
+            }
+        ).populate({
+            path: "admin",
+            select: "userName role",
+        });
+        console.log(group)
+
+        return res.status(200).json({
+            message: "Group admin updated successfully",
+        });
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            message: "Server error",
+        });
+    }
+};
+
+export const removeAdmin = async (req: Request, res: Response) => {
+    try {
+        const { groupId } = req.params as { groupId: string };
+        const { adminId } = req.body;
+
+        const group = await Group.findByIdAndUpdate(
+            groupId,
+            { $pull: { admin: adminId } },
+            {
+                returnDocument: "after",
+            }
         ).populate({
             path: "admin",
             select: "userName role",
         });
 
         return res.status(200).json({
-            message: "Group admin updated successfully",
+            message: "Group admin removed successfully",
         });
-    } catch (error) {
+     } catch (error) {
         console.error(error);
 
         return res.status(500).json({

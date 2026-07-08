@@ -43,12 +43,13 @@ export const useFCM = ({ userId }: { userId?: string }) => {
                     vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
                 });
 
-                console.log("FCM: getToken returned", token);
 
                 if (token && isActive) {
                     try {
                         const res = await api.post("/users/save-fcm-token", { token });
-                        console.log('FCM: token saved', res?.data);
+                        console.log("FCM: notification permission", permission);
+                        console.log("FCM: getToken returned", token);
+                        console.log("FCM: token saved", res?.data);
                     } catch (err) {
                         console.error('FCM: failed to save token', err);
                     }

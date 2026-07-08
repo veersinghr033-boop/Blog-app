@@ -191,7 +191,6 @@ export const initSocket = (server: any) => {
         if (chatRoom) {
           io.to(chatRoom).emit("messagesRead", payload);
         }
-        // Update sorted user lists for the reader and senders so unread counts refresh
         try {
           if (payload?.reader?._id) {
             await emitSortedUsers(io, payload.reader._id.toString());

@@ -4,7 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import { useAppSelector } from "@/lib/store/hooks";
 import AddGroup from "./addGroup";
-import { TeamOutlined } from "@ant-design/icons"
+import { Users } from "lucide-react";
+
 
 interface UserType {
   id: number;
@@ -93,7 +94,7 @@ export default function UserSidebar({
             >
               <div className="relative">
                 <div className="relative h-12 w-12 rounded-full bg-black text-white flex items-center justify-center capitalize font-semibold">
-                  {isGroup ? <TeamOutlined /> : item.name?.[0]}
+                  {isGroup ? <Users size={19} /> : item.name?.[0]}
                 </div>
                 {item.unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">{item.unreadCount > 99 ? '99+' : item.unreadCount}</span>

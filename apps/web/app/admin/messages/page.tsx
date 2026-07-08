@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import Message from "@/components/ui/message/Message"
+import Message from "@/components/ui/message/Message";
 function page() {
-    return (
-        <div>
-            <Message />
-        </div>
-    )
+  return (
+    <div>
+      <Message />
+    </div>
+  );
 }
 
-export default page
+export default page;

@@ -3,7 +3,8 @@ import { message } from "antd"
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useRouter } from "next/navigation";
-import { LikeOutlined, CommentOutlined, SaveOutlined } from "@ant-design/icons";
+import { ThumbsUp, MessageCircle, Save } from "lucide-react";
+
 interface ReaderBlogCardProps {
     post: any;
     userId: string;
@@ -151,16 +152,16 @@ function ReaderBlogCard({
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-4 text-sm">
                             <span
-                                className={`cursor-pointer transition-colors ${isLiked ? "text-blue-500" : "text-gray-500 hover:text-blue-500"}`}
+                                className={`flex items-center gap-1 cursor-pointer transition-colors ${isLiked ? "text-blue-500" : "text-gray-500 hover:text-blue-500"}`}
                                 onClick={() => LikeMutation.mutate(post._id)}
                             >
-                                <LikeOutlined /> {post.likes?.count || 0}
+                                <ThumbsUp size={15} /> {post.likes?.count || 0}
                             </span>
                             <span
                                 className={`flex items-center gap-1 cursor-pointer transition-colors ${isCommented ? "text-green-500" : "text-gray-500 hover:text-green-500"}`}
                                 onClick={() => openBlogModal(post._id)}
                             >
-                                <CommentOutlined /> {post.comments?.count || 0}
+                                <MessageCircle size={15} /> {post.comments?.count || 0}
                             </span>
                             <span>{post.views && post.views.length > 0 ? post.views[0].count : 0} Views</span>
                         </div>
@@ -169,7 +170,7 @@ function ReaderBlogCard({
                             onClick={() => SaveMutation.mutate(post._id)}
                             title={isSaved ? "Unsave" : "Save"}
                         >
-                            <SaveOutlined />
+                            <Save size={20} />
                         </button>
                     </div>
                 </div>

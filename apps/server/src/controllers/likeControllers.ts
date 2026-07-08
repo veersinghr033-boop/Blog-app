@@ -19,7 +19,6 @@ export const likeBlog = async (req: Request, res: Response) => {
             });
         }
         const like = new Like({ user: userId, blog: blogId });
-        // suppressed debug like output
         await like.save();
 
         await Blog.findByIdAndUpdate(blogId, {
