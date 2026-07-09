@@ -10,7 +10,7 @@ import {
   useInfiniteQuery,
 } from "@tanstack/react-query";
 import api from "@/utills/axios";
-import MessageViewer from "./MessageViewer";
+import LexicalViewer from "@/hooks/lexicalViewer";
 import { message , Popconfirm} from "antd"
 function MessageMenu({ onDelete, loading }: { onDelete: () => void; loading?: boolean }) {
   const [open, setOpen] = useState(false);
@@ -410,7 +410,7 @@ export default function ChatMessages({
                   className={`h-full max-w-[85%] wrap-break-word rounded-2xl px-4 py-2 sm:max-w-[70%] sm:px-5 ${isMine ? "bg-blue-500 text-white" : "bg-gray-100 text-black"
                     }`}
                 >
-                  <MessageViewer value={item.message} />
+                  <LexicalViewer value={item.message} />
                 </div>
 
                 {isMine && selectedUser.type !== "group" && (

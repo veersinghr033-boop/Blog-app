@@ -293,11 +293,9 @@ export const saveFcmToken = async (req: Request, res: Response) => {
     try {
         const userId = (req as Request & { user?: { id: string } }).user?.id;
         const { token } = req.body;
-        console.log("saveFcmToken", token,userId)
         const user = await User.findByIdAndUpdate(userId, {
             fcmToken: token,
         });
-        console.log("hello",user)
         return res.json({
             success: true,
         });

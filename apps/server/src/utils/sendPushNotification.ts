@@ -25,7 +25,6 @@ export const sendPushNotification = async ({
         Object.entries(data).map(([k, v]) => [k, String(v)]),
       ),
     };
-    console.log(payload)
     if (token) {
       const response = await getMessaging().send({
         token,

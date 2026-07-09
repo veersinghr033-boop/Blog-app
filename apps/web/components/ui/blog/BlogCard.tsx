@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 
 import BlogFooter from "./BlogFooter";
 import BlogContent from "./BlogContent";

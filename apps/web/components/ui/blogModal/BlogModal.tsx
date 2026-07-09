@@ -1,24 +1,19 @@
-"use client";
+// "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
-
+import { X } from "lucide-react";
 import api from "@/utills/axios";
 import dynamic from "next/dynamic";
 
 const CommentList = dynamic(
     () => import("./CommentList"),
-    {
-        ssr: false,
-    }
-);
+)
 
 const AddCommentForm = dynamic(
     () => import("./AddCommentForm"),
-    {
-        ssr: false,
-    }
+   
 );
 import BlogHeader from "./BlogHeader";
 import BlogActions from "./BlogActions";
@@ -98,7 +93,7 @@ function ReadBlog({ blog }: ReadBlogProps) {
                     {blog.title && <div className="text-gray-600 text-6xl">{blog.title}</div>}
                 </div>
 
-                <button className="text-gray-600 px-2 py-1" onClick={() => router.back()} aria-label="close">✕</button>
+                <button className="text-gray-600 px-2 py-1 cursor-pointer" onClick={() => router.back()} aria-label="close"><X /></button>
             </div>
 
             <div className="flex flex-col gap-4">

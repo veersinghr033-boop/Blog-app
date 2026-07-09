@@ -1,5 +1,5 @@
 
-"use client";
+// "use client";
 import BlogActions from "./BlogActions";
 import React from "react";
 

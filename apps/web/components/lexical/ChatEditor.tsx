@@ -7,7 +7,8 @@ import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import ChatToolbar from "./ChatToolbar";
 import SelectionPlugin from "./plugins/SelectionPlugin";
 import KeyboardPlugin from "./plugins/KeyboardPlugin";
-import chatTheme from "./chatTheme";
+// import chatTheme from "./chatTheme";
+import theme from "./theme";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { ListNode, ListItemNode } from "@lexical/list";
 import OnChangePlugin from "./plugins/OnChangePlugin";
@@ -16,7 +17,7 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 
 const initialConfig = {
     namespace: "ChatEditor",
-    theme: chatTheme,
+    theme: theme,
     nodes: [
         HeadingNode,
         QuoteNode,

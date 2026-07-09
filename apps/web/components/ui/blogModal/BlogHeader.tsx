@@ -1,5 +1,5 @@
-"use client";
-import LexicalContentRenderer from "../../lexical/LexicalContentRenderer";
+// "use client";
+import LexicalViewer from "@/hooks/lexicalViewer";
 
 
 export default function BlogHeader({ blog }: { blog: any }) {
@@ -7,7 +7,8 @@ export default function BlogHeader({ blog }: { blog: any }) {
         <>
 
             <div className="max-h-80 overflow-auto whitespace-pre-line">
-                <LexicalContentRenderer content={blog.content} />
+                {/* <LexicalContentRenderer content={blog.content} /> */}
+                <LexicalViewer value={blog.content} />
             </div>
 
             <div className="flex items-center gap-3" title={"Author: " + blog?.author?.userName}>

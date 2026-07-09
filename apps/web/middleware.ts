@@ -9,19 +9,6 @@ export async function middleware(request: NextRequest) {
 
     const isProtected = path.startsWith("/admin") || path.startsWith("/user");
     const isAuthPage = path === "/login" || path === "/signup";
-    const isKnownRoute =
-        path === "/" ||
-        path === "/login" ||
-        path === "/signup" ||
-        path === "/404" ||
-        path === "/unauthorized" ||
-        path.startsWith("/admin") ||
-        path.startsWith("/user");
-    const isAsset = path.startsWith("/_next") || path.includes(".");
-
-    if (!isKnownRoute && !isAsset) {
-        return NextResponse.rewrite(new URL("/404", request.url));
-    }
 
     if (!token && isProtected) {
         return NextResponse.redirect(new URL("/login", request.url));

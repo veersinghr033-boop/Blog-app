@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 import { message } from "antd"
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

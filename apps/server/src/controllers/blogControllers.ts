@@ -166,29 +166,9 @@ export const getAllBlogs = async (req: Request, res: Response) => {
       ? blogs[blogs.length - 1]?.createdAt
       : null;
 
-    const Blogs = await Blog.find();
-    const totalBlogs = Blogs.length;
-    const totalLikes = Blogs.reduce(
-      (sum, blog) => sum + (blog.Likes?.length || 0),
-      0,
-    );
-    const totalComments = Blogs.reduce(
-      (sum, blog) => sum + (blog.Comments?.length || 0),
-      0,
-    );
-    const totalViews = Blogs.reduce(
-      (sum, blog) => sum + (blog.views?.length || 0),
-      0,
-    );
-    const stats = {
-      totalBlogs,
-      totalComments,
-      totalLikes,
-      totalViews,
-    };
+   
     res.status(200).json({
       blogs,
-      stats,
       hasMore,
       nextCursor: hasMore ? blogs[blogs.length - 1].createdAt : null,
     });

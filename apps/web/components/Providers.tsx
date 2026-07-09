@@ -2,7 +2,7 @@
 
 import { Provider } from "react-redux";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo } from "react";
 import { store } from "@/lib/store/store";
 
 function createQueryClient() {
@@ -26,8 +26,7 @@ export default function Providers({
 }: {
   children: React.ReactNode;
 }) {
-  const [queryClient] = useState(() => createQueryClient());
-
+  const queryClient = useMemo(() => createQueryClient(), []);
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>{children}</Provider>

@@ -22,29 +22,38 @@ export const useFCM = ({ userId }: { userId?: string }) => {
             try {
                 const { getToken, onMessage } = await import("firebase/messaging");
                 const { messaging } = await import("@/lib/firebase");
-
+                console.log(getToken, onMessage, messaging)
                 if (!messaging || typeof window === "undefined") {
                     return;
                 }
 
                 if ("serviceWorker" in navigator) {
                     const reg = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+                    console.log(reg)
                     console.log("FCM: service worker registered", reg.scope);
                 }
 
                 const permission = await Notification.requestPermission();
-                console.log("FCM: notification permission", permission);
+                
 
-                if (permission !== "granted" || !isActive) {
+                if (permission !== "granted") {
                     return;
                 }
 
-                const token = await getToken(messaging, {
-                    vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
-                });
 
 
-                if (token && isActive) {
+                let token: string | null = null;
+             
+                try {
+
+                    token = await getToken(messaging, {
+                        vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+                    });
+                } catch (err) {
+                    console.error("GET TOKEN ERROR =", err);
+                }
+
+                if (token ) {
                     try {
                         const res = await api.post("/users/save-fcm-token", { token });
                         console.log("FCM: notification permission", permission);

@@ -108,8 +108,7 @@ export const createChat = async (req: Request, res: Response) => {
       groupId?: string;
       message?: any;
     };
-    console.log("REQ BODY MESSAGE:", req.body.message);
-    console.log("TYPE:", typeof req.body.message);
+  
     const receiverId = Array.isArray(receiverIdParam)
       ? receiverIdParam[0]
       : receiverIdParam;
@@ -167,12 +166,7 @@ export const createChat = async (req: Request, res: Response) => {
       const allMembers = await Chat.findById(chat._id).populate<{
         participants: Participant[];
       }>("participants", "_id fcmToken");
-      console.log(
-        allMembers?.participants.map((p) => ({
-          id: p._id,
-          token: p.fcmToken,
-        }))
-      );
+      
       const senderUser = await User.findById(senderId).select("userName");
       const senderName = senderUser?.userName || "Someone";
 
@@ -193,7 +187,6 @@ export const createChat = async (req: Request, res: Response) => {
       const receiverIds = (allMembers?.participants || [])
         .map((participant) => participant._id.toString())
         .filter((participantId) => participantId && participantId !== senderId);
-console.log(receiverIds)
       receiverIds.forEach(async (receiverId) => {
         io.to(receiverId).emit("newNotification", {
           senderId,
@@ -214,7 +207,6 @@ console.log(receiverIds)
           .map((participant) => participant.fcmToken)
           .filter((token): token is string => Boolean(token)),
       )];
-      console.log(groupTokens)
       if (groupTokens.length) {
         const pushResult = await sendPushNotification({
           tokens: groupTokens,
@@ -229,7 +221,6 @@ console.log(receiverIds)
             timestamp: newMsg.timestamp,
           },
         });
-        console.log("hi",pushResult)
       }
 
       return res.status(201).json({

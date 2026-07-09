@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 import { message } from "antd";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";

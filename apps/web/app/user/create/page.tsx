@@ -31,6 +31,8 @@ function CreateBlog() {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blogData"] });
+      queryClient.invalidateQueries({ queryKey: ["blogs"] });
+      queryClient.invalidateQueries({ queryKey: ["blog"] });
       message.success("Blog published successfully");
       setFormData({
         title: "",

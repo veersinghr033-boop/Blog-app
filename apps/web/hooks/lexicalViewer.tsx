@@ -38,7 +38,7 @@ interface Props {
     value: any;
 }
 
-export default function MessageViewer({ value }: Props) {
+export default function LexicalViewer({ value }: Props) {
     const config = {
         namespace: "MessageViewer",
         theme: chatTheme,
@@ -58,7 +58,7 @@ export default function MessageViewer({ value }: Props) {
         <LexicalComposer initialConfig={config}>
             <RichTextPlugin
                 contentEditable={
-                    <ContentEditable className="outline-none pointer-events-none" />
+                    <ContentEditable  className="outline-none pointer-events-none" />
                 }
                 placeholder={null}
                 ErrorBoundary={() => null}

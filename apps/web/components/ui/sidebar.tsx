@@ -4,10 +4,10 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useAppSelector, useAppDispatch } from "@/lib/store/hooks"
 import { logout } from "@/lib/store/features/authThunk"
-import { persistor } from "@/lib/store/store"   
+import { persistor } from "@/lib/store/store"
 import { setActiveRole } from "@/lib/store/features/auth";
-import { useEffect } from "react"
-import { House , UsersRound, NotebookText , LayoutGrid , PenLine, MessageCircleMore} from "lucide-react"
+import { useEffect, useState } from "react"
+import { House, UsersRound, NotebookText, LayoutGrid, PenLine, MessageCircleMore } from "lucide-react"
 interface SidebarProps {
     mobile?: boolean
     open?: boolean
@@ -48,20 +48,22 @@ export default function Sidebar({
     const dispatch = useAppDispatch()
     const router = useRouter()
 
-    const roles = useAppSelector((state: any) => state.auth.user?.roles || [state.auth.user?.role])
+    const user = useAppSelector((state) => state.auth.user);
+
+    const roles = user?.roles ?? [];
     const activeRole = useAppSelector(
         (state: any) => state.auth.activeRole
     );
-    console.log("pathname:", pathname)
     const menu =
         activeRole === "admin"
             ? menuByRole.admin
             : menuByRole.user;
+    const [mounted, setMounted] = useState(false)
+
     useEffect(() => {
-        console.log("Sidebar Mounted");
+        setMounted(true)
 
         return () => {
-            console.log("Sidebar Unmounted");
         };
     }, []);
     const handleRoleChange = (role: string) => {
@@ -89,7 +91,7 @@ export default function Sidebar({
     const SidebarContent = (
         <div className="h-full flex flex-col">
             <div className="flex-1">
-                {roles.length > 1 && (
+                {roles.length > 1 && mounted && (
                     <select
                         value={activeRole}
                         onChange={(e) =>
