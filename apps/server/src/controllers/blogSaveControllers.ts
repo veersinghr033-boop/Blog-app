@@ -1,4 +1,7 @@
 import BlogSave from "../models/BlogSaveModel.ts";
+import Like from "../models/LikeModel.ts";
+import Comment from "../models/CommentModel.ts";
+import View from "../models/viewModel.ts";
 import mongoose from "mongoose";
 import { Request, Response } from "express";
 
@@ -49,140 +52,16 @@ export const getSavedBlogs = async (req: Request, res: Response) => {
     const before = req.query.before as string || undefined;
     const limit = 10;
 
-    const pipeline: mongoose.PipelineStage[] = [];
-    if (before) {
-      pipeline.push({
-        $match: {
-          createdAt: {
-            $lt: new Date(before),
-          },
+    const savedBlogs = await BlogSave.find({ user: userId })
+      .sort({ createdAt: -1 })
+      .limit(limit + 1)
+      .populate({
+        path: "blog",
+        populate: {
+          path: "author",
+          select: "userName",
         },
       });
-    }
-    pipeline.push(
-      {
-        $match: {
-          user: new mongoose.Types.ObjectId(userId),
-        },
-      },
-      {
-        $sort: { createdAt: -1 },
-      },
-      {
-        $limit: limit + 1,
-      },
-      {
-        $lookup: {
-          from: "blogs",
-          localField: "blog",
-          foreignField: "_id",
-          as: "blogDetails",
-        },
-      },
-
-      {
-        $unwind: "$blogDetails",
-      },
-
-      {
-        $lookup: {
-          from: "users",
-          localField: "blogDetails.author",
-          foreignField: "_id",
-          as: "authorDetails",
-        },
-      },
-
-      {
-        $unwind: "$authorDetails",
-      },
-      {
-        $lookup: {
-          from: "likes",
-          localField: "blogDetails._id",
-          foreignField: "blog",
-          as: "likeDetails",
-        },
-      },
-      {
-        $lookup: {
-          from: "comments",
-          localField: "blogDetails._id",
-          foreignField: "blog",
-          as: "commentDetails",
-        },
-      },
-      {
-        $lookup: {
-          from: "views",
-          localField: "blogDetails._id",
-          foreignField: "blogId",
-          as: "viewsDetails",
-        },
-      },
-
-      {
-        $project: {
-          _id: 1,
-          user: 1,
-
-          blogDetails: {
-            _id: "$blogDetails._id",
-            title: "$blogDetails.title",
-            content: "$blogDetails.content",
-
-            author: {
-              _id: "$authorDetails._id",
-              userName: "$authorDetails.userName",
-            },
-
-
-            likes: {
-              count: { $size: "$likeDetails" },
-            },
-
-            isLiked: {
-              $in: [
-                new mongoose.Types.ObjectId(userId),
-                {
-                  $map: {
-                    input: "$likeDetails",
-                    as: "like",
-                    in: "$$like.user",
-                  },
-                },
-              ],
-            },
-
-            views: {
-              count: { $size: "$viewsDetails" },
-              users: "$viewsDetails.userId",
-            },
-
-            comments: {
-              count: { $size: "$commentDetails" },
-            },
-
-            isCommented: {
-              $in: [
-                new mongoose.Types.ObjectId(userId),
-                {
-                  $map: {
-                    input: "$commentDetails",
-                    as: "comment",
-                    in: "$$comment.user",
-                  },
-                },
-              ],
-            },
-
-            createdAt: "$blogDetails.createdAt",
-          },
-          createdAt: 1,
-        },
-      },
-    );
-    const savedBlogs = await BlogSave.aggregate(pipeline);
     if (savedBlogs.length === 0) {
       return res.status(404).json({
         message: "Blog not found",
@@ -193,10 +72,86 @@ export const getSavedBlogs = async (req: Request, res: Response) => {
     if (hasMore) {
       savedBlogs.pop();
     }
+    const getTextFromLexical = (content: any): string => {
+      if (!content?.root?.children) return "";
+
+      const extract = (nodes: any[]): string => {
+        return nodes
+          .map((node) => {
+            if (node.text) return node.text;
+            if (node.children) return extract(node.children);
+            return "";
+          })
+          .join(" ");
+      };
+
+      return extract(content.root.children);
+    };
+
+    const blogs = (
+      await Promise.all(
+        savedBlogs.map(async (saved) => {
+          const blog = saved.blog as any;
+
+          if (!blog || !blog._id) {
+            return null;
+          }
+
+          const [likes, comments, views] = await Promise.all([
+            Like.find({ blog: blog._id }).select("user"),
+            Comment.find({ blog: blog._id }).select("user"),
+            View.find({ blogId: blog._id }).select("userId"),
+          ]);
+
+          const author = blog.author ? {
+            _id: blog.author._id,
+            userName: blog.author.userName,
+          } : null;
+          const preview = getTextFromLexical(blog.content).slice(0, 300);
+
+          return {
+            
+            _id: saved._id,
+            user: saved.user,
+            createdAt: saved.createdAt,
+
+            blogDetails: {
+              _id: blog._id,
+              title: blog.title,
+              preview,
+
+              author,
+
+              likes: {
+                count: likes.length,
+              },
+
+              isLiked: likes.some((l: any) => l.user.toString() === userId),
+
+              comments: {
+                count: comments.length,
+              },
+
+              isCommented: comments.some((c: any) => c.user.toString() === userId),
+
+              views: {
+                count: views.length,
+                users: views.map((v: any) => v.userId),
+              },
+
+              createdAt: blog.createdAt,
+            },
+          };
+        })
+      )
+    ).filter(Boolean);
+
+    const validBlogs = blogs as Array<NonNullable<(typeof blogs)[number]>>;
+
     res.status(200).json({
-      blogs: savedBlogs,
+      blogs: validBlogs,
       hasMore,
-      nextCursor: hasMore ? savedBlogs[savedBlogs.length - 1].createdAt : null,
+      nextCursor: hasMore && validBlogs.length > 0 ? validBlogs[validBlogs.length - 1].createdAt : null,
       message: "Saved blogs retrieved successfully",
     });
   } catch (error) {

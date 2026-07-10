@@ -147,9 +147,9 @@ function Users() {
                   okText="Yes"
                   cancelText="No"
                 >
-                  <Button type="primary" danger size="small">
+                  <button className="bg-red-500 text-white px-3 py-1 rounded">
                     Delete
-                  </Button>
+                  </button>
                 </Popconfirm>
               </div>
             ),

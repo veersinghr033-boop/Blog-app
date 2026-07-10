@@ -1,12 +1,13 @@
 // "use client";
 
-import { useMemo, useRef } from "react";
-import {  useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { VirtuosoGrid } from "react-virtuoso";
 import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
 import ReaderBlogCard from "./ReaderBlogCard";
-
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 interface BlogProps {
     data: any[];
     hasNextPage?: boolean;
@@ -17,9 +18,9 @@ interface BlogProps {
 
 function ReaderBlog({ data, hasNextPage = false, isFetchingNextPage = false, fetchNextPage, initialSavedData }: BlogProps) {
     const user = useAppSelector((state) => state.auth.user?.id);
-   
-    const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
+    
+    const loadMoreRef = useRef<HTMLDivElement | null>(null);
     const { data: savedBlogs = [] } = useQuery({
         queryKey: ["save"],
         queryFn: async () => {
@@ -37,7 +38,61 @@ function ReaderBlog({ data, hasNextPage = false, isFetchingNextPage = false, fet
         () => new Set(savedBlogs.map((b: any) => b.blogDetails?._id)),
         [savedBlogs]
     );
-   
+    const queryClient = useQueryClient();
+
+    const likeMutation = useMutation({
+        mutationFn: async ({
+            blogId,
+            userId,
+        }: {
+            blogId: string;
+            userId: string;
+        }) => {
+            return api.post(`/likes/${blogId}`, {
+                userId,
+            });
+        },
+
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["blog"],
+            });
+        },
+    });
+
+    const saveMutation = useMutation({
+        mutationFn: async ({
+            blogId,
+            isSaved,
+        }: {
+            blogId: string;
+            isSaved: boolean;
+        }) => {
+            await api.post("/blogsave", {
+                blogId,
+            });
+
+            return { isSaved };
+        },
+
+        onSuccess: ({ isSaved }) => {
+            if (isSaved) {
+                toast.warning("Blog unsaved");
+            } else {
+                toast.success("Blog saved");
+            }
+
+            queryClient.invalidateQueries({
+                queryKey: ["blog"],
+            });
+        },
+    });
+
+    const viewMutation = useMutation({
+        mutationFn: async (blogId: string) => {
+            return api.post(`/views/${blogId}`);
+        },
+    });
 
     return (
         <div >
@@ -58,6 +113,21 @@ function ReaderBlog({ data, hasNextPage = false, isFetchingNextPage = false, fet
                             post={blog}
                             isSaved={savedIds.has(blog._id)}
                             userId={user}
+                            onLike={(blogId) =>
+                                likeMutation.mutate({
+                                    blogId,
+                                    userId: user!,
+                                })
+                            }
+                            onSave={(blogId, isSaved) =>
+                                saveMutation.mutate({
+                                    blogId,
+                                    isSaved,
+                                })
+                            }
+                            onView={(blogId) =>
+                                viewMutation.mutate(blogId)
+                            }
                         />
                     );
                 }}

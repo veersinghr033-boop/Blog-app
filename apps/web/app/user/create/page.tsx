@@ -4,8 +4,19 @@ import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { message } from "antd";
-import Editor from "@/components/lexical/Editor";
+import { toast } from "sonner";
+import dynamic from "next/dynamic";
+import { Image, Upload } from 'antd';
+import { PlusOutlined } from "@ant-design/icons";
+const Editor = dynamic(
+  () => import("@/components/lexical/Editor"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-60 border rounded animate-pulse" />
+    ),
+  }
+);
 function CreateBlog() {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<{
@@ -18,33 +29,53 @@ function CreateBlog() {
   const [editorKey, setEditorKey] = useState(0);
   const userId = useAppSelector((state) => state.auth.user?.id);
   const [editorContent, setEditorContent] = useState("");
+  const [image, setImage] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string>("");
   const publishMutation = useMutation({
     mutationFn: async (values: { title: string; content: any }) => {
-      const response = await api.post("/blogs/create", {
+      const payload: Record<string, any> = {
         title: values.title,
         content: values.content,
-        authorId: userId,
-      });
+      };
+
+      if (image) {
+        const data = new FormData();
+        data.append("title", values.title);
+        data.append("content", JSON.stringify(values.content));
+        data.append("image", image);
+
+        const response = await api.post("/blogs/create", data, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        return response.data;
+      }
+
+      const response = await api.post("/blogs/create", payload);
 
       return response.data;
     },
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blogData"] });
-      queryClient.invalidateQueries({ queryKey: ["blogs"] });
-      queryClient.invalidateQueries({ queryKey: ["blog"] });
-      message.success("Blog published successfully");
+      // queryClient.invalidateQueries({ queryKey: ["blogs"] });
+      // queryClient.invalidateQueries({ queryKey: ["blog"] });
+      toast.success("Blog published successfully");
       setFormData({
         title: "",
         content: null,
       });
       setEditorContent("");
       setEditorKey((prev) => prev + 1);
+      setImage(null);
+      setPreview("");
     },
 
     onError: (error) => {
       console.log(error);
-      message.error("Failed to publish blog");
+      toast.error("Failed to publish blog");
     },
   });
   const formatContent = (text: string) => {
@@ -168,16 +199,16 @@ Topic: ${title}
         ...prev,
         content: html,
       }));
-      message.success("AI content generated successfully");
+      toast.success("AI content generated successfully");
     },
 
     onError: (error: any) => {
       console.log(error);
 
       if (error.message === "Please enter title first") {
-        message.warning(error.message);
+        toast.warning(error.message);
       } else {
-        message.error("Failed to generate AI content");
+        toast.error("Failed to generate AI content");
       }
     },
   });
@@ -207,11 +238,11 @@ Topic: ${title}
     const content = formData.content;
 
     if (!title) {
-      message.warning("Please enter title first");
+      toast.warning("Please enter title first");
       return;
     }
     if (isContentEmpty(formData.content)) {
-      message.warning("Please enter content first");
+      toast.warning("Please enter content first");
       return;
     }
 
@@ -247,7 +278,35 @@ Topic: ${title}
             required
           />
         </div>
+        <div className="mb-4">
+          <label className="block mb-2">Blog Image</label>
 
+
+          <Upload
+            accept="image/*"
+            maxCount={1}
+            listType="picture-card"
+            showUploadList={false}
+            beforeUpload={(file) => {
+              setImage(file);
+              setPreview(URL.createObjectURL(file));
+              return false; // prevent automatic upload
+            }}
+          >
+            {preview ? (
+              <img
+                src={preview}
+                alt="preview"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div>
+                <PlusOutlined />
+                <div style={{ marginTop: 8 }}>Upload</div>
+              </div>
+            )}
+          </Upload>
+        </div>
         <div className="mb-4">
           <label className="block mb-2">Content</label>
 

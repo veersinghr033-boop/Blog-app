@@ -1,5 +1,5 @@
 "use client";
-import { message } from "antd";
+import { toast } from "sonner"; 
 import { useEffect, useRef, useState } from "react";
 
 import { useMutation } from "@tanstack/react-query";
@@ -38,7 +38,7 @@ export default function ChatInput({
             setEditorKey((prev) => prev + 1);
         },
         onError: (error: any) => {
-            message.error(
+            toast.error(
                 error?.response?.data?.message || "Failed to delete message",
             );
         },

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { changePassword, updateProfile } from "@/lib/store/features/authThunk";
 
-import {  Avatar, message } from "antd";
+import { toast } from "sonner";
 
 
 function Profile() {
@@ -62,29 +62,29 @@ function Profile() {
     );
 
     if (updateProfile.fulfilled.match(resultAction)) {
-      message.success(
+      toast.success(
         resultAction.payload?.message || "Profile updated successfully",
       );
     } else {
-      message.error(resultAction.payload as string);
+      toast.error(resultAction.payload as string);
     }
   };
 
   const handlePasswordSubmit = async () => {
     if (!currentPassword.trim()) {
-      message.error("Please enter currentPassword");
+      toast.error("Please enter currentPassword");
       return;
     }
     if (!newPassword.trim()) {
-      message.error("Please enter new password");
+      toast.error("Please enter new password");
       return;
     }
     if (!confirmPassword.trim()) {
-      message.error("Please enter confirmPassword");
+      toast.error("Please enter confirmPassword");
       return;
     }
     if (newPassword !== confirmPassword) {
-      message.error("New passwords do not match");
+      toast.error("New passwords do not match");
       return;
     }
 
@@ -93,14 +93,14 @@ function Profile() {
     );
 
     if (changePassword.fulfilled.match(resultAction)) {
-      message.success(
+      toast.success(
         resultAction.payload?.message || "Password updated successfully",
       );
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } else {
-      message.error(resultAction.payload as string);
+      toast.error(resultAction.payload as string);
     }
   };
 
@@ -118,8 +118,10 @@ function Profile() {
           <h2 className="text-xl ">Profile Information</h2>
 
           <div className="flex items-center gap-4 mt-4">
-            <Avatar size={64}>{userInitial}</Avatar>
-
+            {/* <Avatar size={64}>{userInitial}</Avatar> */}
+            <div className="w-10 h-10 rounded-full bg-gray-700 text-white flex items-center justify-center">
+              {user.userName.charAt(0)}
+            </div>
             <div>
               <h2 className="font-semibold">{userName}</h2>
 

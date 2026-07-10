@@ -1,7 +1,5 @@
 import { memo, useCallback } from "react";
-import { message } from "antd"
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "@/utills/axios";
+
 import { useRouter } from "next/navigation";
 import { ThumbsUp, MessageCircle, Save } from "lucide-react";
 
@@ -10,67 +8,25 @@ interface ReaderBlogCardProps {
     userId: string;
     isSaved: boolean;
 
+    onLike: (blogId: string) => void;
+    onSave: (
+        blogId: string,
+        isSaved: boolean
+    ) => void;
+    onView: (blogId: string) => void;
 }
-
 function ReaderBlogCard({
     post,
     userId,
     isSaved,
-
+    onLike,
+    onSave,
+    onView,
 }: ReaderBlogCardProps) {
     const isLiked = post.isLiked;
     const isCommented = post.isCommented;
-    const queryClient = useQueryClient();
     const router = useRouter()
-    const LikeMutation = useMutation({
-        mutationFn: async (blogId: string) => api.post(`/likes/${blogId}`, { userId }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["blog"] });
-            queryClient.invalidateQueries({ queryKey: ["saved"] });
-        },
-    });
-    const SaveMutation = useMutation({
-        mutationFn: async (blogId: string) => {
-            const alreadySaved = isSaved;
-            await api.post("/blogsave", { blogId });
-            return { alreadySaved };
-        },
-        onSuccess: ({ alreadySaved }) => {
-            if (alreadySaved) {
-                message.warning("Blog unsaved");
-            } else {
-                message.success("Blog saved");
-            }
 
-            queryClient.invalidateQueries({ queryKey: ["saved"] });
-            queryClient.invalidateQueries({ queryKey: ["blog"] });
-            queryClient.invalidateQueries({ queryKey: ["save"] });
-
-        },
-    });
-    const viewMutation = useMutation({
-        mutationFn: async (blogId: string) => {
-            const response = await api.post(`/views/${blogId}`);
-            return response.data;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["saved"] });
-            queryClient.invalidateQueries({ queryKey: ["blog"] });
-        },
-        onError: (error: any) => {
-            const status = error?.response?.status;
-
-            if (status === 400) {
-                console.log("Already viewed");
-            } else if (status === 404) {
-                message.error("Blog not found");
-            } else if (status === 401) {
-                message.error("Login required");
-            } else {
-                message.error(error?.response?.data?.message || "Something went wrong");
-            }
-        },
-    });
 
     const openBlogModal = useCallback(
         (blogOrId: any) => {
@@ -83,47 +39,52 @@ function ReaderBlogCard({
                 return;
             }
 
-            router.prefetch(`/user/blogs/${blogId}`);
-
             router.push(`/user/blogs/${blogId}`);
 
             requestIdleCallback(() => {
-                viewMutation.mutate(blogId);
+                onView(blogId);
             });
         },
-        [router, viewMutation]
+        [router, onView]
     );
-    const getTextFromLexical = (content: any): string => {
-        if (!content?.root?.children) return "";
+    // const getTextFromLexical = (content: any): string => {
+    //     if (!content?.root?.children) return "";
 
-        const extract = (nodes: any[]): string => {
-            return nodes
-                .map((node) => {
-                    if (node.text) return node.text;
+    //     const extract = (nodes: any[]): string => {
+    //         return nodes
+    //             .map((node) => {
+    //                 if (node.text) return node.text;
 
-                    if (node.children) {
-                        return extract(node.children);
-                    }
+    //                 if (node.children) {
+    //                     return extract(node.children);
+    //                 }
 
-                    return "";
-                })
-                .join(" ");
-        };
+    //                 return "";
+    //             })
+    //             .join(" ");
+    //     };
 
-        return extract(content.root.children);
-    };
-    const textContent = getTextFromLexical(post.content);
-    const showReadMore = textContent.length > 150;
+    //     return extract(content.root.children);
+    // };
+    const showReadMore = post.preview?.length > 150;
 
     return (
         <div className="h-full rounded-lg border bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow border-gray-200 shadow-sm">
             <div className="flex h-full flex-col gap-4">
                 <div>
+                    {post.image && (
+                        <img
+                            src={post.image}
+                            alt={post.title}
+                            className="w-full h-48 object-cover rounded-lg mb-6"
+                        />
+                    )}
                     <h2 className="font-normal text-2xl mb-2  line-clamp-2">
                         {post.title}
                     </h2>
+                   
                     <p className="line-clamp-3">
-                        {textContent.slice(0, 200)}
+                        {post.preview}
                     </p>
 
                     {showReadMore && (
@@ -153,7 +114,7 @@ function ReaderBlogCard({
                         <div className="flex items-center gap-4 text-sm">
                             <span
                                 className={`flex items-center gap-1 cursor-pointer transition-colors ${isLiked ? "text-blue-500" : "text-gray-500 hover:text-blue-500"}`}
-                                onClick={() => LikeMutation.mutate(post._id)}
+                                onClick={() => onLike(post._id)}
                             >
                                 <ThumbsUp size={15} /> {post.likes?.count || 0}
                             </span>
@@ -167,7 +128,9 @@ function ReaderBlogCard({
                         </div>
                         <button
                             className={`cursor-pointer text-lg transition-colors ${isSaved ? "text-blue-500" : "text-gray-400 hover:text-blue-500"}`}
-                            onClick={() => SaveMutation.mutate(post._id)}
+                            onClick={() =>
+                                onSave(post._id, isSaved)
+                            }
                             title={isSaved ? "Unsave" : "Save"}
                         >
                             <Save size={20} />

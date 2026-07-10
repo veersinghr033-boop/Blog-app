@@ -1,7 +1,11 @@
-"use client"
+"use client";
 import dynamic from "next/dynamic";
-const Blog = dynamic(() => import("@/components/ui/blog/Blog"));
-import { useAppSelector } from "@/lib/store/hooks";
+const Blog = dynamic(
+    () => import("@/components/ui/blog/Blog"),
+    {
+        loading: () => <div>Loading...</div>,
+    }
+); import { useAppSelector } from "@/lib/store/hooks";
 import api from "@/utills/axios";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react"

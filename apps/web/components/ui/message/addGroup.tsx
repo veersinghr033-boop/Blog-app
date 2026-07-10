@@ -1,4 +1,4 @@
-import { message } from "antd";
+import { toast } from "sonner"; 
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useEffect, useState } from "react";
@@ -41,7 +41,7 @@ function AddGroup({
     useEffect(() => {
         if (isError) {
             console.error("Error fetching users:", error)
-            message.error("Failed to fetch users")
+            toast.error("Failed to fetch users")
         }
     }, [isError, error])
 
@@ -61,11 +61,11 @@ function AddGroup({
             queryClient.invalidateQueries({
                 queryKey: ["groups"]
             });
-            message.success("Group created successfully");
+            toast.success("Group created successfully");
 
         },
         onError: (error: any) => {
-            message.error(
+            toast.error(
                 error?.response?.data?.message || "Failed to create group"
             );
         },
@@ -74,11 +74,11 @@ function AddGroup({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!groupName.trim()) {
-            message.warning("Group name cannot be empty");
+            toast.warning("Group name cannot be empty");
             return;
         }
         if (selectedMembers.length === 0) {
-            message.warning("Please select at least one member");
+            toast.warning("Please select at least one member");
             return;
         }
         createGroupMutation.mutate({ groupName, members: selectedMembers });

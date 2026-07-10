@@ -4,9 +4,11 @@ import {
     Button,
    
     Popconfirm,
-    message,
 } from "antd";
+import { toast } from "sonner";
 
+toast.success("Report deleted");
+toast.error("Failed to delete report");
 import { useState } from "react";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -36,22 +38,17 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
             await api.delete(`/reports/${reportId}`);
         },
         onSuccess: () => {
-            message.success("Report deleted");
+            toast.success("Report deleted");
 
             queryClient.invalidateQueries({
                 queryKey: ["reports"],
             });
-            queryClient.invalidateQueries({
-                queryKey: ["report"],
-            });
-            queryClient.invalidateQueries({
-                queryKey: ["reportUser", selectedBlogData?._id],
-            });
+        
         },
 
         onError: (error) => {
             console.error("Error deleting report:", error);
-            message.error("Failed to delete report");
+            toast.error("Failed to delete report");
         },
     });
 
@@ -237,13 +234,12 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
                                             cancelText="No"
                                             onConfirm={() => handleDelete(report._id)}
                                         >
-                                            <Button
-                                                danger
-                                                icon={<Trash2 size={15} />}
-                                                className="rounded-xl"
+                                            <button
+                                                className="bg-red-500 text-white px-3 py-2 rounded-xl flex items-center gap-2"
                                             >
+                                                <Trash2 size={15} />
                                                 Delete
-                                            </Button>
+                                            </button>
                                         </Popconfirm>
                                     </div>
                                 </div>)

@@ -2,8 +2,12 @@ import Blog from "../models/BlogModel.ts";
 import Like from "../models/LikeModel.ts";
 import Comment from "../models/CommentModel.ts";
 import Report from "../models/ReportModel.ts";
+import View from "../models/viewModel.ts";
 import mongoose from "mongoose";
 import { Request, Response } from "express";
+import { uploadImage } from "../utils/uploadImage.ts";
+import { AnyBulkWriteOperation } from "mongoose";
+
 export const getAllBlogsData = async (req: Request, res: Response) => {
   try {
     const blogs = await Blog.find().populate("author", "userName");
@@ -40,121 +44,30 @@ export const getAllBlogsData = async (req: Request, res: Response) => {
 
 export const getAllBlogs = async (req: Request, res: Response) => {
   try {
-
     const userId = (req as Request & { user?: { id: string } }).user?.id;
 
     const before = req.query.before as string | undefined;
     const limit = 10;
 
-    const pipeline: mongoose.PipelineStage[] = [];
+    const query: any = {};
+
     if (before) {
-      pipeline.push({
-        $match: {
-          createdAt: {
-            $lt: new Date(before),
-          },
-        },
-      });
+      query.createdAt = {
+        $lt: new Date(before),
+      };
     }
-    pipeline.push(
-      {
-        $sort: { createdAt: -1 },
-      },
-      {
-        $limit: limit + 1,
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "author",
-          foreignField: "_id",
-          as: "authorDetails",
-        },
-      },
-      {
-        $unwind: "$authorDetails",
-      },
 
-      {
-        $lookup: {
-          from: "likes",
-          localField: "_id",
-          foreignField: "blog",
-          as: "likesDetails",
-        },
-      },
+    console.time("getAllBlogs");
 
-      {
-        $lookup: {
-          from: "comments",
-          localField: "_id",
-          foreignField: "blog",
-          as: "commentsDetails",
-        },
-      },
-      {
-        $lookup: {
-          from: "views",
-          localField: "_id",
-          foreignField: "blogId",
-          as: "viewsDetails",
-        },
-      },
+    const blogs = await Blog.find(query)
+      .sort({ createdAt: -1 })
+      .limit(limit + 1)
+      .populate("author", "userName")
+      .populate("Likes", "user")
+      .populate("Comments", "user")
+      .populate("views");
 
-      {
-        $project: {
-          title: 1,
-          content: 1,
-
-          author: {
-            id: "$authorDetails._id",
-            userName: "$authorDetails.userName",
-          },
-
-          likes: {
-            count: { $size: "$likesDetails" },
-          },
-
-          isLiked: {
-            $in: [
-              new mongoose.Types.ObjectId(userId),
-              {
-                $map: {
-                  input: "$likesDetails",
-                  as: "like",
-                  in: "$$like.user",
-                },
-              },
-            ],
-          },
-
-          comments: {
-            count: { $size: "$commentsDetails" },
-          },
-
-          isCommented: {
-            $in: [
-              new mongoose.Types.ObjectId(userId),
-              {
-                $map: {
-                  input: "$commentsDetails",
-                  as: "comment",
-                  in: "$$comment.user",
-                },
-              },
-            ],
-          },
-          views: {
-            count: { $size: "$viewsDetails" },
-          },
-
-          createdAt: 1,
-          updatedAt: 1,
-        },
-      }
-    );
-
-    const blogs = await Blog.aggregate(pipeline);
+    console.timeEnd("getAllBlogs");
 
     const hasMore = blogs.length > limit;
 
@@ -162,19 +75,69 @@ export const getAllBlogs = async (req: Request, res: Response) => {
       blogs.pop();
     }
 
-    const nextCursor = hasMore
-      ? blogs[blogs.length - 1]?.createdAt
-      : null;
+    const getTextFromLexical = (content: any): string => {
+      if (!content?.root?.children) return "";
 
-   
+      const extract = (nodes: any[]): string => {
+        return nodes
+          .map((node) => {
+            if (node.text) return node.text;
+            if (node.children) return extract(node.children);
+            return "";
+          })
+          .join(" ");
+      };
+
+      return extract(content.root.children);
+    };
+
+    const formattedBlogs = blogs.map((blog) => {
+      const preview = getTextFromLexical(blog.content).slice(0, 300);
+
+      return {
+        _id: blog._id,
+        title: blog.title,
+        image: blog.image,
+        preview, // ✅ only send preview
+        author: {
+          id: (blog.author as any)._id,
+          userName: (blog.author as any).userName,
+        },
+        likes: {
+          count: blog.Likes?.length || 0,
+        },
+        isLiked:
+          blog.Likes?.some(
+            (like: any) => like.user?.toString() === userId
+          ) || false,
+
+        comments: {
+          count: blog.Comments?.length || 0,
+        },
+
+        isCommented:
+          blog.Comments?.some(
+            (comment: any) => comment.user?.toString() === userId
+          ) || false,
+
+        views: {
+          count: blog.views?.length || 0,
+        },
+
+        createdAt: blog.createdAt,
+        updatedAt: blog.updatedAt,
+      };
+    });
+
     res.status(200).json({
-      blogs,
+      blogs: formattedBlogs,
       hasMore,
-      nextCursor: hasMore ? blogs[blogs.length - 1].createdAt : null,
+      nextCursor: hasMore
+        ? formattedBlogs[formattedBlogs.length - 1].createdAt
+        : null,
     });
   } catch (error) {
     console.error(error);
-
     res.status(500).json({
       message: "Failed to retrieve blogs",
     });
@@ -187,115 +150,88 @@ export const getBlogById = async (req: Request, res: Response) => {
 
     const before = req.query.before as string | undefined; const limit = 5;
 
-    const pipeline: mongoose.PipelineStage[] = [];
+
+
+    const query: any = {};
 
     if (before) {
-      pipeline.push({
-        $match: {
-          createdAt: {
-            $lt: new Date(before),
-          },
-        },
-      });
+      query.createdAt = {
+        $lt: new Date(before),
+      };
     }
-    pipeline.push(
-      {
-        $match: { author: new mongoose.Types.ObjectId(id) },
-      },
-      {
-        $sort: { createdAt: -1 },
-      },
-      {
-        $limit: limit + 1,
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "author",
-          foreignField: "_id",
-          as: "authorDetails",
+
+    console.time("getAllBlogs");
+
+    const blog = await Blog.find(query)
+      .sort({ createdAt: -1 })
+      .limit(limit + 1)
+      .populate("author", "userName")
+      .populate("Likes", "user")
+      .populate("Comments", "user")
+      .populate("views");
+
+    console.timeEnd("getAllBlogs");
+
+    const hasMore = blog.length > limit;
+
+    if (hasMore) {
+      blog.pop();
+    }
+    const getTextFromLexical = (content: any): string => {
+      if (!content?.root?.children) return "";
+
+      const extract = (nodes: any[]): string => {
+        return nodes
+          .map((node) => {
+            if (node.text) return node.text;
+            if (node.children) return extract(node.children);
+            return "";
+          })
+          .join(" ");
+      };
+
+      return extract(content.root.children);
+    };
+
+    const formattedBlogs = blog.map((blog) => {
+      const preview = getTextFromLexical(blog.content).slice(0, 300);
+
+      return {
+        _id: blog._id,
+        title: blog.title,
+        image: blog.image,
+
+        preview, // ✅ only send preview
+        author: {
+          id: (blog.author as any)._id,
+          userName: (blog.author as any).userName,
         },
-      },
-      {
-        $unwind: "$authorDetails",
-      },
-      {
-        $lookup: {
-          from: "likes",
-          localField: "_id",
-          foreignField: "blog",
-          as: "likesDetails",
+        likes: {
+          count: blog.Likes?.length || 0,
         },
-      },
-      {
-        $lookup: {
-          from: "comments",
-          localField: "_id",
-          foreignField: "blog",
-          as: "commentsDetails",
+        isLiked:
+          blog.Likes?.some(
+            (like: any) => like.user?.toString() === userId
+          ) || false,
+
+        comments: {
+          count: blog.Comments?.length || 0,
         },
-      },
-      {
-        $lookup: {
-          from: "views",
-          localField: "_id",
-          foreignField: "blogId",
-          as: "viewsDetails",
+
+        isCommented:
+          blog.Comments?.some(
+            (comment: any) => comment.user?.toString() === userId
+          ) || false,
+
+        views: {
+          count: blog.views?.length || 0,
         },
-      },
-      {
-        $project: {
-          title: 1,
-          content: 1,
 
-          author: {
-            id: "$authorDetails._id",
-            userName: "$authorDetails.userName",
-          },
-
-          likes: {
-            count: { $size: "$likesDetails" },
-          },
-
-          isLiked: {
-            $in: [
-              new mongoose.Types.ObjectId(userId),
-              {
-                $map: {
-                  input: "$likesDetails",
-                  as: "like",
-                  in: "$$like.user",
-                },
-              },
-            ],
-          },
-
-          comments: {
-            count: { $size: "$commentsDetails" },
-          },
-
-          isCommented: {
-            $in: [
-              new mongoose.Types.ObjectId(userId),
-              {
-                $map: {
-                  input: "$commentsDetails",
-                  as: "comment",
-                  in: "$$comment.user",
-                },
-              },
-            ],
-          },
-          views: {
-            count: { $size: "$viewsDetails" },
-          },
-
-          createdAt: 1,
-          updatedAt: 1,
-        },
-      }
-    );
-    const blog = await Blog.aggregate(pipeline);
+        createdAt: blog.createdAt,
+        updatedAt: blog.updatedAt,
+      };
+    });
+    // const blog = await Blog.aggregate(pipeline);
     const blogs = await Blog.find({ author: id });
 
     const totalBlogs = blogs.length;
@@ -316,7 +252,6 @@ export const getBlogById = async (req: Request, res: Response) => {
         message: "Blog not found",
       });
     }
-    const hasMore = blog.length > limit;
 
     if (hasMore) {
       blog.pop();
@@ -329,7 +264,7 @@ export const getBlogById = async (req: Request, res: Response) => {
     };
 
     res.status(200).json({
-      blog,
+      blog: formattedBlogs,
       ...(before ? {} : { stats }),
       hasMore,
       nextCursor: hasMore ? blog[blog.length - 1].createdAt : null,
@@ -344,25 +279,57 @@ export const getBlogById = async (req: Request, res: Response) => {
 export const createBlog = async (req: Request, res: Response) => {
   try {
     const { title, content } = req.body;
-    const userId = (req as Request & { user?: { id: string } }).user?.id;
+
+    const userId = (req as Request & {
+      user?: { id: string };
+    }).user?.id;
 
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
     }
 
     if (!title || !content) {
-      return res.status(400).json({ message: "Title and content are required" });
+      return res.status(400).json({
+        message: "Title and content are required",
+      });
     }
 
-    const newBlog = new Blog({ title, content, author: userId });
+    let imageUrl = "";
+
+    if (req.file) {
+      const result: any = await uploadImage(req.file);
+      imageUrl = result.secure_url;
+    }
+
+    let parsedContent: any = content;
+    if (typeof content === "string") {
+      try {
+        parsedContent = JSON.parse(content);
+      } catch (e) {
+      }
+    }
+
+    const newBlog = new Blog({
+      title,
+      content: parsedContent,
+      image: imageUrl,
+      author: userId,
+    });
+
     await newBlog.save();
+
     res.status(201).json({
       message: "Blog created successfully",
       blog: newBlog,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Failed to create blog" });
+
+    res.status(500).json({
+      message: "Failed to create blog",
+    });
   }
 };
 
@@ -389,109 +356,96 @@ export const deleteBlog = async (req: Request, res: Response) => {
 export const findByBlogId = async (req: Request, res: Response) => {
   try {
     const { blogId } = req.params as { blogId: string };
-    const userId = (req as Request & { user?: { id: string } }).user?.id;
 
-    const pipelines = [
-      {
-        $match: { _id: new mongoose.Types.ObjectId(blogId) },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "author",
-          foreignField: "_id",
-          as: "authorDetails",
-        },
-      },
-      {
-        $unwind: "$authorDetails",
-      },
-      {
-        $lookup: {
-          from: "likes",
-          localField: "_id",
-          foreignField: "blog",
-          as: "likesDetails",
-        },
-      },
-      {
-        $lookup: {
-          from: "comments",
-          localField: "_id",
-          foreignField: "blog",
-          as: "commentsDetails",
-        },
-      },
-      {
-        $lookup: {
-          from: "views",
-          localField: "_id",
-          foreignField: "blogId",
-          as: "viewsDetails",
-        },
-      },
-      {
-        $project: {
-          title: 1,
-          content: 1,
+    const userId = (req as Request & {
+      user?: { id: string };
+    }).user?.id;
 
-          author: {
-            id: "$authorDetails._id",
-            userName: "$authorDetails.userName",
-          },
+    const blog = await Blog.findById(blogId)
+      .populate<{
+        author: {
+          _id: mongoose.Types.ObjectId;
+          userName: string;
+        };
+      }>("author", "userName")
+      .lean();
 
-          likes: {
-            count: { $size: "$likesDetails" },
-          },
-
-          isLiked: {
-            $in: [
-              new mongoose.Types.ObjectId(userId),
-              {
-                $map: {
-                  input: "$likesDetails",
-                  as: "like",
-                  in: "$$like.user",
-                },
-              },
-            ],
-          },
-
-          comments: {
-            count: { $size: "$commentsDetails" },
-          },
-
-          isCommented: {
-            $in: [
-              new mongoose.Types.ObjectId(userId),
-              {
-                $map: {
-                  input: "$commentsDetails",
-                  as: "comment",
-                  in: "$$comment.user",
-                },
-              },
-            ],
-          },
-          views: {
-            count: { $size: "$viewsDetails" },
-          },
-
-          createdAt: 1,
-          updatedAt: 1,
-        },
-      }
-    ];
-    const blog = await Blog.aggregate(pipelines);
-    if (blog.length === 0) {
-      return res.status(404).json({ message: "Blog not found" });
+    if (!blog) {
+      return res.status(404).json({
+        message: "Blog not found",
+      });
     }
-    res.status(200).json({
+
+    const [
+      likesCount,
+      commentsCount,
+      viewsCount,
+      liked,
+      commented,
+    ] = await Promise.all([
+      Like.countDocuments({ blog: blog._id }),
+
+      Comment.countDocuments({ blog: blog._id }),
+
+      View.countDocuments({ blogId: blog._id }),
+
+      userId
+        ? Like.exists({
+          blog: blog._id,
+          user: userId,
+        })
+        : null,
+
+      userId
+        ? Comment.exists({
+          blog: blog._id,
+          user: userId,
+        })
+        : null,
+    ]);
+
+    const response = {
+      _id: blog._id,
+
+      title: blog.title,
+      image: blog.image,
+
+      content: blog.content,
+
+      author: {
+        id: blog.author._id,
+        userName: blog.author.userName,
+      },
+
+      likes: {
+        count: likesCount,
+      },
+
+      isLiked: !!liked,
+
+      comments: {
+        count: commentsCount,
+      },
+
+      isCommented: !!commented,
+
+      views: {
+        count: viewsCount,
+      },
+
+      createdAt: blog.createdAt,
+      updatedAt: blog.updatedAt,
+    };
+
+    return res.status(200).json({
       message: "Blog retrieved successfully",
-      blog: blog[0],
+      blog: response,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Failed to retrieve blog" });
+
+    return res.status(500).json({
+      message: "Failed to retrieve blog",
+    });
   }
 };

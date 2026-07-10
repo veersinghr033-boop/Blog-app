@@ -5,8 +5,14 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import SetEditorContent from "./plugins/SetEditorContent";
-import Toolbar from "./Toolbar";
-import theme from "./theme";
+import dynamic from "next/dynamic";
+
+const Toolbar = dynamic(
+    () => import("./Toolbar"),
+    {
+        ssr: false,
+    }
+); import theme from "./theme";
 import EditorChangePlugin from "./plugins/OnChangePlugin";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { ListNode, ListItemNode } from "@lexical/list";
@@ -27,8 +33,8 @@ const initialConfig = {
         LinkNode,
     ],
     onError(error: Error) {
-        throw error;
-    },
+        console.error(error);
+    }
 };
 interface Props {
     initialContent: string;

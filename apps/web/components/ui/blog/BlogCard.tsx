@@ -6,7 +6,7 @@ import React, { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
-import { message } from "antd";
+import { toast } from "sonner"; 
 interface BlogCardProps {
   post: any;
   userId?: string;
@@ -31,17 +31,16 @@ function BlogCard({ post, role, userId }: BlogCardProps) {
       if (status === 400) {
         console.log("Already viewed");
       } else if (status === 404) {
-        message.error("Blog not found");
+        toast.error("Blog not found");
       } else if (status === 401) {
-        message.error("Login required");
+        toast.error("Login required");
       } else {
-        message.error(error?.response?.data?.message || "Something went wrong");
+        toast.error(error?.response?.data?.message || "Something went wrong");
       }
     },
   });
   const openBlog = useCallback(
     (blogId: string) => {
-      console.log("blogId", blogId)
       router.push(`/${role}/blogs/${blogId}`);
       requestIdleCallback(() => {
         viewMutation.mutate(blogId);

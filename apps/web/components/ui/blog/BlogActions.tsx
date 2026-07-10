@@ -15,19 +15,12 @@ function BlogActions({ post, onOpen, userId }: any) {
       const res = await api.post(`/likes/${blogId}`, {
         userId: userId,
       });
-console.log(res.data)
       return res.data;
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["blogs"],
-      });
-     
-
-      queryClient.invalidateQueries({
-        queryKey: ["blogData", userId],
-      });
+      queryClient.invalidateQueries({ queryKey: ["blogs"] });
+      queryClient.invalidateQueries({ queryKey: ["blogData", userId] });
     },
 
     onError: () => {

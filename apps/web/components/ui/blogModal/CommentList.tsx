@@ -3,8 +3,16 @@ import { message,Popconfirm } from "antd";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
-import CommentReply from "./commentReply";
-import { Virtuoso } from "react-virtuoso";
+import dynamic from "next/dynamic";
+
+const CommentReply = dynamic(
+    () => import("./commentReply"),
+    {
+        loading: () => <div>Loading replies...</div>,
+    }
+); import { Virtuoso } from "react-virtuoso";
+import { toast } from "sonner";
+import { useCallback } from "react";
 
 
 interface Props {
@@ -48,15 +56,14 @@ export default function CommentList({
                 queryKey: ["blog"],
             });
 
-            message.success("Comment deleted");
-        },
+            toast.success("Comment deleted");        },
     });
 
     const handleDeleteComment = (commentId: string) => {
         deleteCommentMutation.mutate(commentId);
     };
 
-    const isCommentOwner = (comment: any) => {
+    const isCommentOwner = useCallback( (comment: any) => {
         const commentUserId = comment?.user?._id || comment?.user?.id;
 
         return Boolean(
@@ -64,7 +71,8 @@ export default function CommentList({
             commentUserId &&
             String(currentUserId) === String(commentUserId)
         );
-    };
+    }, [currentUserId]);
+
 
     if (!comments.length) {
         return (
