@@ -17,6 +17,11 @@ function Navbar({ onMenuClick }: NavbarProps) {
     const user = useAppSelector((state) => state.auth.user);
 
     const roles = user?.roles ?? [];
+    const [avatar, setAvatar] = useState("");
+
+    useEffect(() => {
+        setAvatar(user?.profileImage || "");
+    }, [user]);
 
     const [mounted, setMounted] = useState(false)
 
@@ -63,8 +68,18 @@ function Navbar({ onMenuClick }: NavbarProps) {
                     {displayedName}
                 </span>
 
-                <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center">
-                    {displayedName[0]?.toUpperCase()}
+                <div className="w-8 h-8 rounded-full bg-gray-700 text-white flex items-center justify-center overflow-hidden">
+                    {avatar ? (
+                        <img
+                            src={avatar}
+                            alt="avatar"
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <span className="text-xs uppercase">
+                            {displayedName.charAt(0)}
+                        </span>
+                    )}
                 </div>
             </Link>
         </header>

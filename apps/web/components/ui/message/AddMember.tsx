@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import api from "@/utills/axios";
-import { toast } from "sonner"; 
+import { message } from "antd";
 interface User {
   id: string;
   name: string;
@@ -29,7 +29,7 @@ function AddMember({ group, onClose }: PropType) {
   });
 
   const existingMemberIds =
-    group?.chatId?.participants.map((p: any) => p._id) || [];
+    group?.chatId?.participants?.map((p: any) => p._id) || [];
 
   const rmainingUsers = users.filter(
     (user) => !existingMemberIds.includes(user.id),
@@ -48,17 +48,17 @@ function AddMember({ group, onClose }: PropType) {
       queryClient.invalidateQueries({
         queryKey: ["group", group._id],
       });
-      toast.success("Members added successfully");
+      message.success("Members added successfully");
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to add members");
+      message.error(error?.response?.data?.message || "Failed to add members");
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedMembers.length === 0) {
-      toast.warning("Please select at least one member");
+      message.warning("Please select at least one member");
       return;
     }
     addMemberMutation.mutate({ members: selectedMembers });

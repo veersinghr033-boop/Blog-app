@@ -49,7 +49,7 @@ function BlogActions({ post, onOpen, userId }: any) {
         <MessageCircle size={15} />{post.comments?.count || 0}
       </span>
       <span className="text-sm cursor-pointer hover:text-blue-500 text-gray-500">
-        {post.views && post.views.length > 0 ? post.views[0].count : 0} Views
+        {post.views?.count || 0} Views
       </span>
     </>
   );

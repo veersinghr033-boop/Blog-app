@@ -30,20 +30,25 @@ export default function UserSidebar({
   useEffect(() => {
     setHydrated(true);
   }, []);
-
-  const userId = useAppSelector((state) => state.auth.user?.id);
+  const userId = useAppSelector((state) => state.auth.user?._id);
 
 
   useEffect(() => {
+    console.log("userId in UserSidebar:", userId, "openAddGroup:", openAddGroup);
     if (!userId) return;
 
     const socket = io("http://localhost:5050");
 
     socketRef.current = socket;
 
-    socket.emit("userOnline", userId);
+    socket.on("connect", () => {
+      console.log("Connected:", socket.id);
+
+      socket.emit("userOnline", userId);
+    });
 
     socket.on("sortedUsers", (users) => {
+      // console.log("sortedUsers received", users);
       setSortedUsers(users);
     });
 
@@ -93,8 +98,18 @@ export default function UserSidebar({
               className={`w-full px-4 py-4 flex items-center gap-3 border-y border-gray-200 hover:bg-slate-50 ${isSelected ? "bg-slate-100" : ""}`}
             >
               <div className="relative">
-                <div className="relative h-12 w-12 rounded-full bg-black text-white flex items-center justify-center capitalize font-semibold">
-                  {isGroup ? <Users size={19} /> : item.name?.[0]}
+                <div className="relative h-12 w-12 rounded-full bg-black text-white flex items-center justify-center capitalize font-semibold overflow-hidden">
+                  {isGroup ? (
+                    <Users size={19} />
+                  ) : item.img ? (
+                    <img
+                      src={item.img}
+                      alt={item.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    item.name?.charAt(0)
+                  )}
                 </div>
                 {item.unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">{item.unreadCount > 99 ? '99+' : item.unreadCount}</span>

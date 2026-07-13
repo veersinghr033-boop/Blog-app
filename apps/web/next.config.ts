@@ -11,4 +11,13 @@ export default withBundleAnalyzer({
       "@ant-design/icons",
     ],
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
+      },
+    ],
+  },
 });

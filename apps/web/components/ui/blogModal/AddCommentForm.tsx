@@ -1,6 +1,6 @@
 
 // "use client";
-import {  message } from "antd";
+import { message } from "antd";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 
@@ -19,18 +19,9 @@ export default function AddCommentForm({ blogId }: { blogId: string }) {
             queryClient.invalidateQueries({
                 queryKey: ["comments", blogId],
             });
+            // Invalidate the specific blog query to update comment counts
             queryClient.invalidateQueries({
-                queryKey: ["blogData"],
-            });
-            queryClient.invalidateQueries({
-                queryKey: ["blogs"],
-            });
-            queryClient.invalidateQueries({
-                queryKey: ["saved"],
-            });
-           
-            queryClient.invalidateQueries({
-                queryKey: ["blog"],
+                queryKey: ["blog", blogId],
             });
 
             message.success("Comment added");
@@ -48,7 +39,8 @@ export default function AddCommentForm({ blogId }: { blogId: string }) {
         }
 
         commentMutation.mutate({ comment });
-        form.reset();    };
+        form.reset();
+    };
 
     return (
         <form onSubmit={handleCommentSubmit} className="flex gap-2 items-start">

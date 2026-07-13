@@ -81,8 +81,8 @@ function ReadBlog({ blog }: ReadBlogProps) {
 
     return (
         <div
-            className="bg-white rounded shadow-xl border border-gray-200 p-6 max-w-full mx-auto overflow-y-auto"
-            style={{ maxHeight: "90vh" }}
+            className="bg-white rounded shadow-xl border border-gray-200 p-6 max-w-full mx-auto overflow-y-auto  max-h-[90vh] "
+            // style={{ maxHeight: "100vh" }}
         >
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
                 <div>
@@ -106,7 +106,7 @@ function ReadBlog({ blog }: ReadBlogProps) {
                 </button>
             </div>
 
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 ">
                 <BlogHeader blog={blog} />
 
                 <BlogActions

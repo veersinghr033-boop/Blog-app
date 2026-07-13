@@ -16,7 +16,7 @@ interface Props {
 export default function BlogActions({ blog, onReport, onOpen }: Props) {
     const queryClient = useQueryClient();
     const router = useRouter();
-    const userId = useAppSelector((state) => state.auth.user?.id);
+    const userId = useAppSelector((state) => state.auth.user?._id);
 
     const isAuthor = blog.author?.id === userId;
     const { data: report = [] } = useQuery({
@@ -121,9 +121,9 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
                 >
                     <MessageCircle size={15} /> {blog.comments?.count || 0}
                 </p>
-                <p className="text-sm text-gray-500">
-                    {blog.views && blog.views.length > 0 ? blog.views[0].count : 0} Views
-                </p>
+                <span className="text-sm cursor-pointer hover:text-blue-500 text-gray-500">
+                    {blog?.views?.count || 0} Views
+                </span>
             </div>
 
             {isAuthor ? (

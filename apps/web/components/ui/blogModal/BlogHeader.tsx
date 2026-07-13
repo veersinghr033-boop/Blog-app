@@ -6,14 +6,14 @@ export default function BlogHeader({ blog }: { blog: any }) {
     return (
         <>
 
-            <div className="max-h-100 overflow-auto whitespace-pre-line">
-                {blog?.image && (
+            <div className="max-h-135 overflow-auto whitespace-pre-line ">
+                
                     <img
                         src={blog.image}
                         alt={blog.title}
-                        className="w-auto   object-cover rounded-lg mb-6"
+                        className=" max-w-4/5   mx-auto object-cover rounded-lg mb-6 m-2 shadow-2xs shadow-gray-300"
                     />
-                )}
+                
                 <LexicalViewer value={blog.content} />
             </div>
 

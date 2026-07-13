@@ -11,7 +11,7 @@ import {
 } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import LexicalViewer from "@/hooks/lexicalViewer";
-import { message , Popconfirm} from "antd"
+import { message, Popconfirm } from "antd"
 function MessageMenu({ onDelete, loading }: { onDelete: () => void; loading?: boolean }) {
   const [open, setOpen] = useState(false);
 
@@ -27,15 +27,15 @@ function MessageMenu({ onDelete, loading }: { onDelete: () => void; loading?: bo
 
       {open && (
         <div className="absolute right-0 mt-1 bg-white border rounded shadow p-2 z-50">
-         
-         <Popconfirm
+
+          <Popconfirm
             title="Are you sure to delete this message?"
             onConfirm={onDelete}
             okText="Yes"
             cancelText="No"
-            >
-              <button>Delete</button>
-            </Popconfirm>
+          >
+            <button>Delete</button>
+          </Popconfirm>
         </div>
       )}
     </div>
@@ -81,9 +81,19 @@ export default function ChatMessages({
   selectedUser,
   clearNotification,
 }: Props) {
+  if (!selectedUser) {
+    return (
+      <div className="flex h-full items-center justify-center text-gray-500">
+        <div className="text-center">
+          <p>Select a chat to start messaging</p>
+        </div>
+      </div>
+    );
+  }
+
   const currentRoomRef = useRef<string | null>(null);
   const [typingUsers, setTypingUsers] = useState<Record<string, boolean>>({});
-  const userId = useAppSelector((state) => state.auth.user?.id);
+  const userId = useAppSelector((state) => state.auth.user?._id);
   const virtuosoRef = useRef<any>(null);
   const selectedChatId = selectedUser.id || selectedUser._id || "";
   const firstItemIndex = useRef(100000);
@@ -129,8 +139,8 @@ export default function ChatMessages({
     });
 
   const messages = useMemo(
-    () => data?.pages.flatMap((page) => page.messages) ?? [],
-    [data?.pages],
+    () => data?.pages.flatMap((page) => page?.messages || []) ?? [],
+    [data],
   );
 
   useEffect(() => {

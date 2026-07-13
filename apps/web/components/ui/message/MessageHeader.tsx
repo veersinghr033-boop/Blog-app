@@ -40,9 +40,21 @@ export default function MessageHeader({
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-black text-white font-semibold uppercase relative">
             {selectedUser?.type === "group" ? (
               <Users size={19} />
+            ) : selectedUser?.img ? (
+              <img
+                src={selectedUser?.img}
+                alt={selectedUser?.name}
+                className="h-full w-full object-cover rounded-full"
+              />
             ) : (
-              selectedUser?.name?.[0] || "U"
+              selectedUser?.name?.charAt(0)
+            ) ? (
+              selectedUser?.name?.charAt(0)
+            ) : (
+              "U"
             )}
+
+
 
             {selectedUser?.type !== "group" && (
               <span

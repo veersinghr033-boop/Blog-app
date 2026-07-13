@@ -60,7 +60,7 @@ export const registerUser = async (
       success: true,
       message: "User registered successfully",
       user: {
-        id: newUser._id,
+        _id: newUser._id,
         userName: newUser.userName,
         fullName: newUser.fullName || "",
         bio: newUser.bio || "",
@@ -127,7 +127,7 @@ export const loginUser = async (
       success: true,
       message: "Login successful",
       user: {
-        id: user._id,
+        _id: user._id,
         userName: user.userName,
         fullName: user.fullName || "",
         bio: user.bio || "",

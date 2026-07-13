@@ -18,9 +18,7 @@ export const addView = async (req: Request, res: Response) => {
       userId,
     });
     if (existingView) {
-      return res.status(400).json({
-        message: "You already viewed this blog",
-      });
+      return 
     }
 
     const newView = await View.create({

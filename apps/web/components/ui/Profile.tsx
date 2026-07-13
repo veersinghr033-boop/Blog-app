@@ -4,8 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { changePassword, updateProfile } from "@/lib/store/features/authThunk";
 
-import { toast } from "sonner";
+import { message, Upload } from "antd";
+import type { UploadFile, UploadProps } from "antd";
 
+
+type FileType = Parameters<NonNullable<UploadProps["beforeUpload"]>>[0];
 
 function Profile() {
   const dispatch = useAppDispatch() as any;
@@ -29,6 +32,9 @@ function Profile() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [removeProfileImage, setRemoveProfileImage] = useState(false);
 
   useEffect(() => {
     setUserName(initialValues.userName);
@@ -54,37 +60,53 @@ function Profile() {
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
+    setAvatarFile(null);
+    setAvatarPreview("");
+    setRemoveProfileImage(false);
+  };
+
+  const handleRemoveProfileImage = () => {
+    setAvatarFile(null);
+    setAvatarPreview("");
+    setRemoveProfileImage(true);
   };
 
   const handleSubmit = async () => {
     const resultAction = await dispatch(
-      updateProfile({ userName, email, bio }),
+      updateProfile({
+        userName,
+        email,
+        bio,
+        image: avatarFile,
+        removeImage: removeProfileImage,
+      })
     );
 
     if (updateProfile.fulfilled.match(resultAction)) {
-      toast.success(
-        resultAction.payload?.message || "Profile updated successfully",
+      message.success(
+        resultAction.payload?.message ||
+        "Profile updated successfully"
       );
     } else {
-      toast.error(resultAction.payload as string);
+      message.error(resultAction.payload as string);
     }
   };
 
   const handlePasswordSubmit = async () => {
     if (!currentPassword.trim()) {
-      toast.error("Please enter currentPassword");
+      message.error("Please enter currentPassword");
       return;
     }
     if (!newPassword.trim()) {
-      toast.error("Please enter new password");
+      message.error("Please enter new password");
       return;
     }
     if (!confirmPassword.trim()) {
-      toast.error("Please enter confirmPassword");
+      message.error("Please enter confirmPassword");
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error("New passwords do not match");
+      message.error("New passwords do not match");
       return;
     }
 
@@ -93,16 +115,17 @@ function Profile() {
     );
 
     if (changePassword.fulfilled.match(resultAction)) {
-      toast.success(
+      message.success(
         resultAction.payload?.message || "Password updated successfully",
       );
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } else {
-      toast.error(resultAction.payload as string);
+      message.error(resultAction.payload as string);
     }
   };
+
 
   return (
     <div className="min-h-screen  ">
@@ -118,10 +141,40 @@ function Profile() {
           <h2 className="text-xl ">Profile Information</h2>
 
           <div className="flex items-center gap-4 mt-4">
-            {/* <Avatar size={64}>{userInitial}</Avatar> */}
-            <div className="w-10 h-10 rounded-full bg-gray-700 text-white flex items-center justify-center">
-              {user.userName.charAt(0)}
-            </div>
+            <Upload
+              accept="image/*"
+              maxCount={1}
+              showUploadList={false}
+              beforeUpload={(file: FileType) => {
+                setAvatarFile(file as File);
+                setAvatarPreview(URL.createObjectURL(file as File));
+                setRemoveProfileImage(false);
+                return false;
+              }}
+            >
+              {(avatarPreview || (!removeProfileImage && user?.profileImage)) ? (
+                <>
+                  <img
+                    src={avatarPreview || user?.profileImage}
+                    alt="avatar"
+                    className="w-20 h-20 rounded-full object-cover relative"
+                  />
+                  <button
+                    type="button"
+                    className="text-xs text-red-600 hover:text-red-800  top-0 right-0 mt-1 mr-1 "
+                    onClick={handleRemoveProfileImage}
+                  >
+                    Remove image
+                  </button>
+                </>
+              ) : (
+                <div className="bg-gray-700 text-white rounded-full w-20 h-20 flex items-center justify-center text-lg uppercase">
+                  {userInitial}
+                </div>
+              )}
+            </Upload>
+
+
             <div>
               <h2 className="font-semibold">{userName}</h2>
 
@@ -148,7 +201,13 @@ function Profile() {
             </div>
 
             <div className="flex gap-4">
-              <button type="submit" className="bg-black text-white px-4 py-2 rounded" disabled={loading}>Save Changes</button>
+              <button
+                type="submit"
+                className="bg-black text-white px-4 py-2 rounded disabled:opacity-50"
+                disabled={loading}
+              >
+                {loading ? "Updating..." : "Update Profile"}
+              </button>
 
               <button type="button" onClick={handleCancel} className="px-4 py-2 border rounded">Cancel</button>
             </div>
@@ -177,7 +236,7 @@ function Profile() {
           </form>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 

@@ -1,5 +1,4 @@
 "use client";
-import { toast } from "sonner"; 
 import { useEffect, useRef, useState } from "react";
 
 import { useMutation } from "@tanstack/react-query";
@@ -7,6 +6,7 @@ import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
 import ChatEditor from "@/components/lexical/ChatEditor";
 import { Send } from "lucide-react";
+import { message } from "antd";
 
 interface Props {
     socketRef: any
@@ -18,7 +18,7 @@ export default function ChatInput({
     selectedUser,
 }: Props) {
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const userId = useAppSelector((state) => state.auth.user?.id);
+    const userId = useAppSelector((state) => state.auth.user?._id);
     const [messageText, setMessageText] = useState<any>(null);
     const [editorKey, setEditorKey] = useState(0);
 
@@ -38,7 +38,7 @@ export default function ChatInput({
             setEditorKey((prev) => prev + 1);
         },
         onError: (error: any) => {
-            toast.error(
+            message.error(
                 error?.response?.data?.message || "Failed to delete message",
             );
         },

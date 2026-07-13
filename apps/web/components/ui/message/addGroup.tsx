@@ -1,7 +1,7 @@
-import { toast } from "sonner"; 
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useEffect, useState } from "react";
+import { message } from "antd";
 
 interface User {
     id: number;
@@ -41,7 +41,7 @@ function AddGroup({
     useEffect(() => {
         if (isError) {
             console.error("Error fetching users:", error)
-            toast.error("Failed to fetch users")
+            message.error("Failed to fetch users")
         }
     }, [isError, error])
 
@@ -61,11 +61,11 @@ function AddGroup({
             queryClient.invalidateQueries({
                 queryKey: ["groups"]
             });
-            toast.success("Group created successfully");
+            message.success("Group created successfully");
 
         },
         onError: (error: any) => {
-            toast.error(
+            message.error(
                 error?.response?.data?.message || "Failed to create group"
             );
         },
@@ -74,11 +74,11 @@ function AddGroup({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!groupName.trim()) {
-            toast.warning("Group name cannot be empty");
+            message.warning("Group name cannot be empty");
             return;
         }
         if (selectedMembers.length === 0) {
-            toast.warning("Please select at least one member");
+            message.warning("Please select at least one member");
             return;
         }
         createGroupMutation.mutate({ groupName, members: selectedMembers });
@@ -105,7 +105,7 @@ function AddGroup({
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Select Members</label>
                         <div className="mt-1 max-h-40 overflow-y-auto space-y-2 border border-gray-100 p-2 rounded-md">
-                            {users.map((u) => (
+                            {users?.map((u) => (
                                 <div key={u.id} className="flex items-center">
                                     <input type="checkbox" id={`member-${u.id}`} value={u.id} className="h-4 w-4" checked={selectedMembers.includes(u.id.toString())} onChange={(e) => setSelectedMembers((prev) => e.target.checked ? [...prev, u.id.toString()] : prev.filter((id) => id !== u.id.toString()))} />
                                     <label htmlFor={`member-${u.id}`} className="ml-2 block text-sm text-gray-900">{u.name}</label>

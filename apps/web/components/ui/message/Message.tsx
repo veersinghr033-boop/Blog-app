@@ -13,7 +13,7 @@ export default function Message() {
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const userId = useAppSelector((state) => state.auth.user?.id);
+  const userId = useAppSelector((state) => state.auth.user?._id);
 
   const userStatus = useUserStatus(userId);
 

@@ -48,7 +48,7 @@ export const getGroups = async (req: Request, res: Response) => {
             select: "participants",
             populate: {
                 path: "participants",
-                select: "userName role",
+                select: "userName role profileImage",
             },
         });
 
@@ -214,7 +214,7 @@ export const removeAdmin = async (req: Request, res: Response) => {
             }
         ).populate({
             path: "admin",
-            select: "userName role",
+            select: "userName role profileImage",
         });
 
         return res.status(200).json({

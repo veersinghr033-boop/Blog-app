@@ -11,7 +11,6 @@ const CommentReply = dynamic(
         loading: () => <div>Loading replies...</div>,
     }
 ); import { Virtuoso } from "react-virtuoso";
-import { toast } from "sonner";
 import { useCallback } from "react";
 
 
@@ -56,7 +55,7 @@ export default function CommentList({
                 queryKey: ["blog"],
             });
 
-            toast.success("Comment deleted");        },
+            message.success("Comment deleted");        },
     });
 
     const handleDeleteComment = (commentId: string) => {

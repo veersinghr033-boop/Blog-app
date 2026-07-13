@@ -148,11 +148,12 @@ export const getBlogById = async (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
     const userId = (req as Request & { user?: { id: string } }).user?.id;
 
-    const before = req.query.before as string | undefined; const limit = 5;
+    const before = req.query.before as string | undefined;
+    const limit = 5;
 
-
-
-    const query: any = {};
+    const query: any = {
+      author: id,
+    };
 
     if (before) {
       query.createdAt = {
@@ -201,7 +202,7 @@ export const getBlogById = async (req: Request, res: Response) => {
         title: blog.title,
         image: blog.image,
 
-        preview, // ✅ only send preview
+        preview,
         author: {
           id: (blog.author as any)._id,
           userName: (blog.author as any).userName,
@@ -231,7 +232,6 @@ export const getBlogById = async (req: Request, res: Response) => {
         updatedAt: blog.updatedAt,
       };
     });
-    // const blog = await Blog.aggregate(pipeline);
     const blogs = await Blog.find({ author: id });
 
     const totalBlogs = blogs.length;
@@ -276,13 +276,14 @@ export const getBlogById = async (req: Request, res: Response) => {
     });
   }
 };
-export const createBlog = async (req: Request, res: Response) => {
+export const createBlog = async (
+  req: Request & { file?: any; user?: { id: string } },
+  res: Response,
+) => {
   try {
     const { title, content } = req.body;
 
-    const userId = (req as Request & {
-      user?: { id: string };
-    }).user?.id;
+    const userId = req.user?.id;
 
     if (!userId) {
       return res.status(401).json({

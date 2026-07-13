@@ -43,16 +43,54 @@ export const logout = createAsyncThunk("auth/logout", async () => {
 
 export const updateProfile = createAsyncThunk(
   "auth/updateProfile",
-  async ({ userName, email, bio }: any, { rejectWithValue }) => {
+  async (
+    {
+      userName,
+      email,
+      bio,
+      image,
+      removeImage,
+    }: {
+      userName: string;
+      email: string;
+      bio: string;
+      image?: File | null;
+      removeImage?: boolean;
+    },
+    { rejectWithValue }
+  ) => {
     try {
-      const response = await api.put("/users/profile", { userName, email, bio });
+      const formData = new FormData();
+
+      formData.append("userName", userName);
+      formData.append("email", email);
+      formData.append("bio", bio);
+
+      if (image) {
+        formData.append("image", image);
+      }
+      if (removeImage) {
+        formData.append("removeImage", "true");
+      }
+
+      const response = await api.put(
+        "/users/profile",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
       return response.data;
     } catch (error: any) {
       return rejectWithValue(
-        error?.response?.data?.message || "Failed to update profile",
+        error?.response?.data?.message ||
+        "Failed to update profile"
       );
     }
-  },
+  }
 );
 
 export const changePassword = createAsyncThunk(

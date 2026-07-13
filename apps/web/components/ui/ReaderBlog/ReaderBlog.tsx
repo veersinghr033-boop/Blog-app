@@ -7,7 +7,7 @@ import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
 import ReaderBlogCard from "./ReaderBlogCard";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { message } from "antd";
 interface BlogProps {
     data: any[];
     hasNextPage?: boolean;
@@ -77,9 +77,9 @@ function ReaderBlog({ data, hasNextPage = false, isFetchingNextPage = false, fet
 
         onSuccess: ({ isSaved }) => {
             if (isSaved) {
-                toast.warning("Blog unsaved");
+                message.warning("Blog unsaved");
             } else {
-                toast.success("Blog saved");
+                message.success("Blog saved");
             }
 
             queryClient.invalidateQueries({

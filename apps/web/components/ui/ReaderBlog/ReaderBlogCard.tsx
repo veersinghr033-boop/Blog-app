@@ -124,7 +124,9 @@ function ReaderBlogCard({
                             >
                                 <MessageCircle size={15} /> {post.comments?.count || 0}
                             </span>
-                            <span>{post.views && post.views.length > 0 ? post.views[0].count : 0} Views</span>
+                            <span className="text-sm cursor-pointer hover:text-blue-500 text-gray-500">
+                                {post.views?.count || 0} Views
+                            </span>
                         </div>
                         <button
                             className={`cursor-pointer text-lg transition-colors ${isSaved ? "text-blue-500" : "text-gray-400 hover:text-blue-500"}`}

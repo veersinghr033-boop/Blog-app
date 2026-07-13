@@ -1,14 +1,13 @@
 "use client";
 
 import {
-    Button,
+   
+    message,
    
     Popconfirm,
 } from "antd";
-import { toast } from "sonner";
 
-toast.success("Report deleted");
-toast.error("Failed to delete report");
+
 import { useState } from "react";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -38,7 +37,7 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
             await api.delete(`/reports/${reportId}`);
         },
         onSuccess: () => {
-            toast.success("Report deleted");
+            message.success("Report deleted");
 
             queryClient.invalidateQueries({
                 queryKey: ["reports"],
@@ -48,7 +47,7 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
 
         onError: (error) => {
             console.error("Error deleting report:", error);
-            toast.error("Failed to delete report");
+            message.error("Failed to delete report");
         },
     });
 

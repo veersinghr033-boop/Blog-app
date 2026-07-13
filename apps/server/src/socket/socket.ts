@@ -41,6 +41,7 @@ export const initSocket = (server: any) => {
     };
 
     socket.on("userOnline", async (userId:string) => {
+      console.log("userOnline:", userId);
 
       userStatus.set(userId, "online");
       socketToUser.set(socket.id, userId);

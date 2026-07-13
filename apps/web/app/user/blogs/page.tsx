@@ -11,7 +11,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react"
 
 function Blogs() {
-    const userId = useAppSelector((state) => state.auth.user?.id);
+    const userId = useAppSelector((state) => state.auth.user?._id);
     const role = useAppSelector((state) => state.auth.user?.role);
     const {
         data,
@@ -44,7 +44,7 @@ function Blogs() {
         return data?.pages.flatMap(page => page.blog) ?? [];
     }, [data]);
     const stats = data?.pages?.[0]?.stats;
-
+console.log(blog)
     const cardData = [
         {
             title: "Total Blogs",

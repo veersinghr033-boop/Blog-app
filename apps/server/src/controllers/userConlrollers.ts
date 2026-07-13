@@ -4,13 +4,13 @@ import Chat from "../models/chatModel.ts";
 import Group from "../models/GroupModel.ts";
 import Message from "../models/message.ts";
 import { Request, Response } from "express";
-
+import { uploadImage } from "../utils/uploadImage.ts";
 export const getAllUsersData = async (req: Request, res: Response) => {
     try {
         const userId = (req as Request & { user?: { id: string } }).user?.id;
 
-        const users = await User.find({_id: {$ne: userId}}).select("-password");
-      
+        const users = await User.find({ _id: { $ne: userId } }).select("-password");
+
         res.status(200).json({
             users,
         });
@@ -77,45 +77,83 @@ export const getUserById = async (req: Request, res: Response) => {
     }
 };
 
-export const updateUserProfile = async (req: Request, res: Response) => {
+export const updateUserProfile = async (
+    req: Request,
+    res: Response,
+) => {
     const userId = (req as Request & { user?: { id: string } }).user?.id;
+
     const { userName, email, bio } = req.body;
 
     try {
-        if (!userName && !email && bio === undefined) {
+        if (!userName && !email && bio === undefined && !req.file) {
             return res
                 .status(400)
                 .json({ message: "No profile fields provided" });
         }
 
         if (email) {
-            const existingUser = await User.findOne({ email, _id: { $ne: userId } });
+            const existingUser = await User.findOne({
+                email,
+                _id: { $ne: userId },
+            });
+
             if (existingUser) {
-                return res.status(400).json({ message: "Email already in use" });
+                return res
+                    .status(400)
+                    .json({ message: "Email already in use" });
             }
         }
 
-        const updateData: Partial<{ userName: string; email: string; bio: string }> = {};
-        if (userName !== undefined) updateData.userName = userName;
-        if (email !== undefined) updateData.email = email;
-        if (bio !== undefined) updateData.bio = bio;
+        const updateData: any = {};
 
-        const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
-            new: true,
-            runValidators: true,
-        }).select("-password");
-
-        if (!updatedUser) {
-            return res.status(404).json({ message: "User not found" });
+        if (userName !== undefined) {
+            updateData.userName = userName;
         }
 
+        if (email !== undefined) {
+            updateData.email = email;
+        }
+
+        if (bio !== undefined) {
+            updateData.bio = bio;
+        }
+
+        if (req.body.removeImage === "true") {
+            updateData.profileImage = "";
+        }
+
+        if (req.file) {
+            const result: any = await uploadImage(req.file);
+
+            updateData.profileImage = result.secure_url;
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            updateData,
+            {
+                new: true,
+                runValidators: true,
+            },
+        ).select("-password");
+
+        if (!updatedUser) {
+            return res
+                .status(404)
+                .json({ message: "User not found" });
+        }
+        console.log(updatedUser)
         return res.status(200).json({
             message: "Profile updated successfully",
             user: updatedUser,
         });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: "Failed to update profile" });
+
+        return res.status(500).json({
+            message: "Failed to update profile",
+        });
     }
 };
 
@@ -166,6 +204,8 @@ export async function emitSortedUsers(io: any, currentUserId?: string) {
     if (!currentUserId) {
         return [];
     }
+    console.log("1. emitSortedUsers called", currentUserId);
+
     const users = await User.find({
         _id: { $ne: currentUserId },
     }).select("-password").lean();
@@ -237,7 +277,7 @@ export async function emitSortedUsers(io: any, currentUserId?: string) {
             role: user.role,
             type: "user",
             updatedAt: chat.updatedAt,
-
+            img: user.profileImage,
             unreadCount,
 
         });
@@ -255,6 +295,7 @@ export async function emitSortedUsers(io: any, currentUserId?: string) {
             role: user.role,
             type: "user",
             updatedAt: null,
+            img: user.profileImage,
         }));
 
     result.push(...remainingUsers);
@@ -271,7 +312,7 @@ export async function emitSortedUsers(io: any, currentUserId?: string) {
         return a.name.localeCompare(b.name);
     });
     io.to(currentUserId.toString()).emit("sortedUsers", result);
-
+    console.log(result)
     return result;
 };
 export const getUsersSorted = async (req: Request, res: Response) => {

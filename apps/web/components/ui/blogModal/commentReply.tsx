@@ -1,8 +1,10 @@
 // "use client";
-import { toast } from "sonner"; 
+
+
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useState, } from "react";
+import { message } from "antd";
 
 function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
     const [openReply, setOpenReply] = useState<string | null>(null);
@@ -35,7 +37,7 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
                 queryKey: ["replies", comment._id],
             });
 
-            toast.success("Reply added");
+            message.success("Reply added");
             setReplyText((prev) => ({
                 ...prev,
                 [openReply!]: "",
@@ -45,13 +47,13 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
         onError: (error: any) => {
             const status = error?.response?.status;
             if (status === 400) {
-                toast.warning("Reply cannot be empty");
+                message.warning("Reply cannot be empty");
             } else if (status === 404) {
-                toast.error("Comment not found");
+                message.error("Comment not found");
             } else if (status === 401) {
-                toast.error("Login required");
+                message.error("Login required");
             } else {
-                toast.error(
+                message.error(
                     error?.response?.data?.message ||
                     "Something went wrong"
                 );
@@ -78,7 +80,7 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
                 <form className="pl-8 mt-3 flex gap-2" onSubmit={(e) => {
                     e.preventDefault();
                     if (!replyText[comment._id]?.trim()) {
-                        toast.warning("Reply cannot be empty");
+                        message.warning("Reply cannot be empty");
                         return;
                     }
 

@@ -6,7 +6,7 @@ import React, { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
-import { toast } from "sonner"; 
+import { message } from "antd";
 interface BlogCardProps {
   post: any;
   userId?: string;
@@ -31,12 +31,12 @@ function BlogCard({ post, role, userId }: BlogCardProps) {
       if (status === 400) {
         console.log("Already viewed");
       } else if (status === 404) {
-        toast.error("Blog not found");
+        message.error("Blog not found");
       } else if (status === 401) {
-        toast.error("Login required");
+        message.error("Login required");
       } else {
-        toast.error(error?.response?.data?.message || "Something went wrong");
       }
+      message.error(error?.response?.data?.message || "Something went wrong");
     },
   });
   const openBlog = useCallback(
@@ -51,7 +51,14 @@ function BlogCard({ post, role, userId }: BlogCardProps) {
   );
 
   return (
-    <div className="w-full bg-white p-5 rounded-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow">
+    <div className="w-full flex gap-2 bg-white p-5 rounded-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow">
+      <img
+        src={post.image}
+        alt={post.title}
+        className=" max-w-1/5 mx-auto object-cover rounded-lg shadow-2xs shadow-gray-300"
+      />
+      <div>
+
       <BlogContent
         post={post}
         onOpen={openBlog}
@@ -62,6 +69,7 @@ function BlogCard({ post, role, userId }: BlogCardProps) {
         onOpen={openBlog}
         userId={userId}
       />
+      </div>
     </div>
   );
 }

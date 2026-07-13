@@ -15,7 +15,7 @@ function Blogs() {
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
-  const userId = useAppSelector((state) => state.auth.user?.id);
+  const userId = useAppSelector((state) => state.auth.user?._id);
 
   const role = useAppSelector((state) => state.auth.user?.role);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =

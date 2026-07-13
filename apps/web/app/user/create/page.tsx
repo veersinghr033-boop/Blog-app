@@ -4,7 +4,7 @@ import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { toast } from "sonner";
+import { message} from "antd";
 import dynamic from "next/dynamic";
 import { Image, Upload } from 'antd';
 import { PlusOutlined } from "@ant-design/icons";
@@ -27,7 +27,7 @@ function CreateBlog() {
     content: null,
   });
   const [editorKey, setEditorKey] = useState(0);
-  const userId = useAppSelector((state) => state.auth.user?.id);
+  const userId = useAppSelector((state) => state.auth.user?._id);
   const [editorContent, setEditorContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
@@ -51,18 +51,19 @@ function CreateBlog() {
         });
 
         return response.data;
+      } else {
+        message.warning("Please upload an image");
+        return;
       }
 
-      const response = await api.post("/blogs/create", payload);
 
-      return response.data;
     },
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blogData"] });
-      // queryClient.invalidateQueries({ queryKey: ["blogs"] });
-      // queryClient.invalidateQueries({ queryKey: ["blog"] });
-      toast.success("Blog published successfully");
+      queryClient.invalidateQueries({ queryKey: ["blogs"] });
+      queryClient.invalidateQueries({ queryKey: ["blog"] });
+      message.success("Blog published successfully");
       setFormData({
         title: "",
         content: null,
@@ -75,7 +76,7 @@ function CreateBlog() {
 
     onError: (error) => {
       console.log(error);
-      toast.error("Failed to publish blog");
+      message.error("Failed to publish blog");
     },
   });
   const formatContent = (text: string) => {
@@ -199,16 +200,16 @@ Topic: ${title}
         ...prev,
         content: html,
       }));
-      toast.success("AI content generated successfully");
+      message.success("AI content generated successfully");
     },
 
     onError: (error: any) => {
       console.log(error);
 
       if (error.message === "Please enter title first") {
-        toast.warning(error.message);
+        message.warning(error.message);
       } else {
-        toast.error("Failed to generate AI content");
+        message.error("Failed to generate AI content");
       }
     },
   });
@@ -237,12 +238,13 @@ Topic: ${title}
     const title = formData.title.trim();
     const content = formData.content;
 
+
     if (!title) {
-      toast.warning("Please enter title first");
+      message.warning("Please enter title first");
       return;
     }
     if (isContentEmpty(formData.content)) {
-      toast.warning("Please enter content first");
+      message.warning("Please enter content first");
       return;
     }
 
