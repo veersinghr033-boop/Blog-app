@@ -72,7 +72,7 @@ export default function Message() {
     };
   }, []);
   return (
-    <div className="flex h-[calc(100dvh-115px)] min-h-0 w-full overflow-hidden md:gap-0">
+    <div className="flex h-[calc(100dvh-100px)] min-h-0 w-full overflow-hidden md:gap-0">
       <div className="hidden h-full md:block md:w-62.5 md:shrink-0">
         <UserSidebar
           selectedUser={selectedUser}

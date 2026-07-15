@@ -1,6 +1,6 @@
 "use client"
 
-import { Table } from "antd";
+import  Table  from "antd/es/table/Table";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useMemo } from "react";

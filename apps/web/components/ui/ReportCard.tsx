@@ -1,11 +1,7 @@
 "use client";
 
-import {
-   
-    message,
-   
-    Popconfirm,
-} from "antd";
+import { toast } from "sonner";
+import Popconfirm from "antd/es/popconfirm";
 
 
 import { useState } from "react";
@@ -37,7 +33,7 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
             await api.delete(`/reports/${reportId}`);
         },
         onSuccess: () => {
-            message.success("Report deleted");
+            toast.success("Report deleted");
 
             queryClient.invalidateQueries({
                 queryKey: ["reports"],
@@ -47,7 +43,7 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
 
         onError: (error) => {
             console.error("Error deleting report:", error);
-            message.error("Failed to delete report");
+            toast.error("Failed to delete report");
         },
     });
 

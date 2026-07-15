@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { store } from "@/lib/store/store";
+import { Toaster } from "sonner";
 
 function createQueryClient() {
   return new QueryClient({
@@ -29,7 +30,9 @@ export default function Providers({
   const queryClient = useMemo(() => createQueryClient(), []);
   return (
     <QueryClientProvider client={queryClient}>
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}>{children}
+        <Toaster richColors position="top-right" />
+      </Provider>
     </QueryClientProvider>
   );
 }

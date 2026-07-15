@@ -1,8 +1,9 @@
 
 // "use client";
-import { message } from "antd";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
+import { toast } from "sonner";
+
 
 export default function AddCommentForm({ blogId }: { blogId: string }) {
 
@@ -24,7 +25,7 @@ export default function AddCommentForm({ blogId }: { blogId: string }) {
                 queryKey: ["blog", blogId],
             });
 
-            message.success("Comment added");
+            toast.success("Comment added");
         },
     });
 
@@ -34,7 +35,7 @@ export default function AddCommentForm({ blogId }: { blogId: string }) {
         const data = new FormData(form);
         const comment = String(data.get("comment") || "").trim();
         if (!comment) {
-            message.warning("Please enter a comment");
+            toast.warning("Please enter a comment");
             return;
         }
 

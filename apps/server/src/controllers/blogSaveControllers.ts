@@ -59,7 +59,7 @@ export const getSavedBlogs = async (req: Request, res: Response) => {
         path: "blog",
         populate: {
           path: "author",
-          select: "userName",
+          select: "userName profileImage",
         },
       });
     if (savedBlogs.length === 0) {
@@ -106,6 +106,7 @@ export const getSavedBlogs = async (req: Request, res: Response) => {
           const author = blog.author ? {
             _id: blog.author._id,
             userName: blog.author.userName,
+            profileImage: blog.author.profileImage,
           } : null;
           const preview = getTextFromLexical(blog.content).slice(0, 300);
 

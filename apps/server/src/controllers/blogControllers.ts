@@ -6,7 +6,6 @@ import View from "../models/viewModel.ts";
 import mongoose from "mongoose";
 import { Request, Response } from "express";
 import { uploadImage } from "../utils/uploadImage.ts";
-import { AnyBulkWriteOperation } from "mongoose";
 
 export const getAllBlogsData = async (req: Request, res: Response) => {
   try {
@@ -62,7 +61,7 @@ export const getAllBlogs = async (req: Request, res: Response) => {
     const blogs = await Blog.find(query)
       .sort({ createdAt: -1 })
       .limit(limit + 1)
-      .populate("author", "userName")
+      .populate("author", "userName  profileImage")
       .populate("Likes", "user")
       .populate("Comments", "user")
       .populate("views");
@@ -102,6 +101,7 @@ export const getAllBlogs = async (req: Request, res: Response) => {
         author: {
           id: (blog.author as any)._id,
           userName: (blog.author as any).userName,
+          profileImage: (blog.author as any).profileImage,
         },
         likes: {
           count: blog.Likes?.length || 0,
@@ -166,7 +166,7 @@ export const getBlogById = async (req: Request, res: Response) => {
     const blog = await Blog.find(query)
       .sort({ createdAt: -1 })
       .limit(limit + 1)
-      .populate("author", "userName")
+      .populate("author", "userName profileImage")
       .populate("Likes", "user")
       .populate("Comments", "user")
       .populate("views");
@@ -206,6 +206,7 @@ export const getBlogById = async (req: Request, res: Response) => {
         author: {
           id: (blog.author as any)._id,
           userName: (blog.author as any).userName,
+          profileImage: (blog.author as any).profileImage,
         },
         likes: {
           count: blog.Likes?.length || 0,
@@ -368,7 +369,7 @@ export const findByBlogId = async (req: Request, res: Response) => {
           _id: mongoose.Types.ObjectId;
           userName: string;
         };
-      }>("author", "userName")
+      }>("author", "userName profileImage")
       .lean();
 
     if (!blog) {
@@ -416,6 +417,7 @@ export const findByBlogId = async (req: Request, res: Response) => {
       author: {
         id: blog.author._id,
         userName: blog.author.userName,
+        profileImage: (blog.author as any).profileImage,
       },
 
       likes: {

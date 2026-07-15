@@ -1,4 +1,8 @@
-import { Modal, Button, Popconfirm, message } from "antd";
+import { toast } from "sonner";
+import Popconfirm from "antd/es/popconfirm";
+import Modal from "antd/es/modal";
+import Button from "antd/es/button";
+import { Virtuoso } from "react-virtuoso";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
@@ -6,6 +10,7 @@ import { useState, useMemo, useCallback, memo } from "react";
 import AddMember from "./AddMember";
 import useUserStatus from "./useUserStatus";
 import { Ellipsis, Trash2, LogOut, User } from "lucide-react";
+import { Upload } from "antd";
 
 interface Participant {
     _id: string;
@@ -70,11 +75,11 @@ const ViewGroup = memo(({
             });
             onClose();
             SelectedUser(null);
-            message.success("Member removed");
+            toast.success("Member removed");
         },
 
         onError: () => {
-            message.error("Failed to remove member");
+            toast.error("Failed to remove member");
         },
     });
 
@@ -89,11 +94,11 @@ const ViewGroup = memo(({
             });
             onClose();
             SelectedUser(null);
-            message.success("Group delete");
+            toast.success("Group delete");
         },
 
         onError: () => {
-            message.error("Failed to remove member");
+            toast.error("Failed to remove member");
         },
     });
 
@@ -108,11 +113,11 @@ const ViewGroup = memo(({
                 queryKey: ["group", Groups],
             });
 
-            message.success("Admin changed successfully");
+            toast.success("Admin changed successfully");
         },
 
         onError: () => {
-            message.error("Failed to change admin");
+            toast.error("Failed to change admin");
         },
     });
 
@@ -126,10 +131,10 @@ const ViewGroup = memo(({
             queryClient.invalidateQueries({
                 queryKey: ["group", Groups],
             });
-            message.success("Admin role removed");
+            toast.success("Admin role removed");
         },
         onError: () => {
-            message.error("Failed to remove admin role");
+            toast.error("Failed to remove admin role");
         },
     });
 
@@ -146,7 +151,7 @@ const ViewGroup = memo(({
             isLeavingUserAdmin &&
             adminIds.length === 1
         ) {
-            message.warning(
+            toast.warning(
                 "You are the only admin. Assign another admin before leaving the group."
             );
             return;
@@ -156,7 +161,7 @@ const ViewGroup = memo(({
             memberId !== userId &&
             isLeavingUserAdmin
         ) {
-            message.warning(
+            toast.warning(
                 "Admin cannot be removed. Please change their role first."
             );
             return;
@@ -178,7 +183,7 @@ const ViewGroup = memo(({
 
     const handleRemoveAdmin = useCallback((adminId: string) => {
         if (adminIds.length === 1) {
-            message.warning(
+            toast.warning(
                 "The last admin cannot be removed."
             );
             return;
@@ -188,6 +193,21 @@ const ViewGroup = memo(({
     }, [adminIds.length, removeAdminMutation]);
     return (
         <Modal title="View Group" open={open} onCancel={onClose} footer={null}>
+            <Upload
+                showUploadList={false}
+                beforeUpload={(file) => {
+                    updateGroupImageMutation.mutate(file);
+                    return false;
+                }}
+            >
+                <div className="cursor-pointer">
+                    <img
+                        src={group?.groupImage || "/group-placeholder.png"}
+                        className="h-16 w-16 rounded-full object-cover"
+                        alt="group"
+                    />
+                </div>
+            </Upload>
             <div className="p-2 border-b border-gray-200 mt-1 flex justify-between items-center">
                 <h2 className="text-base font-semibold capitalize">{group?.name}</h2>
                 {isCurrentUserAdmin && (
@@ -199,6 +219,7 @@ const ViewGroup = memo(({
                     </Popconfirm>
                 )}
             </div>
+
 
             <h2 className="text-xl font-semibold mt-3 mb-2">Members</h2>
 

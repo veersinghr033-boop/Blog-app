@@ -1,64 +1,148 @@
-// "use client";
+"use client";
 
-import { useEffect, useRef } from "react";
-import BlogCard from "./BlogCard";
+import { useMemo, useRef, useState } from "react";
 import { Virtuoso } from "react-virtuoso";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import api from "@/utills/axios";
+import BlogCard from "./BlogCard";
 
 interface BlogProps {
-  data: any[];
-  hasNextPage?: boolean;
-  isFetchingNextPage?: boolean;
-  fetchNextPage?: () => void;
-  initialSavedData?: any[];
+  type: "admin" | "user";
   userId?: string;
   role?: string;
 }
-function Blog({
-  data,
-  userId,
-  role,
-  hasNextPage = false,
-  isFetchingNextPage = false,
-  fetchNextPage,
-  initialSavedData,
-}: BlogProps) {
 
+function Blog({ type, userId, role }: BlogProps) {
+  const [searchText, setSearchText] = useState("");
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  if (!data.length) {
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey:
+      type === "admin"
+        ? ["blogs"]
+        : ["blogData", userId],
+
+    queryFn: async ({ pageParam }) => {
+      const before = pageParam
+        ? `? before = ${ pageParam } `
+        : "";
+
+      const res = await api.get(
+        type === "admin"
+          ? `/blogs/all${ before } `
+          : `/ blogs / ${ userId }${ before } `
+      );
+
+      return res.data;
+    },
+
+    initialPageParam: null,
+
+    getNextPageParam: (lastPage) =>
+      lastPage?.hasMore
+        ? lastPage.nextCursor
+        : undefined,
+
+    staleTime: 60_000,
+    gcTime: 10 * 60_000,
+    refetchOnWindowFocus: false,
+  });
+
+  const blogs = useMemo(() => {
+    if (type === "admin") {
+      return (
+        data?.pages.flatMap(
+          (page: any) => page.blogs
+        ) ?? []
+      );
+    }
+
     return (
-      <div className="text-center py-4">
-        <p className="text-gray-500">No blogs yet</p>
-      </div>
+      data?.pages.flatMap(
+        (page: any) => page.blog
+      ) ?? []
     );
-  }
+  }, [data, type]);
+
+  const filteredBlogs = useMemo(() => {
+    return blogs.filter((blog: any) => {
+      const title =
+        blog.title?.toLowerCase() || "";
+
+      const preview =
+        blog.preview?.toLowerCase() || "";
+
+      return (
+        title.includes(
+          searchText.toLowerCase()
+        ) ||
+        preview.includes(
+          searchText.toLowerCase()
+        )
+      );
+    });
+  }, [blogs, searchText]);
+
   return (
-    <div className="flex flex-col gap-4 pt-4 ">
-      <Virtuoso
-        style={{ height: "67vh" }}
-        data={data}
-        endReached={() => {
-          if (hasNextPage && !isFetchingNextPage && fetchNextPage) {
-            fetchNextPage();
+    <div className="flex flex-col gap-4 pt-4">
+      <div>
+        <input
+          className="w-full p-2 border border-gray-300 outline-0 rounded"
+          placeholder="Search blogs..."
+          value={searchText}
+          onChange={(e) =>
+            setSearchText(e.target.value)
           }
-        }}
-        itemContent={(_, post) => (
-          <div className="mb-4">
+        />
+      </div>
 
-            <BlogCard
-              post={post}
-              userId={userId}
-              role={role}
-            />          </div>
-        )}
-      />
-      <div ref={loadMoreRef} className="col-span-full h-4" />
-
-      {isFetchingNextPage ? (
-        <div className="col-span-full text-center py-4 text-sm text-gray-500">
-          Loading more blogs...
+      {!filteredBlogs.length ? (
+        <div className="text-center py-4">
+          <p className="text-gray-500">
+            No blogs found
+          </p>
         </div>
-      ) : null}
+      ) : (
+        <>
+          <Virtuoso
+            style={{ height: "67vh" }}
+            data={filteredBlogs}
+            endReached={() => {
+              if (
+                hasNextPage &&
+                !isFetchingNextPage
+              ) {
+                fetchNextPage();
+              }
+            }}
+            itemContent={(_, post) => (
+              <div className="mb-4">
+                <BlogCard
+                  post={post}
+                  userId={userId}
+                  role={role}
+                />
+              </div>
+            )}
+          />
+
+          <div
+            ref={loadMoreRef}
+            className="col-span-full h-4"
+          />
+
+          {isFetchingNextPage && (
+            <div className="col-span-full text-center py-4 text-sm text-gray-500">
+              Loading more blogs...
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

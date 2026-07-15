@@ -6,7 +6,7 @@ import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
 import ChatEditor from "@/components/lexical/ChatEditor";
 import { Send } from "lucide-react";
-import { message } from "antd";
+import { toast } from "sonner";
 
 interface Props {
     socketRef: any
@@ -22,10 +22,7 @@ export default function ChatInput({
     const [messageText, setMessageText] = useState<any>(null);
     const [editorKey, setEditorKey] = useState(0);
 
-    onSuccess: () => {
-        setMessageText(null);
-        setEditorKey((prev) => prev + 1);
-    };    useEffect(() => {
+    useEffect(() => {
         setMessageText("")
     }, [selectedUser])
 
@@ -38,7 +35,7 @@ export default function ChatInput({
             setEditorKey((prev) => prev + 1);
         },
         onError: (error: any) => {
-            message.error(
+            toast.error(
                 error?.response?.data?.message || "Failed to delete message",
             );
         },
@@ -49,12 +46,30 @@ export default function ChatInput({
 
         sendMessage();
     };
-    const sendMessage = () => {
-        if (!messageText || !selectedUser || !userId) return;
-        console.log("messageText:", messageText);
-        console.log(messageText);
+    const hasContent = (content: any): boolean => {
+        if (!content?.root?.children) return false;
 
-        console.log("Sending:", messageText);
+        const getText = (nodes: any[]): string => {
+            return nodes
+                .map((node) => {
+                    if (node.text) return node.text;
+                    if (node.children) return getText(node.children);
+                    return "";
+                })
+                .join("");
+        };
+
+        return getText(content.root.children).trim().length > 0;
+    };
+    const sendMessage = () => {
+        if (!hasContent(messageText)) return;
+
+        if (!socketRef.current || !selectedUser || !userId) return;
+        // console.log("messageText:", messageText);
+        // console.log(messageText);
+     
+
+        // console.log("Sending:", messageText);
 
         if (selectedUser.type === "group") {
             sendMutation.mutate({
@@ -74,7 +89,9 @@ export default function ChatInput({
         });
     };
     const handleMessageChange = (json: any) => {
+
         setMessageText(json);
+
 
 
         if (!socketRef.current || !selectedUser || !userId) return;
@@ -118,7 +135,7 @@ export default function ChatInput({
                 />
                 <button
                     type="submit"
-                    disabled={!messageText || sendMutation.isPending}
+                    disabled={!hasContent(messageText) || sendMutation.isPending}
                     className="bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center shrink-0"
                 >
                     {sendMutation.isPending ? (

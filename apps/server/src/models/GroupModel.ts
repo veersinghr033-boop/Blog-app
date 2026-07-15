@@ -6,6 +6,10 @@ const groupSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
+    groupImage: {
+        type: String,
+        default: "",
+    },
     admin: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

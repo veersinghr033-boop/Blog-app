@@ -1,139 +1,173 @@
-import { memo, useCallback } from "react";
-
+// ReaderBlogCard.tsx
+import { memo, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ThumbsUp, MessageCircle, Save } from "lucide-react";
+import Image from "next/image";
 
 interface ReaderBlogCardProps {
     post: any;
     userId: string;
     isSaved: boolean;
-
     onLike: (blogId: string) => void;
-    onSave: (
-        blogId: string,
-        isSaved: boolean
-    ) => void;
+    onSave: (blogId: string, isSaved: boolean) => void;
     onView: (blogId: string) => void;
 }
+
 function ReaderBlogCard({
     post,
-    userId,
     isSaved,
     onLike,
     onSave,
     onView,
 }: ReaderBlogCardProps) {
+    const router = useRouter();
+
     const isLiked = post.isLiked;
     const isCommented = post.isCommented;
-    const router = useRouter()
-
+    const blogId = post._id;
 
     const openBlogModal = useCallback(
-        (blogOrId: any) => {
-            const blogId = typeof blogOrId === "string" || typeof blogOrId === "number"
-                ? blogOrId
-                : blogOrId?._id || blogOrId?.id;
+        (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
 
-            if (!blogId) {
-                console.warn("Missing blog id", blogOrId);
-                return;
+            const id = blogId;
+            if (!id) return;
+
+            router.push(`/user/blogs/${id}`);
+            router.prefetch(`/user/blogs/${id}`); 
+
+            if (typeof requestIdleCallback !== "undefined") {
+                requestIdleCallback(() => onView(id));
+            } else {
+                setTimeout(() => onView(id), 100);
             }
-
-            router.push(`/user/blogs/${blogId}`);
-
-            requestIdleCallback(() => {
-                onView(blogId);
-            });
         },
-        [router, onView]
+        [router, onView, blogId]
     );
-    // const getTextFromLexical = (content: any): string => {
-    //     if (!content?.root?.children) return "";
 
-    //     const extract = (nodes: any[]): string => {
-    //         return nodes
-    //             .map((node) => {
-    //                 if (node.text) return node.text;
+    const handleLike = useCallback(
+        (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onLike(blogId);
+        },
+        [onLike, blogId]
+    );
 
-    //                 if (node.children) {
-    //                     return extract(node.children);
-    //                 }
+    const handleSave = useCallback(
+        (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onSave(blogId, isSaved);
+        },
+        [onSave, blogId, isSaved]
+    );
 
-    //                 return "";
-    //             })
-    //             .join(" ");
-    //     };
+    const authorInitial = useMemo(
+        () => post.author?.userName?.charAt(0)?.toUpperCase() || "U",
+        [post.author?.userName]
+    );
 
-    //     return extract(content.root.children);
-    // };
+    const formattedDate = useMemo(
+        () => (post.createdAt ? new Date(post.createdAt).toLocaleDateString() : ""),
+        [post.createdAt]
+    );
+
     const showReadMore = post.preview?.length > 150;
+
+    const isPriority = post.index < 3; 
 
     return (
         <div className="h-full rounded-lg border bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow border-gray-200 shadow-sm">
             <div className="flex h-full flex-col gap-4">
                 <div>
                     {post.image && (
-                        <img
-                            src={post.image}
-                            alt={post.title}
-                            className="w-full h-48 object-cover rounded-lg mb-6"
-                        />
+                        <div className="relative w-full h-48 mb-6">
+                            <Image
+                                src={post.image}
+                                alt={post.title}
+                                fill
+                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                className="object-cover rounded-lg"
+                                priority={isPriority}
+                                loading={isPriority ? "eager" : "lazy"}
+                                placeholder="blur"
+                                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRg..."
+                            />
+                        </div>
                     )}
-                    <h2 className="font-normal text-2xl mb-2  line-clamp-2">
+                    <h2 className="font-normal text-2xl mb-2 line-clamp-2">
                         {post.title}
                     </h2>
-                   
-                    <p className="line-clamp-3">
-                        {post.preview}
-                    </p>
+
+                    <p className="line-clamp-3 text-gray-700">{post.preview}</p>
 
                     {showReadMore && (
-                        <span
-                            className="text-blue-500 cursor-pointer"
-                            onClick={() => openBlogModal(post._id)}
+                        <button
+                            className="text-blue-500 hover:text-blue-700 font-medium cursor-pointer"
+                            onClick={openBlogModal}
                         >
-                            Read more
-                        </span>
+                            Read more 
+                        </button>
                     )}
                 </div>
 
                 <div className="mt-auto flex flex-col gap-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-xs uppercase text-white">
-                                {post.author?.userName?.charAt(0) || "U"}
-                            </div>
-                            <span>{post.author?.userName || "Unknown"}</span>
+                            {post.author?.profileImage ? (
+                                <img
+                                    src={post.author?.profileImage}
+                                    alt={post.author?.userName}
+                                    className="h-8 w-8 rounded-full object-cover"
+                                />
+                            ) : (
+                                <div className="h-8 w-8 rounded-full bg-black text-white flex items-center justify-center capitalize font-semibold">
+                                    {authorInitial}
+                                </div>
+                            )}
+                            <span className="text-sm font-medium">
+                                {post.author?.userName || "Unknown"}
+                            </span>
                         </div>
-                        <span className="text-xs text-gray-400">
-                            {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : ""}
-                        </span>
+                        <time className="text-xs text-gray-400" dateTime={post.createdAt}>
+                            {formattedDate}
+                        </time>
                     </div>
 
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-4 text-sm">
-                            <span
-                                className={`flex items-center gap-1 cursor-pointer transition-colors ${isLiked ? "text-blue-500" : "text-gray-500 hover:text-blue-500"}`}
-                                onClick={() => onLike(post._id)}
+                            <button
+                                className={`flex items-center gap-1 transition-colors ${isLiked ? "text-blue-500" : "text-gray-500 hover:text-blue-500"
+                                    }`}
+                                onClick={handleLike}
+                                aria-label={isLiked ? "Unlike post" : "Like post"}
                             >
-                                <ThumbsUp size={15} /> {post.likes?.count || 0}
-                            </span>
-                            <span
-                                className={`flex items-center gap-1 cursor-pointer transition-colors ${isCommented ? "text-green-500" : "text-gray-500 hover:text-green-500"}`}
-                                onClick={() => openBlogModal(post._id)}
+                                <ThumbsUp size={15} />
+                                <span>{post.likes?.count || 0}</span>
+                            </button>
+
+                            <button
+                                className={`flex items-center gap-1 transition-colors ${isCommented ? "text-green-500" : "text-gray-500 hover:text-green-500"
+                                    }`}
+                                onClick={openBlogModal}
+                                aria-label="View comments"
                             >
-                                <MessageCircle size={15} /> {post.comments?.count || 0}
-                            </span>
-                            <span className="text-sm cursor-pointer hover:text-blue-500 text-gray-500">
+                                <MessageCircle size={15} />
+                                <span>{post.comments?.count || 0}</span>
+                            </button>
+
+                            <span className="text-sm text-gray-500">
                                 {post.views?.count || 0} Views
                             </span>
                         </div>
+
                         <button
-                            className={`cursor-pointer text-lg transition-colors ${isSaved ? "text-blue-500" : "text-gray-400 hover:text-blue-500"}`}
-                            onClick={() =>
-                                onSave(post._id, isSaved)
-                            }
-                            title={isSaved ? "Unsave" : "Save"}
+                            className={`cursor-pointer transition-colors ${isSaved ? "text-blue-500" : "text-gray-400 hover:text-blue-500"
+                                }`}
+                            onClick={handleSave}
+                            aria-label={isSaved ? "Unsave blog" : "Save blog"}
                         >
                             <Save size={20} />
                         </button>
@@ -144,4 +178,14 @@ function ReaderBlogCard({
     );
 }
 
-export default memo(ReaderBlogCard);
+// Use memo with custom comparator
+export default memo(ReaderBlogCard, (prevProps, nextProps) => {
+    // Only re-render if these props change
+    return (
+        prevProps.post._id === nextProps.post._id &&
+        prevProps.post.isLiked === nextProps.post.isLiked &&
+        prevProps.post.likes?.count === nextProps.post.likes?.count &&
+        prevProps.isSaved === nextProps.isSaved &&
+        prevProps.post.comments?.count === nextProps.post.comments?.count
+    );
+});

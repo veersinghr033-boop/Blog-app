@@ -1,5 +1,6 @@
 // "use client";
-import { message,Popconfirm } from "antd";
+import { toast } from "sonner";
+import Popconfirm from "antd/es/popconfirm";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
@@ -55,7 +56,7 @@ export default function CommentList({
                 queryKey: ["blog"],
             });
 
-            message.success("Comment deleted");        },
+            toast.success("Comment deleted");        },
     });
 
     const handleDeleteComment = (commentId: string) => {

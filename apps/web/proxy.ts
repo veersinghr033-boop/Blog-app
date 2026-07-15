@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
 export async function proxy(request: NextRequest) {
-    console.log("MIDDLEWARE RUNNING");
 
     const token = request.cookies.get("token")?.value;
     const path = request.nextUrl.pathname;
@@ -26,7 +25,6 @@ export async function proxy(request: NextRequest) {
                     ? [role]
                     : [];
 
-            console.log("role", roles);
 
             if (path === "/") {
                 if (roles.includes("admin")) {
@@ -56,7 +54,7 @@ export async function proxy(request: NextRequest) {
                 return NextResponse.redirect(new URL("/unauthorized", request.url));
             }
         } catch (error) {
-            console.log("JWT ERROR:", error);
+            console.error("JWT ERROR:", error);
 
             const response = NextResponse.redirect(new URL("/login", request.url));
             response.cookies.delete("token");

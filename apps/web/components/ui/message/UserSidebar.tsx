@@ -99,9 +99,7 @@ export default function UserSidebar({
             >
               <div className="relative">
                 <div className="relative h-12 w-12 rounded-full bg-black text-white flex items-center justify-center capitalize font-semibold overflow-hidden">
-                  {isGroup ? (
-                    <Users size={19} />
-                  ) : item.img ? (
+                  {item.img ? (
                     <img
                       src={item.img}
                       alt={item.name}

@@ -1,6 +1,6 @@
 // "use client";
 import React from "react";
-import { message } from "antd"
+import { toast } from "sonner"; 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { ThumbsUp, MessageCircle } from "lucide-react";
@@ -24,7 +24,7 @@ function BlogActions({ post, onOpen, userId }: any) {
     },
 
     onError: () => {
-      message.error("Failed to like blog");
+      toast.error("Failed to like blog");
     },
   });
 

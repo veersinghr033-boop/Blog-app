@@ -2,43 +2,70 @@ import Group from "../models/GroupModel.ts";
 import Chat from "../models/chatModel.ts";
 import Message from "../models/message.ts";
 import { Request, Response } from "express";
+import { uploadImage } from "../utils/uploadImage.ts";
 export const createGroup = async (req: Request, res: Response) => {
     try {
-        const userId = (req as Request & { user?: { id: string } }).user?.id;
-        const { groupName, members } = req.body;
+        const userId = (req as Request & {
+            user?: { id: string };
+        }).user?.id;
+
+        const { groupName } = req.body;
+
+        let members = req.body.members;
 
         if (!userId) {
-            return res.status(401).json({ message: "Unauthorized" });
+            return res.status(401).json({
+                message: "Unauthorized",
+            });
         }
 
-        if (!groupName.trim()) {
-            return res.status(400).json({ message: "Group name is required" });
+        if (!groupName?.trim()) {
+            return res.status(400).json({
+                message: "Group name is required",
+            });
         }
 
-        const normalizedMembers = members.map((id: string) => id).filter((id: string) => id);
+        if (!Array.isArray(members)) {
+            members = members ? [members] : [];
+        }
 
-        const participants = [...new Set([userId, ...normalizedMembers])].sort();
+        const normalizedMembers = members.filter(Boolean);
 
+        const participants = [
+            ...new Set([userId, ...normalizedMembers]),
+        ];
+
+        let groupImage = "";
+
+        if (req.file) {
+            const result: any = await uploadImage(req.file);
+            groupImage = result.secure_url;
+        }
 
         const chat = await Chat.create({
             participants,
             isGroupChat: true,
         });
 
-
         const group = await Group.create({
             name: groupName.trim(),
+            groupImage,
             admin: [userId],
             chatId: chat._id,
         });
 
-        res.status(201).json({ message: "Group created successfully", group });
+        return res.status(201).json({
+            message: "Group created successfully",
+            group,
+        });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Failed to create group" });
+
+        return res.status(500).json({
+            message: "Failed to create group",
+        });
     }
 };
-
 export const getGroups = async (req: Request, res: Response) => {
     try {
         const { groupId } = req.params;

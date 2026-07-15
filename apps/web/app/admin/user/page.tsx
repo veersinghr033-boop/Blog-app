@@ -1,6 +1,9 @@
 "use client";
 
-import { Table, Button, message, Popconfirm } from "antd";
+import Table from "antd/es/table/Table";
+import Popconfirm from "antd/es/popconfirm";
+import { toast } from "sonner";
+
 import {
   useMutation,
   useQueryClient,
@@ -65,14 +68,14 @@ function Users() {
     },
 
     onSuccess: () => {
-      message.success("User deleted successfully");
+      toast.success("User deleted successfully");
       queryClient.invalidateQueries({
         queryKey: ["users"],
       });
     },
     onError: (error) => {
       console.error("Error deleting user:", error);
-      message.error("Failed to delete user");
+      toast.error("Failed to delete user");
     },
   });
 

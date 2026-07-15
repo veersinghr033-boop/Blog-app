@@ -78,7 +78,7 @@ export const getUserById = async (req: Request, res: Response) => {
 };
 
 export const updateUserProfile = async (
-    req: Request,
+    req: Request & { file?: any; user?: { id: string } },
     res: Response,
 ) => {
     const userId = (req as Request & { user?: { id: string } }).user?.id;
@@ -204,7 +204,6 @@ export async function emitSortedUsers(io: any, currentUserId?: string) {
     if (!currentUserId) {
         return [];
     }
-    console.log("1. emitSortedUsers called", currentUserId);
 
     const users = await User.find({
         _id: { $ne: currentUserId },
@@ -236,6 +235,7 @@ export async function emitSortedUsers(io: any, currentUserId?: string) {
                 id: group._id,
                 chatId: group.chatId,
                 name: group.name,
+                img: group.groupImage,
                 type: "group",
                 updatedAt: groupChat && groupChat.updatedAt ?
                     groupChat.updatedAt : group.updatedAt,
@@ -312,7 +312,7 @@ export async function emitSortedUsers(io: any, currentUserId?: string) {
         return a.name.localeCompare(b.name);
     });
     io.to(currentUserId.toString()).emit("sortedUsers", result);
-    console.log(result)
+    // console.log(result)
     return result;
 };
 export const getUsersSorted = async (req: Request, res: Response) => {

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build:analyze": "cross-env ANALYZE=true next build",
+    "build:analyze": "cross-env ANALYZE=true next build --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

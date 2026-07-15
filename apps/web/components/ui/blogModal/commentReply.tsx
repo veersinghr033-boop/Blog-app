@@ -4,7 +4,8 @@
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useState, } from "react";
-import { message } from "antd";
+import { toast } from "sonner";
+
 
 function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
     const [openReply, setOpenReply] = useState<string | null>(null);
@@ -37,7 +38,7 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
                 queryKey: ["replies", comment._id],
             });
 
-            message.success("Reply added");
+            toast.success("Reply added");
             setReplyText((prev) => ({
                 ...prev,
                 [openReply!]: "",
@@ -47,14 +48,14 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
         onError: (error: any) => {
             const status = error?.response?.status;
             if (status === 400) {
-                message.warning("Reply cannot be empty");
+                toast.warning("Reply cannot be empty");
             } else if (status === 404) {
-                message.error("Comment not found");
+                toast.error("Comment not found");
             } else if (status === 401) {
-                message.error("Login required");
+                toast.error("Login required");
             } else {
-                message.error(
-                    error?.response?.data?.message ||
+                toast.error(
+                    error?.response?.data?.toast ||
                     "Something went wrong"
                 );
             }
@@ -80,7 +81,7 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
                 <form className="pl-8 mt-3 flex gap-2" onSubmit={(e) => {
                     e.preventDefault();
                     if (!replyText[comment._id]?.trim()) {
-                        message.warning("Reply cannot be empty");
+                        toast.warning("Reply cannot be empty");
                         return;
                     }
 

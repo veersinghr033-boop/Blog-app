@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { changePassword, updateProfile } from "@/lib/store/features/authThunk";
 
-import { message, Upload } from "antd";
-import type { UploadFile, UploadProps } from "antd";
+import Upload from "antd/es/upload/Upload";
+import type { UploadProps } from "antd/es/upload/interface";
+import { toast } from "sonner";
 
 
 type FileType = Parameters<NonNullable<UploadProps["beforeUpload"]>>[0];
@@ -83,30 +84,30 @@ function Profile() {
     );
 
     if (updateProfile.fulfilled.match(resultAction)) {
-      message.success(
+      toast.success(
         resultAction.payload?.message ||
         "Profile updated successfully"
       );
     } else {
-      message.error(resultAction.payload as string);
+      toast.error(resultAction.payload as string);
     }
   };
 
   const handlePasswordSubmit = async () => {
     if (!currentPassword.trim()) {
-      message.error("Please enter currentPassword");
+      toast.error("Please enter currentPassword");
       return;
     }
     if (!newPassword.trim()) {
-      message.error("Please enter new password");
+      toast.error("Please enter new password");
       return;
     }
     if (!confirmPassword.trim()) {
-      message.error("Please enter confirmPassword");
+      toast.error("Please enter confirmPassword");
       return;
     }
     if (newPassword !== confirmPassword) {
-      message.error("New passwords do not match");
+      toast.error("New passwords do not match");
       return;
     }
 
@@ -115,14 +116,14 @@ function Profile() {
     );
 
     if (changePassword.fulfilled.match(resultAction)) {
-      message.success(
+      toast.success(
         resultAction.payload?.message || "Password updated successfully",
       );
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } else {
-      message.error(resultAction.payload as string);
+      toast.error(resultAction.payload as string);
     }
   };
 

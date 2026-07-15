@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { Button, Result } from "antd";
-
+import Result from "antd/es/result";
 export default function NotFoundPage() {
     return (
         <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">

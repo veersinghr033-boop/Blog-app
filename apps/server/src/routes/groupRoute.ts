@@ -9,9 +9,10 @@ import {
     removeAdmin
 } from "../controllers/groupControllers.ts";
 import { verifyToken } from "../middleware/authMiddleware.ts";
+import { upload } from "../middleware/multer.ts"; 
 
 const router = e.Router();
-router.post("/create", verifyToken, createGroup);
+router.post("/create", upload.single("groupImage"), verifyToken, createGroup);
 router.get("/:groupId", verifyToken, getGroups);
 router.delete("/:userId", verifyToken, deleteById);
 router.delete("/group/:groupId", verifyToken, groupDelete)

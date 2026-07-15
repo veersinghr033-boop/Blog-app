@@ -13,54 +13,54 @@ import { useMemo } from "react"
 function Blogs() {
     const userId = useAppSelector((state) => state.auth.user?._id);
     const role = useAppSelector((state) => state.auth.user?.role);
-    const {
-        data,
-        fetchNextPage,
-        hasNextPage,
-        isFetchingNextPage,
-    } = useInfiniteQuery({
-        queryKey: ["blogData", userId],
-        queryFn: async ({ pageParam }) => {
-            const before = pageParam
-                ? `?before=${pageParam}`
-                : "";
+//     const {
+//         data,
+//         fetchNextPage,
+//         hasNextPage,
+//         isFetchingNextPage,
+//     } = useInfiniteQuery({
+//         queryKey: ["blogData", userId],
+//         queryFn: async ({ pageParam }) => {
+//             const before = pageParam
+//                 ? `?before=${pageParam}`
+//                 : "";
 
-            const res = await api.get(
-                `/blogs/${userId}${before}`
-            );
+//             const res = await api.get(
+//                 `/blogs/${userId}${before}`
+//             );
 
-            return res.data;
-        },
+//             return res.data;
+//         },
 
-        initialPageParam: null,
+//         initialPageParam: null,
 
-        getNextPageParam: (lastPage) =>
-            lastPage.hasMore
-                ? lastPage.nextCursor
-                : undefined,
-    });
+//         getNextPageParam: (lastPage) =>
+//             lastPage.hasMore
+//                 ? lastPage.nextCursor
+//                 : undefined,
+//     });
   
-    const blog = useMemo(() => {
-        return data?.pages.flatMap(page => page.blog) ?? [];
-    }, [data]);
-    const stats = data?.pages?.[0]?.stats;
-console.log(blog)
+//     const blog = useMemo(() => {
+//         return data?.pages.flatMap(page => page.blog) ?? [];
+//     }, [data]);
+//     const stats = data?.pages?.[0]?.stats;
+// console.log(blog)
     const cardData = [
         {
             title: "Total Blogs",
-            value: stats?.totalBlogs ?? 0,
+            // value: stats?.totalBlogs ?? 0,
             desc: "Published",
             bg: "bg-blue-100",
         },
         {
             title: "Total Views",
-            value: stats?.totalViews ?? 0,
+            // value: stats?.totalViews ?? 0,
             desc: "All time",
             bg: "bg-green-100",
         },
         {
             title: "Engagement",
-            value: (stats?.totalLikes ?? 0) + (stats?.totalComments ?? 0),
+            // value: (stats?.totalLikes ?? 0) + (stats?.totalComments ?? 0),
             desc: "Likes and comments",
             bg: "bg-yellow-100",
         },
@@ -86,9 +86,9 @@ console.log(blog)
                                 {card.title}
                             </h3>
 
-                            <p className="text-2xl font-bold">
+                            {/* <p className="text-2xl font-bold">
                                 {card.value}
-                            </p>
+                            </p> */}
 
                             <p className="text-gray-500">
                                 {card.desc}
@@ -99,9 +99,14 @@ console.log(blog)
             </header>
             <div className="h-[67vh] mt-3 overflow-auto ">
 
-                <Blog data={blog} hasNextPage={hasNextPage}
+                {/* <Blog data={blog} hasNextPage={hasNextPage}
                     isFetchingNextPage={isFetchingNextPage}
                     fetchNextPage={fetchNextPage} userId={userId} role={role}
+                /> */}
+                <Blog
+                    type="user"
+                    userId={userId}
+                    role={role}
                 />
             </div>
         </div>

@@ -4,10 +4,9 @@ import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { message} from "antd";
 import dynamic from "next/dynamic";
-import { Image, Upload } from 'antd';
-import { PlusOutlined } from "@ant-design/icons";
+import   Upload  from 'antd/es/upload/Upload';
+import { Plus } from "lucide-react"; import { toast } from "sonner";
 const Editor = dynamic(
   () => import("@/components/lexical/Editor"),
   {
@@ -52,7 +51,7 @@ function CreateBlog() {
 
         return response.data;
       } else {
-        message.warning("Please upload an image");
+        toast.warning("Please upload an image");
         return;
       }
 
@@ -63,7 +62,7 @@ function CreateBlog() {
       queryClient.invalidateQueries({ queryKey: ["blogData"] });
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
       queryClient.invalidateQueries({ queryKey: ["blog"] });
-      message.success("Blog published successfully");
+      toast.success("Blog published successfully");
       setFormData({
         title: "",
         content: null,
@@ -76,7 +75,7 @@ function CreateBlog() {
 
     onError: (error) => {
       console.log(error);
-      message.error("Failed to publish blog");
+      toast.error("Failed to publish blog");
     },
   });
   const formatContent = (text: string) => {
@@ -200,16 +199,16 @@ Topic: ${title}
         ...prev,
         content: html,
       }));
-      message.success("AI content generated successfully");
+      toast.success("AI content generated successfully");
     },
 
     onError: (error: any) => {
       console.log(error);
 
       if (error.message === "Please enter title first") {
-        message.warning(error.message);
+        toast.warning(error.message);
       } else {
-        message.error("Failed to generate AI content");
+        toast.error("Failed to generate AI content");
       }
     },
   });
@@ -240,11 +239,11 @@ Topic: ${title}
 
 
     if (!title) {
-      message.warning("Please enter title first");
+      toast.warning("Please enter title first");
       return;
     }
     if (isContentEmpty(formData.content)) {
-      message.warning("Please enter content first");
+      toast.warning("Please enter content first");
       return;
     }
 
@@ -303,8 +302,7 @@ Topic: ${title}
               />
             ) : (
               <div>
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Upload</div>
+                  <Plus size={18} />                <div style={{ marginTop: 8 }}>Upload</div>
               </div>
             )}
           </Upload>

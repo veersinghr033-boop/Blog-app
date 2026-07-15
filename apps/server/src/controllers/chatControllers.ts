@@ -133,6 +133,19 @@ export const createChat = async (req: Request, res: Response) => {
     }
 
     const notificationBody = extractText(message.root);
+    const cleanedMessage = {
+      ...message,
+      root: {
+        ...message.root,
+        children: message.root.children.map((node: any) => ({
+          ...node,
+          children: node.children?.map((child: any) => ({
+            ...child,
+            text: child.text?.trim?.() ?? child.text,
+          })),
+        })),
+      },
+    };
     if (groupId) {
       const group = await Group.findById(groupId);
 
@@ -153,7 +166,7 @@ export const createChat = async (req: Request, res: Response) => {
       const newMsg = await Message.create({
         senderId,
         chatId: chat._id,
-        message,
+        message: cleanedMessage,
         isRead: false,
         readBy: [],
       });
@@ -178,7 +191,7 @@ export const createChat = async (req: Request, res: Response) => {
         },
         chatId: chat._id,
         groupId,
-        message,
+        message: cleanedMessage,
         timestamp: newMsg.timestamp,
         isRead: false,
         readBy: [],
@@ -194,7 +207,7 @@ export const createChat = async (req: Request, res: Response) => {
           groupName: group.name || "Group",
           groupId,
           receiverId,
-          message,
+          message: cleanedMessage,
           type: "group",
           timestamp: newMsg.timestamp,
         });
@@ -250,7 +263,7 @@ export const createChat = async (req: Request, res: Response) => {
     const newMsg = await Message.create({
       senderId,
       chatId: chat._id,
-      message,
+      message: cleanedMessage,
       isRead: false,
       readBy: [],
     });
@@ -271,7 +284,7 @@ export const createChat = async (req: Request, res: Response) => {
         userName: senderName,
       },
       receiverId,
-      message,
+      message: cleanedMessage,
       timestamp: newMsg.timestamp,
       isRead: false,
       readBy: [],
@@ -281,7 +294,7 @@ export const createChat = async (req: Request, res: Response) => {
       senderId,
       senderName,
       receiverId,
-      message,
+      message: cleanedMessage,
       type: "private",
       timestamp: newMsg.timestamp,
       isRead: false,
@@ -299,7 +312,7 @@ export const createChat = async (req: Request, res: Response) => {
           type: "private",
           senderId,
           receiverId,
-          message,
+          message: cleanedMessage,
           timestamp: newMsg.timestamp,
         },
       });
