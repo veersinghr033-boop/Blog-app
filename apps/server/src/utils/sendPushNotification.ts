@@ -1,6 +1,6 @@
 import { getMessaging } from "firebase-admin/messaging";
-import "../config/firebase.ts";
-import User from "../models/UsersModel.ts";
+import "../config/firebase";
+import User from "../models/UsersModel";
 
 export const sendPushNotification = async ({
   token,

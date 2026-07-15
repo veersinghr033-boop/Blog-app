@@ -3,6 +3,8 @@
 import { useAppSelector } from "@/lib/store/hooks"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import Image from "next/image";
+
 
 
 interface NavbarProps {
@@ -17,11 +19,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
     const user = useAppSelector((state) => state.auth.user);
 
     const roles = user?.roles ?? [];
-    const [avatar, setAvatar] = useState("");
-
-    useEffect(() => {
-        setAvatar(user?.profileImage || "");
-    }, [user]);
+    const avatar = user?.profileImage || "";
 
     const [mounted, setMounted] = useState(false)
 
@@ -29,8 +27,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
         setMounted(true)
     }, [])
 
-    const displayedName = mounted ? userName : "User"
-
+    const displayedName = mounted ? userName : "User";
     const profilePath = mounted
         ? roles.includes("admin")
             ? "/admin/profile"
@@ -64,12 +61,15 @@ function Navbar({ onMenuClick }: NavbarProps) {
                 className="flex items-center gap-2 md:gap-3"
                 title="Profile"
             >
-                <span className="hidden sm:block capitalize font-medium">
-                    {displayedName}
+                <span
+                    suppressHydrationWarning
+                    className="hidden sm:block capitalize font-medium"
+                >
+                    {mounted ? userName : "User"}
                 </span>
 
                 <div className="w-8 h-8 rounded-full bg-gray-700 text-white flex items-center justify-center overflow-hidden">
-                    {avatar ? (
+                    {mounted && avatar ? (
                         <img
                             src={avatar}
                             alt="avatar"

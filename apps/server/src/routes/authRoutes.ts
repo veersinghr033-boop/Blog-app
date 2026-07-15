@@ -1,7 +1,7 @@
 import e from "express";
-import { registerUser, loginUser, logoutUser } from "../controllers/authControllers.ts";
-import { verifyToken } from "../middleware/authMiddleware.ts";
-import { authLimiter } from "../middleware/rateLimiter.ts";
+import { registerUser, loginUser, logoutUser } from "../controllers/authControllers";
+import { verifyToken } from "../middleware/authMiddleware";
+import { authLimiter } from "../middleware/rateLimiter";
 
 const router = e.Router();
 

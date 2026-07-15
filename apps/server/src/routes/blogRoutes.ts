@@ -7,9 +7,9 @@ import {
   deleteBlog,
   findByBlogId,
   getAllBlogsData
-} from "../controllers/blogControllers.ts";
-import { upload } from "../middleware/multer.ts"; 
-import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.ts";
+} from "../controllers/blogControllers";
+import { upload } from "../middleware/multer"; 
+import { verifyToken, authorizeRoles } from "../middleware/authMiddleware";
 
 const router = e.Router();
 
@@ -20,7 +20,7 @@ router.post(
   "/create",
   verifyToken,
   upload.single("image"),
-  createBlog
+  createBlog as unknown as e.RequestHandler,
 );
 router.get("/:id", verifyToken, authorizeRoles("user"), getBlogById);
 

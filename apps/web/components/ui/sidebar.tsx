@@ -88,6 +88,7 @@ export default function Sidebar({
         }
     }
 
+    if (!mounted) return null;
     const SidebarContent = (
         <div className="h-full flex flex-col">
             <div className="flex-1">

@@ -1,6 +1,11 @@
 "use client";
 
-import Table from "antd/es/table/Table";
+import dynamic from "next/dynamic";
+
+const Table = dynamic(
+  () => import("antd/es/table/Table"),
+  { ssr: false }
+); 
 import Popconfirm from "antd/es/popconfirm";
 import { toast } from "sonner";
 
@@ -20,6 +25,11 @@ interface UserType {
   status: string;
   joined: string;
   createdAt: Date;
+  updatedAt: Date;
+  __v: number;
+  userName: string;
+  profileImage: string;
+
 }
 
 function Users() {
@@ -142,7 +152,7 @@ function Users() {
           {
             title: "Actions",
             key: "actions",
-            render: (_: any, record: UserType) => (
+            render: (_: any, record: any) => (
               <div className="flex gap-2">
                 <Popconfirm
                   title="Are you sure you want to delete this user?"

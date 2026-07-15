@@ -1,9 +1,9 @@
 import { Server } from "socket.io";
-import { emitSortedUsers } from "../controllers/userConlrollers.ts";
-import User from "../models/UsersModel.ts";
-import Chat from "../models/chatModel.ts";
-import Group from "../models/GroupModel.ts";
-import Message from "../models/message.ts";
+import { emitSortedUsers } from "../controllers/userConlrollers";
+import User from "../models/UsersModel";
+import Chat from "../models/chatModel";
+import Group from "../models/GroupModel";
+import Message from "../models/message";
 
 const socketToUser = new Map();
 const userStatus = new Map();

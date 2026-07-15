@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import Chat from "../models/chatModel.ts";
-import Message from "../models/message.ts";
-import Group from "../models/GroupModel.ts";
-import User from "../models/UsersModel.ts";
-import { emitSortedUsers } from "./userConlrollers.ts";
-import { sendPushNotification } from "../utils/sendPushNotification.ts";
+import Chat from "../models/chatModel";
+import Message from "../models/message";
+import Group from "../models/GroupModel";
+import User from "../models/UsersModel";
+import { emitSortedUsers } from "./userConlrollers";
+import { sendPushNotification } from "../utils/sendPushNotification";
 import { Request, Response } from "express";
 
 interface Participant {

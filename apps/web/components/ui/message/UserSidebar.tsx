@@ -4,8 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import { useAppSelector } from "@/lib/store/hooks";
 import AddGroup from "./addGroup";
-import { Users } from "lucide-react";
-
+import Image from "next/image";
 
 interface UserType {
   id: number;
@@ -100,13 +99,20 @@ export default function UserSidebar({
               <div className="relative">
                 <div className="relative h-12 w-12 rounded-full bg-black text-white flex items-center justify-center capitalize font-semibold overflow-hidden">
                   {item.img ? (
-                    <img
-                      src={item.img}
-                      alt={item.name}
-                      className="h-full w-full object-cover"
-                    />
+                  //   <
+                  //     src = {item.img}
+                  // alt={item.name}
+                  // className="h-full w-full object-cover"
+                  //   />
+                  <Image
+                    src={item.img} 
+                    alt={item.name}
+
+                    fill
+                    className="object-cover"
+                  />
                   ) : (
-                    item.name?.charAt(0)
+                  item.name?.charAt(0)
                   )}
                 </div>
                 {item.unreadCount > 0 && (

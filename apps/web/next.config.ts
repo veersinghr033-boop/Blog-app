@@ -8,7 +8,10 @@ export default withBundleAnalyzer({
   experimental: {
     optimizePackageImports: [
       "antd",
-      "@ant-design/icons",
+      'date-fns',
+      'lodash',
+      'react-icons',
+      '@mui/icons-material',
     ],
   },
   images: {

@@ -1,4 +1,3 @@
-"use client";
 
 import ReaderBlog from "@/components/ui/ReaderBlog/ReaderBlog";
 

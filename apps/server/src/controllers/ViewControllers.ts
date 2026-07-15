@@ -1,5 +1,5 @@
-import View from "../models/viewModel.ts";
-import Blog from "../models/BlogModel.ts";
+import View from "../models/viewModel";
+import Blog from "../models/BlogModel";
 import { Request, Response } from "express";
 
 
@@ -18,7 +18,9 @@ export const addView = async (req: Request, res: Response) => {
       userId,
     });
     if (existingView) {
-      return 
+      return res.status(400).json({
+        message: "View already exists",
+      });
     }
 
     const newView = await View.create({

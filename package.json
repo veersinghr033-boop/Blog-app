@@ -5,9 +5,10 @@
   "workspaces": [
     "apps/*"
   ],
-  "scripts": {
+ "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "start": "turbo run start",
     "analyze": "cross-env ANALYZE=true next build"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 import e from "express";
-import { verifyToken } from "../middleware/authMiddleware.ts";
-import { createReply ,getRepliesByCommentId} from "../controllers/replyControllers.ts";
+import { verifyToken } from "../middleware/authMiddleware";
+import { createReply ,getRepliesByCommentId} from "../controllers/replyControllers";
 
 const router = e.Router();
 

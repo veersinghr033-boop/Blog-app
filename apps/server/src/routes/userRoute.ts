@@ -8,9 +8,9 @@ import {
   updateUserProfile,
   changeUserPassword,
   getAllUsersData
-} from "../controllers/userConlrollers.ts";
-import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.ts";
-import { upload } from "../middleware/multer.ts";
+} from "../controllers/userConlrollers";
+import { verifyToken, authorizeRoles } from "../middleware/authMiddleware";
+import { upload } from "../middleware/multer";
 
 const router = e.Router();
 
@@ -22,7 +22,7 @@ router.put(
   "/profile",
   verifyToken,
   upload.single("image"),
-  updateUserProfile,
+  updateUserProfile as unknown as e.RequestHandler,
 );
 router.put("/change-password", verifyToken, changeUserPassword);
 router.get("/:id", verifyToken, getUserById);

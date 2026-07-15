@@ -4,9 +4,9 @@ import {
   createComment,
   getCommentsByBlogId,
   deleteComment
-} from "../controllers/commentControllers.ts";
+} from "../controllers/commentControllers";
 
-import { verifyToken } from "../middleware/authMiddleware.ts";
+import { verifyToken } from "../middleware/authMiddleware";
 
 const router = e.Router();
 

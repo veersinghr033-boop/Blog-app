@@ -67,6 +67,8 @@ export const registerUser = async (
         email: newUser.email,
         role: newUser.role,
         roles: newUser.roles,
+        profileImage: newUser.profileImage || "",
+
       },
       token,
     });
@@ -134,6 +136,7 @@ export const loginUser = async (
         email: user.email,
         role: user.role,
         roles: user.roles,
+        profileImage: user.profileImage || "",
       },
       token,
     });

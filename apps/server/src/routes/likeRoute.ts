@@ -1,8 +1,8 @@
 import e from "express";
 
-import { likeBlog } from "../controllers/likeControllers.ts";
+import { likeBlog } from "../controllers/likeControllers";
 
-import { verifyToken } from "../middleware/authMiddleware.ts";
+import { verifyToken } from "../middleware/authMiddleware";
 
 const router = e.Router();
 

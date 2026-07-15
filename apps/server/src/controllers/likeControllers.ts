@@ -1,5 +1,5 @@
-import Like from "../models/LikeModel.ts";
-import Blog from "../models/BlogModel.ts";
+import Like from "../models/LikeModel";
+import Blog from "../models/BlogModel";
 import { Request, Response } from "express";
 
 export const likeBlog = async (req: Request, res: Response) => {

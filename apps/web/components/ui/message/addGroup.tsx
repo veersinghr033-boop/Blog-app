@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { toast } from "sonner";
-import { Upload, Image } from "antd";
-import type { UploadFile } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import  Upload from "antd/es/upload";
+import type  UploadFile  from "antd/es/upload/interface";
+import Image from "next/image";
+import { Plus as PlusOutlined } from "lucide-react";
 
 interface User {
     id: string;
@@ -157,7 +158,6 @@ function AddGroup({
                                 <Image
                                     src={preview}
                                     alt="group"
-                                    preview={false}
                                     width={100}
                                     height={100}
                                     className="rounded-full object-cover"

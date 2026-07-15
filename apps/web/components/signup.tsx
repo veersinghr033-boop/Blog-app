@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { signup } from "@/lib/store/features/authThunk";
-import { message } from "antd"
+import { toast } from "sonner";
 interface FormData {
     username: string;
     email: string;
@@ -43,7 +43,7 @@ export default function RegisterPage() {
         try {
             const resultAction: any = await dispatch(signup(data) as any);
             if (signup.fulfilled.match(resultAction)) {
-                message.success("Signup successful");
+                toast.success("Signup successful");
                 const roles = resultAction.payload.user?.roles || [resultAction.payload.user?.role];
                 if (roles.includes("admin")) {
                     router.push("/admin");
@@ -51,10 +51,10 @@ export default function RegisterPage() {
                     router.push("/user");
                 }
             } else {
-                message.error(resultAction.payload || "Signup failed");
+                toast.error(resultAction.payload || "Signup failed");
             }
         } catch (error: any) {
-            message.error(error);
+            toast.error(error);
         }
     };
 

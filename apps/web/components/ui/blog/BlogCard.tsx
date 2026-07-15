@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { toast } from "sonner";
+import Image from "next/image";
 interface BlogCardProps {
   post: any;
   userId?: string;
@@ -52,23 +53,27 @@ function BlogCard({ post, role, userId }: BlogCardProps) {
 
   return (
     <div className="w-full flex gap-2 bg-white p-5 rounded-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow">
-      <img
-        src={post.image}
-        alt={post.title}
-        className=" max-w-1/5 mx-auto object-cover rounded-lg shadow-2xs shadow-gray-300"
-      />
+      <div className="relative w-100 h-48 mb-6">
+        <Image
+          src={post.image}
+          alt={post.title}
+          fill
+          sizes="(max-width:768px)100vw,33vw"
+          className="object-cover rounded-lg"
+        />
+      </div>
       <div>
 
-      <BlogContent
-        post={post}
-        onOpen={openBlog}
-      />
+        <BlogContent
+          post={post}
+          onOpen={openBlog}
+        />
 
-      <BlogFooter
-        post={post}
-        onOpen={openBlog}
-        userId={userId}
-      />
+        <BlogFooter
+          post={post}
+          onOpen={openBlog}
+          userId={userId}
+        />
       </div>
     </div>
   );

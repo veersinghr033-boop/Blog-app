@@ -1,8 +1,8 @@
-import Group from "../models/GroupModel.ts";
-import Chat from "../models/chatModel.ts";
-import Message from "../models/message.ts";
+import Group from "../models/GroupModel";
+import Chat from "../models/chatModel";
+import Message from "../models/message";
 import { Request, Response } from "express";
-import { uploadImage } from "../utils/uploadImage.ts";
+import { uploadImage } from "../utils/uploadImage";
 export const createGroup = async (req: Request, res: Response) => {
     try {
         const userId = (req as Request & {
@@ -248,6 +248,51 @@ export const removeAdmin = async (req: Request, res: Response) => {
             message: "Group admin removed successfully",
         });
      } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            message: "Server error",
+        });
+    }
+};
+export const updateGroup = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        const { groupId } = req.params;
+        const { name } = req.body;
+
+        const group = await Group.findById(groupId);
+
+        if (!group) {
+            return res.status(404).json({
+                message: "Group not found",
+            });
+        }
+
+        const updateData: any = {};
+
+        if (name?.trim()) {
+            updateData.name = name.trim();
+        }
+
+        if (req.file) {
+            const result: any = await uploadImage(req.file);
+            updateData.groupImage = result.secure_url;
+        }
+
+        const updatedGroup = await Group.findByIdAndUpdate(
+            groupId,
+            updateData,
+            { new: true }
+        );
+
+        return res.status(200).json({
+            message: "Group updated successfully",
+            group: updatedGroup,
+        });
+    } catch (error) {
         console.error(error);
 
         return res.status(500).json({

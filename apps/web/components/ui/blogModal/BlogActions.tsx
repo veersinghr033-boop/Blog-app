@@ -1,10 +1,10 @@
 // "use client";
-import { message } from "antd"
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useRouter } from "next/navigation";
 import { ThumbsUp, MessageCircle } from "lucide-react";
+import { toast } from "sonner";
 
 
 interface Props {
@@ -62,7 +62,7 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
         },
 
         onError: () => {
-            message.error("Failed to like blog");
+            toast.error("Failed to like blog");
         },
     });
 
@@ -76,7 +76,7 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
         },
 
         onSuccess: () => {
-            message.success("Blog deleted");
+            toast.success("Blog deleted");
 
             queryClient.invalidateQueries({
                 queryKey: ["blogs"],

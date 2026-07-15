@@ -2,12 +2,10 @@
   "name": "web",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
+ "scripts": {
     "dev": "next dev --webpack",
-    "build:analyze": "cross-env ANALYZE=true next build --webpack",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "start": "next start"
   },
   "dependencies": {
     "@lexical/code": "^0.46.0",

@@ -154,7 +154,9 @@ function ReaderBlog({ type }: BlogProps) {
     return (
         <div>
             <VirtuosoGrid
-                style={{ height: "80vh" }}
+                style={{
+                    height: "calc(100vh - 150px)"
+                }}
                 totalCount={blogs.length}
                 endReached={() => {
                     if (hasNextPage && !isFetchingNextPage) {
@@ -164,9 +166,9 @@ function ReaderBlog({ type }: BlogProps) {
                 listClassName="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 itemContent={(index) => {
                     const blog = blogs[index];
-                    console.log(blog)
                     return (
                         <ReaderBlogCard
+                            index={index}
                             post={blog}
                             isSaved={savedIds.has(blog._id)}
                             userId={userId!}

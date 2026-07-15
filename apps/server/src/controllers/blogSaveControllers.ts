@@ -1,7 +1,7 @@
-import BlogSave from "../models/BlogSaveModel.ts";
-import Like from "../models/LikeModel.ts";
-import Comment from "../models/CommentModel.ts";
-import View from "../models/viewModel.ts";
+import BlogSave from "../models/BlogSaveModel";
+import Like from "../models/LikeModel";
+import Comment from "../models/CommentModel";
+import View from "../models/viewModel";
 import mongoose from "mongoose";
 import { Request, Response } from "express";
 

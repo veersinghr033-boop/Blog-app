@@ -11,7 +11,8 @@ import {
 } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import LexicalViewer from "@/hooks/lexicalViewer";
-import { message, Popconfirm } from "antd"
+import  Popconfirm from "antd/es/popconfirm"; 
+import { toast } from "sonner";
 function MessageMenu({ onDelete, loading }: { onDelete: () => void; loading?: boolean }) {
   const [open, setOpen] = useState(false);
 
@@ -335,7 +336,7 @@ export default function ChatMessages({
       });
     },
     onError: (error: any) => {
-      message.error(
+      toast.error(
         error?.response?.data?.message || "Failed to delete message",
       );
     },

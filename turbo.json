@@ -4,6 +4,13 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "dist/**"]
+    },
+    "start": {
+      "cache": false
     }
   }
 }

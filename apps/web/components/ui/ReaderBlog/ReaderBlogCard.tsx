@@ -1,10 +1,10 @@
-// ReaderBlogCard.tsx
 import { memo, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ThumbsUp, MessageCircle, Save } from "lucide-react";
 import Image from "next/image";
 
 interface ReaderBlogCardProps {
+    index: number;
     post: any;
     userId: string;
     isSaved: boolean;
@@ -14,6 +14,7 @@ interface ReaderBlogCardProps {
 }
 
 function ReaderBlogCard({
+    index,
     post,
     isSaved,
     onLike,
@@ -35,7 +36,7 @@ function ReaderBlogCard({
             if (!id) return;
 
             router.push(`/user/blogs/${id}`);
-            router.prefetch(`/user/blogs/${id}`); 
+            router.prefetch(`/user/blogs/${id}`);
 
             if (typeof requestIdleCallback !== "undefined") {
                 requestIdleCallback(() => onView(id));
@@ -76,7 +77,7 @@ function ReaderBlogCard({
 
     const showReadMore = post.preview?.length > 150;
 
-    const isPriority = post.index < 3; 
+    const isPriority = post.index < 3;
 
     return (
         <div className="h-full rounded-lg border bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow border-gray-200 shadow-sm">
@@ -88,12 +89,8 @@ function ReaderBlogCard({
                                 src={post.image}
                                 alt={post.title}
                                 fill
-                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                sizes="(max-width:768px)100vw,33vw"
                                 className="object-cover rounded-lg"
-                                priority={isPriority}
-                                loading={isPriority ? "eager" : "lazy"}
-                                placeholder="blur"
-                                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRg..."
                             />
                         </div>
                     )}
@@ -108,7 +105,7 @@ function ReaderBlogCard({
                             className="text-blue-500 hover:text-blue-700 font-medium cursor-pointer"
                             onClick={openBlogModal}
                         >
-                            Read more 
+                            Read more
                         </button>
                     )}
                 </div>
@@ -117,11 +114,14 @@ function ReaderBlogCard({
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             {post.author?.profileImage ? (
-                                <img
-                                    src={post.author?.profileImage}
-                                    alt={post.author?.userName}
-                                    className="h-8 w-8 rounded-full object-cover"
-                                />
+                                <div className="relative h-8 w-8 rounded-full overflow-hidden">
+                                    <Image
+                                        src={post.author.profileImage}
+                                        alt={post.author.userName}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
                             ) : (
                                 <div className="h-8 w-8 rounded-full bg-black text-white flex items-center justify-center capitalize font-semibold">
                                     {authorInitial}
@@ -178,9 +178,7 @@ function ReaderBlogCard({
     );
 }
 
-// Use memo with custom comparator
 export default memo(ReaderBlogCard, (prevProps, nextProps) => {
-    // Only re-render if these props change
     return (
         prevProps.post._id === nextProps.post._id &&
         prevProps.post.isLiked === nextProps.post.isLiked &&

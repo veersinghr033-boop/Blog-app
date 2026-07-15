@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { login } from "@/lib/store/features/authThunk";
-import { message } from "antd"
+import { toast } from "sonner";
 
 interface FormData {
     email: string;
@@ -35,7 +35,7 @@ export default function LoginPage() {
         try {
             const resultAction: any = await dispatch(login(formData) as any);
             if (login.fulfilled.match(resultAction)) {
-                message.success("Login successful");
+                toast.success("Login successful");
                 const roles = resultAction.payload.user?.roles || [resultAction.payload.user?.role];
                 if (roles.includes("admin")) {
                     router.push("/admin");
@@ -43,10 +43,10 @@ export default function LoginPage() {
                     router.push("/user");
                 }
             } else {
-                message.error(resultAction.payload || "Login failed");
+                toast.error(resultAction.payload || "Login failed");
             }
         } catch (error: any) {
-            message.error(error);
+            toast.error(error);
         }
     };
 

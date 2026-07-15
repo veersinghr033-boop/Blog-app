@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { changePassword, updateProfile } from "@/lib/store/features/authThunk";
 
-import Upload from "antd/es/upload/Upload";
 import type { UploadProps } from "antd/es/upload/interface";
 import { toast } from "sonner";
+
+const Upload = dynamic(() => import("antd/es/upload/Upload"), { ssr: false });
 
 
 type FileType = Parameters<NonNullable<UploadProps["beforeUpload"]>>[0];
