@@ -6,3 +6,6 @@ dist/
 firebase-service-account.json
 apps/server/src/config/firebase-service-account.json
 .turbo
+.turbo/
+**/.turbo/
+turbo-build.log

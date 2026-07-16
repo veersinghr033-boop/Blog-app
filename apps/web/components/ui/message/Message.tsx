@@ -4,8 +4,15 @@ import MobileDrawer from "@/components/ui/MobileDrawer";
 import { useState, useEffect } from "react";
 import { useAppSelector } from "@/lib/store/hooks";
 
-import UserSidebar from "./UserSidebar";
-import MessageChat from "./MessageChat";
+import dynamic from "next/dynamic";
+
+const UserSidebar = dynamic(() => import("./UserSidebar"), {
+  ssr: false,
+});
+
+const MessageChat = dynamic(() => import("./MessageChat"), {
+  ssr: false,
+});
 import useUserStatus from "./useUserStatus";
 
 export default function Message() {

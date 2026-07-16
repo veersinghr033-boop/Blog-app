@@ -5,11 +5,10 @@
   "main": "dist/server.ts",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --exec tsx server.ts",
-    "build": "tsc",
-    "start": "node dist/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "dev": "tsx watch server.ts",
+  "start": "tsx server.ts",
+  "build": "tsc"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",

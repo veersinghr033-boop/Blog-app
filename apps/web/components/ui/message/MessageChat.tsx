@@ -6,6 +6,7 @@ import { io } from "socket.io-client";
 import ChatInput from "./ChatInput";
 import ChatMessages from "./ChatMessages";
 import MessageHeader from "./MessageHeader";
+import { getSocket } from "@/utills/socket";
 
 export default function MessageChat({
   selectedUser,
@@ -17,7 +18,8 @@ export default function MessageChat({
   const [userStatuses, setUserStatuses] = useState<Record<string, string>>({});
   const socketRef = useRef<any>(null);
   useEffect(() => {
-    const socket = io("http://localhost:5050");
+    const socket = getSocket();
+    console.log(socket)
     socketRef.current = socket;
     socketRef.current.on("userStatus", ({ userId, status }: any) => {
       setUserStatuses((prev) => ({

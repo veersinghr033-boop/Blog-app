@@ -207,7 +207,9 @@ export const initSocket = (server: any) => {
         console.error(error);
       }
     });
-
+    socket.on("connect", () => console.log("CONNECTED", socket.id));
+    socket.on("connect_error", (err) => console.log("CONNECT ERROR", err.message));
+    socket.on("disconnect", (reason) => console.log("DISCONNECTED", reason));
     socket.on("disconnect", () => {
       const userId = socketToUser.get(socket.id);
 

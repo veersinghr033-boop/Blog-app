@@ -5,6 +5,8 @@ import { io } from "socket.io-client";
 import { useAppSelector } from "@/lib/store/hooks";
 import AddGroup from "./addGroup";
 import Image from "next/image";
+import { getSocket } from "@/utills/socket";
+
 
 interface UserType {
   id: number;
@@ -33,28 +35,45 @@ export default function UserSidebar({
 
 
   useEffect(() => {
-    console.log("userId in UserSidebar:", userId, "openAddGroup:", openAddGroup);
     if (!userId) return;
 
-    const socket = io("http://localhost:5050");
-
+    const socket = getSocket();
     socketRef.current = socket;
 
-    socket.on("connect", () => {
+    const handleConnect = () => {
       console.log("Connected:", socket.id);
-
       socket.emit("userOnline", userId);
-    });
+    };
 
-    socket.on("sortedUsers", (users) => {
-      // console.log("sortedUsers received", users);
+    const handleSortedUsers = (users: any) => {
       setSortedUsers(users);
-    });
+    };
+
+    const handleDisconnect = (reason: string) => {
+      console.log("DISCONNECTED", reason);
+    };
+
+    const handleError = (err: any) => {
+      console.log("CONNECT ERROR", err);
+    };
+
+    if (socket.connected) {
+      handleConnect();
+    } else {
+      socket.on("connect", handleConnect);
+    }
+
+    socket.on("sortedUsers", handleSortedUsers);
+    socket.on("disconnect", handleDisconnect);
+    socket.on("connect_error", handleError);
 
     return () => {
-      socket.disconnect();
+      socket.off("connect", handleConnect);
+      socket.off("sortedUsers", handleSortedUsers);
+      socket.off("disconnect", handleDisconnect);
+      socket.off("connect_error", handleError);
     };
-  }, [userId, openAddGroup]);
+  }, [userId]);
   const filteredUsers = sortedUsers
     .filter((user) => user.name.toLowerCase().includes(search.toLowerCase()))
     .map((user) => ({
