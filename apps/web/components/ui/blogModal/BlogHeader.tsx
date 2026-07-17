@@ -1,19 +1,24 @@
 // "use client";
 import LexicalViewer from "@/hooks/lexicalViewer";
-
+import Image from "next/image";
 
 export default function BlogHeader({ blog }: { blog: any }) {
     return (
         <>
 
             <div className="max-h-135 overflow-auto whitespace-pre-line ">
-                
-                    <img
+
+             
+                <div className="relative w-full max-w-10/12 h-110 mx-auto mb-4">
+                    <Image
                         src={blog.image}
                         alt={blog.title}
-                        className=" max-w-4/5   mx-auto object-cover rounded-lg mb-6 m-2 shadow-2xs shadow-gray-300"
+                        fill
+                        
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="rounded-lg w-full h-auto"
                     />
-                
+                </div>
                 <LexicalViewer value={blog.content} />
             </div>
 

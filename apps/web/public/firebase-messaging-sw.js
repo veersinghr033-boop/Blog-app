@@ -24,16 +24,17 @@ messaging.onBackgroundMessage((payload) => {
     payload.notification?.title || "Notification",
     {
       body: payload.notification?.body || "",
-        data: payload.data,
+      data: payload.data,
     },
+    console.log(payload),
   );
 });
-
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const url = event.notification.data?.url || "/reader/messages";
+  const url = event.notification.data?.url || "/user/messages";
+  console.log(" Url", url);
 
   event.waitUntil(clients.openWindow(url));
 });

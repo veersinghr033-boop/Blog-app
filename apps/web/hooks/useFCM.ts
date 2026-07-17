@@ -22,15 +22,15 @@ export const useFCM = ({ userId }: { userId?: string }) => {
             try {
                 const { getToken, onMessage } = await import("firebase/messaging");
                 const { messaging } = await import("@/lib/firebase");
-                console.log(getToken, onMessage, messaging)
+                // console.log(getToken, onMessage, messaging)
                 if (!messaging || typeof window === "undefined") {
                     return;
                 }
 
                 if ("serviceWorker" in navigator) {
                     const reg = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-                    console.log(reg)
-                    console.log("FCM: service worker registered", reg.scope);
+                    // console.log(reg)
+                    // console.log("FCM: service worker registered", reg.scope);
                 }
 
                 const permission = await Notification.requestPermission();
@@ -43,12 +43,14 @@ export const useFCM = ({ userId }: { userId?: string }) => {
 
 
                 let token: string | null = null;
+
              
                 try {
 
                     token = await getToken(messaging, {
                         vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
                     });
+                    // console.log("FCM: getToken returned", token);
                 } catch (err) {
                     console.error("GET TOKEN ERROR =", err);
                 }
@@ -56,9 +58,9 @@ export const useFCM = ({ userId }: { userId?: string }) => {
                 if (token ) {
                     try {
                         const res = await api.post("/users/save-fcm-token", { token });
-                        console.log("FCM: notification permission", permission);
-                        console.log("FCM: getToken returned", token);
-                        console.log("FCM: token saved", res?.data);
+                        // console.log("FCM: notification permission", permission);
+                        // console.log("FCM: getToken returned", token);
+                        // console.log("FCM: token saved", res?.data);
                     } catch (err) {
                         console.error('FCM: failed to save token', err);
                     }
@@ -69,7 +71,7 @@ export const useFCM = ({ userId }: { userId?: string }) => {
                 }
 
                 const unsubscribe = onMessage(messaging, (payload) => {
-                    console.log("Foreground Message", payload);
+                    // console.log("Foreground Message", payload);
                 });
 
                 return unsubscribe;

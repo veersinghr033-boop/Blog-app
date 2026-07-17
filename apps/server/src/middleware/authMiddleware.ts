@@ -12,12 +12,18 @@ declare global {
 
 export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let token: string | undefined;
+    const label = `verifyToken-${Date.now()}-${Math.random()}`;
 
+    console.time(label);
+
+    // verify logic
+
+    let token: string | undefined;
+    
     if (req.cookies.token) {
       token = req.cookies.token;
     }
-
+    
     if (!token && req.headers.authorization) {
       token = req.headers.authorization.split(" ")[1];
     }
@@ -27,20 +33,21 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
         message: "No token provided",
       });
     }
-
+    
     const jwtSecret = process.env.JWT_SECRET;
-
+    
     if (!jwtSecret) {
       return res.status(500).json({
         message: "JWT secret is not configured",
       });
     }
-
+    
     const decoded = jwt.verify(token, jwtSecret);
-
+    
     req.user = decoded;
-
+    
     next();
+    console.timeEnd(label);
   } catch (error) {
     console.error(error);
 

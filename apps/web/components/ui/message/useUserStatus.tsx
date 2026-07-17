@@ -22,7 +22,7 @@ export default function useUserStatus(userId?: string) {
     if (!userId) return;
 
     const socket = getSocket();
-    console.log(socket)
+    // console.log(socket)
     socketRef.current = socket;
 
     const handleConnect = () => {

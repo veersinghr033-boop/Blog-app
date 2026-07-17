@@ -19,16 +19,19 @@ export default function MessageChat({
   const socketRef = useRef<any>(null);
   useEffect(() => {
     const socket = getSocket();
-    console.log(socket)
     socketRef.current = socket;
-    socketRef.current.on("userStatus", ({ userId, status }: any) => {
+
+    const handleStatus = ({ userId, status }: any) => {
       setUserStatuses((prev) => ({
         ...prev,
         [userId]: status,
       }));
-    });
+    };
+
+    socket.on("userStatus", handleStatus);
+
     return () => {
-      socketRef.current?.disconnect();
+      socket.off("userStatus", handleStatus);
     };
   }, []);
 

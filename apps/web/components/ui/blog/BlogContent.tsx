@@ -36,12 +36,12 @@ function BlogContent({ post, onOpen }: any) {
       </p>
 
       {showReadMore && (
-        <span
+        <button
           className="text-blue-500 cursor-pointer"
           onClick={() => onOpen(post._id)}
         >
           Read more
-        </span>
+        </button>
       )}
     </>
   );

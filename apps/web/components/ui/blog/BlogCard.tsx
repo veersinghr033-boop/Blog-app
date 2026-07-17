@@ -12,9 +12,10 @@ interface BlogCardProps {
   post: any;
   userId?: string;
   role?: string;
+  index?: number;
 }
 
-function BlogCard({ post, role, userId }: BlogCardProps) {
+function BlogCard({ post, role, userId, index }: BlogCardProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const viewMutation = useMutation({
@@ -53,13 +54,17 @@ function BlogCard({ post, role, userId }: BlogCardProps) {
 
   return (
     <div className="w-full flex gap-2 bg-white p-5 rounded-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow">
-      <div className="relative w-100 h-48 mb-6">
+      <div className="relative w-full max-w-md h-48">
+
+
         <Image
           src={post.image}
           alt={post.title}
           fill
-          sizes="(max-width:768px)100vw,33vw"
-          className="object-cover rounded-lg"
+          priority={index === 0}
+          // fetchPriority={index === 0 ? "high" : undefined}
+          sizes="(max-width:768px)100vw,(max-width:1200px)50vw,33vw"
+          className="rounded-lg object-cover"
         />
       </div>
       <div>

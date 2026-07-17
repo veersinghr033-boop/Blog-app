@@ -6,15 +6,28 @@ import {
   getBlogById,
   deleteBlog,
   findByBlogId,
+  findtrendingBlogs,
   getAllBlogsData
 } from "../controllers/blogControllers";
-import { upload } from "../middleware/multer"; 
+import { upload } from "../middleware/multer";
 import { verifyToken, authorizeRoles } from "../middleware/authMiddleware";
 
 const router = e.Router();
 
-router.get("/all", verifyToken, getAllBlogs);
-router.get("/all-data", verifyToken, getAllBlogsData);
+router.get(
+  "/all",
+  (req, res, next) => {
+    console.time("verifyToken");
+    next();
+  },
+  verifyToken,
+  (req, res, next) => {
+    console.timeEnd("verifyToken");
+    next();
+  },
+  getAllBlogs
+); router.get("/all-data", verifyToken, getAllBlogsData);
+router.get("/trending", verifyToken, findtrendingBlogs);
 // router.post("/create", verifyToken, authorizeRoles("user"), createBlog);
 router.post(
   "/create",

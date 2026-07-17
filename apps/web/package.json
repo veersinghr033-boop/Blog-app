@@ -6,7 +6,7 @@
     "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
-    "analyze": "cross-env ANALYZE=true next build"  
+    "analyze": "cross-env ANALYZE=true npm run build"  
   },
   "dependencies": {
     "@lexical/code": "^0.46.0",

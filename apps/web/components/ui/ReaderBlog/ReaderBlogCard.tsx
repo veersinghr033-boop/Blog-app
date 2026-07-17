@@ -77,7 +77,7 @@ function ReaderBlogCard({
 
     const showReadMore = post.preview?.length > 150;
 
-    const isPriority = post.index < 3;
+    const isPriority = index < 3;
 
     return (
         <div className="h-full rounded-lg border bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow border-gray-200 shadow-sm">
@@ -89,8 +89,13 @@ function ReaderBlogCard({
                                 src={post.image}
                                 alt={post.title}
                                 fill
-                                sizes="(max-width:768px)100vw,33vw"
-                                className="object-cover rounded-lg"
+                                priority={isPriority}
+                                fetchPriority={index === 0 ? "high" : undefined}
+                                sizes="
+(max-width:768px) 100vw,
+(max-width:1200px) 50vw,
+33vw
+"                                className="object-cover rounded-lg"
                             />
                         </div>
                     )}
@@ -114,12 +119,13 @@ function ReaderBlogCard({
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             {post.author?.profileImage ? (
-                                <div className="relative h-8 w-8 rounded-full overflow-hidden">
+                                <div className="relative h-12 w-12">
                                     <Image
                                         src={post.author.profileImage}
                                         alt={post.author.userName}
                                         fill
-                                        className="object-cover"
+                                        sizes="48px"
+                                        className="rounded-full object-cover"
                                     />
                                 </div>
                             ) : (
@@ -178,12 +184,4 @@ function ReaderBlogCard({
     );
 }
 
-export default memo(ReaderBlogCard, (prevProps, nextProps) => {
-    return (
-        prevProps.post._id === nextProps.post._id &&
-        prevProps.post.isLiked === nextProps.post.isLiked &&
-        prevProps.post.likes?.count === nextProps.post.likes?.count &&
-        prevProps.isSaved === nextProps.isSaved &&
-        prevProps.post.comments?.count === nextProps.post.comments?.count
-    );
-});
+export default memo(ReaderBlogCard )

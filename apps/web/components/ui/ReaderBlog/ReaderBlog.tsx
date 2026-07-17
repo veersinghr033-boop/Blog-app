@@ -10,10 +10,12 @@ import {
 import { VirtuosoGrid } from "react-virtuoso";
 import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
-import ReaderBlogCard from "./ReaderBlogCard";
-import { toast } from "sonner";
+import dynamic from "next/dynamic";
+const ReaderBlogCard = dynamic(
+    () => import("./ReaderBlogCard")
+); import { toast } from "sonner";
 interface BlogProps {
-    type: "all" | "saved";
+    type: "all" | "saved" | "trending";
 }
 
 function ReaderBlog({ type }: BlogProps) {
@@ -36,7 +38,9 @@ function ReaderBlog({ type }: BlogProps) {
             const response = await api.get(
                 type === "saved"
                     ? `/blogsave/get${before}`
-                    : `/blogs/all${before}`
+                    : type === "trending"
+                        ? `/blogs/trending${before}`
+                        : `/blogs/all${before}`
             );
 
             return response.data;
@@ -47,7 +51,7 @@ function ReaderBlog({ type }: BlogProps) {
         getNextPageParam: (lastPage) =>
             lastPage?.hasMore ? lastPage.nextCursor : undefined,
 
-        staleTime: 60_000,
+        staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60_000,
         refetchOnWindowFocus: false,
     });
@@ -60,7 +64,7 @@ function ReaderBlog({ type }: BlogProps) {
             return response.data.blogs;
         },
 
-        enabled: Boolean(userId),
+        enabled: userId !== null,
         staleTime: 5 * 60_000,
         gcTime: 10 * 60_000,
         refetchOnWindowFocus: false,
@@ -106,6 +110,9 @@ function ReaderBlog({ type }: BlogProps) {
             queryClient.invalidateQueries({
                 queryKey: ["saved"],
             });
+            queryClient.invalidateQueries({
+                queryKey: ["trending"],
+            });
         },
     });
 
@@ -150,7 +157,7 @@ function ReaderBlog({ type }: BlogProps) {
             return api.post(`/views/${blogId}`);
         },
     });
-
+    // console.log(blogs)
     return (
         <div>
             <VirtuosoGrid

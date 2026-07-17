@@ -7,7 +7,7 @@ import { logout } from "@/lib/store/features/authThunk"
 import { persistor } from "@/lib/store/store"
 import { setActiveRole } from "@/lib/store/features/auth";
 import { useEffect, useState } from "react"
-import { House, UsersRound, NotebookText, LayoutGrid, PenLine, MessageCircleMore } from "lucide-react"
+import { House, UsersRound, NotebookText, LayoutGrid, PenLine, MessageCircleMore ,ChartNoAxesCombined } from "lucide-react"
 interface SidebarProps {
     mobile?: boolean
     open?: boolean
@@ -31,10 +31,12 @@ const menuByRole: Record<string, MenuItem[]> = {
     user: [
         { label: "Home", href: "/user", icon: <House size={19} /> },
         { label: "Saved Blogs", href: "/user/save", icon: <NotebookText size={19} /> },
+        { label: "trending Blogs", href: "/user/trending", icon: < ChartNoAxesCombined size={19} /> },
         { label: "Reports", href: "/user/reports", icon: <LayoutGrid size={19} /> },
         { label: "Create Blog", href: "/user/create", icon: <PenLine size={19} /> },
         { label: "My Blogs", href: "/user/blogs", icon: <NotebookText size={19} /> },
         { label: "Messages", href: "/user/messages", icon: <MessageCircleMore size={19} /> }
+
     ],
 }
 

@@ -27,10 +27,10 @@ export const initSocket = (server: any) => {
     },
   });
 
-  io.sockets.on("connection", (socket:any) => {
+  io.sockets.on("connection", (socket: any) => {
+    console.log("connection", socket.id);
     const setUserOffline = (userId: string) => {
       if (!userId) return;
-
       userStatus.set(userId, "offline");
       socketToUser.delete(socket.id);
 
@@ -40,8 +40,8 @@ export const initSocket = (server: any) => {
       });
     };
 
-    socket.on("userOnline", async (userId:string) => {
-      // console.log("userOnline:", userId);
+    socket.on("userOnline", async (userId: string) => {
+      // console.log("use rOnline:", userId);
 
       userStatus.set(userId, "online");
       socketToUser.set(socket.id, userId);
@@ -56,7 +56,7 @@ export const initSocket = (server: any) => {
       await emitSortedUsers(io, userId);
     });
 
-    socket.on("userAway", (userId:string) => {
+    socket.on("userAway", (userId: string) => {
       userStatus.set(userId, "away");
 
       io.sockets.emit("userStatus", {
@@ -65,7 +65,7 @@ export const initSocket = (server: any) => {
       });
     });
 
-    socket.on("userOffline", (userId:string) => {
+    socket.on("userOffline", (userId: string) => {
       setUserOffline(userId);
     });
 
@@ -94,7 +94,7 @@ export const initSocket = (server: any) => {
     socket.on("leaveGroup", (groupId: string) => {
       socket.leave(groupId);
     });
-    socket.on("typing", ({ senderId, receiverId, groupId }:{senderId: string, receiverId: string, groupId: string}) => {
+    socket.on("typing", ({ senderId, receiverId, groupId }: { senderId: string, receiverId: string, groupId: string }) => {
       if (groupId && typeof senderId === 'string') {
         socket.to(groupId).emit("userTyping", {
           userId: senderId,
@@ -128,7 +128,7 @@ export const initSocket = (server: any) => {
       });
     });
 
-    socket.on("readMessages", async ({ chatId, userId }:{chatId: string, userId: string}) => {
+    socket.on("readMessages", async ({ chatId, userId }: { chatId: string, userId: string }) => {
       try {
         const chat = await Chat.findById(chatId);
 
@@ -207,9 +207,9 @@ export const initSocket = (server: any) => {
         console.error(error);
       }
     });
-    socket.on("connect", () => console.log("CONNECTED", socket.id));
-    socket.on("connect_error", (err) => console.log("CONNECT ERROR", err.message));
-    socket.on("disconnect", (reason) => console.log("DISCONNECTED", reason));
+    // socket.on("connect", () => console.log("CONNECTED", socket.id));
+    // socket.on("connect_error", (err) => console.log("CONNECT ERROR", err.message));
+    // socket.on("disconnect", (reason) => console.log("DISCONNECTED", reason));
     socket.on("disconnect", () => {
       const userId = socketToUser.get(socket.id);
 

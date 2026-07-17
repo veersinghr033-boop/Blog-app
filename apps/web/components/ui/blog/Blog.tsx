@@ -29,13 +29,13 @@ function Blog({ type, userId, role }: BlogProps) {
 
     queryFn: async ({ pageParam }) => {
       const before = pageParam
-        ? `? before = ${ pageParam } `
+        ? `? before = ${pageParam} `
         : "";
 
       const res = await api.get(
         type === "admin"
-          ? `/blogs/all${ before } `
-          : `/ blogs / ${ userId }${ before } `
+          ? `/blogs/all${before} `
+          : `/ blogs / ${userId}${before} `
       );
 
       return res.data;
@@ -69,24 +69,16 @@ function Blog({ type, userId, role }: BlogProps) {
     );
   }, [data, type]);
 
-  const filteredBlogs = useMemo(() => {
-    return blogs.filter((blog: any) => {
-      const title =
-        blog.title?.toLowerCase() || "";
-
-      const preview =
-        blog.preview?.toLowerCase() || "";
-
-      return (
-        title.includes(
-          searchText.toLowerCase()
-        ) ||
-        preview.includes(
-          searchText.toLowerCase()
-        )
-      );
-    });
-  }, [blogs, searchText]);
+  const filteredBlogs = useMemo(
+    () =>
+      searchText
+        ? blogs.filter((blog: any) => {
+          const search = searchText.toLowerCase();
+          return (blog.title?.toLowerCase() || "").includes(search) || (blog.preview?.toLowerCase() || "").includes(search);
+        })
+        : blogs,
+    [blogs, searchText]
+  );
 
   return (
     <div className="flex flex-col gap-4 pt-4">
@@ -120,12 +112,14 @@ function Blog({ type, userId, role }: BlogProps) {
                 fetchNextPage();
               }
             }}
-            itemContent={(_, post) => (
+            itemContent={(index, post) => (
               <div className="mb-4">
                 <BlogCard
                   post={post}
                   userId={userId}
                   role={role}
+                  index={index}
+
                 />
               </div>
             )}

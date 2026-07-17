@@ -9,7 +9,7 @@ export default function FCMProvider({
     children: React.ReactNode;
 }) {
     const userId = useAppSelector(
-        (state) => state.auth.user?.id
+        (state) => state.auth.user?._id
     );
 
     useFCM({ userId });

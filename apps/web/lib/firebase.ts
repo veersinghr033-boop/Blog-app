@@ -17,3 +17,4 @@ export const messaging =
   typeof window !== "undefined"
     ? getMessaging(app)
     : null;
+    

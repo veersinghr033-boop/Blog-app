@@ -41,7 +41,7 @@ export default function UserSidebar({
     socketRef.current = socket;
 
     const handleConnect = () => {
-      console.log("Connected:", socket.id);
+      // console.log("Connected:", socket.id);
       socket.emit("userOnline", userId);
     };
 
@@ -50,11 +50,11 @@ export default function UserSidebar({
     };
 
     const handleDisconnect = (reason: string) => {
-      console.log("DISCONNECTED", reason);
+      // console.log("DISCONNECTED",// reason);
     };
 
     const handleError = (err: any) => {
-      console.log("CONNECT ERROR", err);
+      // console.log("CONNECT ERROR", err);
     };
 
     if (socket.connected) {
@@ -126,10 +126,11 @@ export default function UserSidebar({
                   <Image
                     src={item.img} 
                     alt={item.name}
-
                     fill
-                    className="object-cover"
+                    sizes="48px"
+                    className="rounded-full object-cover"
                   />
+                  
                   ) : (
                   item.name?.charAt(0)
                   )}
