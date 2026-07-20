@@ -54,7 +54,7 @@ export default function UserSidebar({
     };
 
     const handleError = (err: any) => {
-      // console.log("CONNECT ERROR", err);
+      console.error("CONNECT ERROR", err);
     };
 
     if (socket.connected) {

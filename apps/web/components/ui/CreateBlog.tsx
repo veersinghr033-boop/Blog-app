@@ -39,7 +39,7 @@ function CreateBlog() {
         content: values.content,
       };
 
-      if (image) {
+      // if (image) {
         const data = new FormData();
         data.append("title", values.title);
         data.append("content", JSON.stringify(values.content));
@@ -52,10 +52,10 @@ function CreateBlog() {
         });
 
         return response.data;
-      } else {
-        toast.warning("Please upload an image");
-        return;
-      }
+      // } else {
+      //   toast.warning("Please upload an image");
+      //   return;
+      // }
 
 
     },
@@ -247,10 +247,11 @@ Topic: ${title}
     if (isContentEmpty(formData.content)) {
       toast.warning("Please enter content first");
       return;
-    } if (!image) {
-      toast.warning("Please upload an image");
-      return;
-    }
+    } 
+    // if (!image) {
+    //   toast.warning("Please upload an image");
+    //   return;
+    // }
 
     publishMutation.mutate({ title, content });
   };
@@ -303,6 +304,8 @@ Topic: ${title}
               <Image
                 src={preview}
                 alt="preview"
+                width={200}
+                height={200}
                 className="h-full w-full object-cover"
               />
             ) : (

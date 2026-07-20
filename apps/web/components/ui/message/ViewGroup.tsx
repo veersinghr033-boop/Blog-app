@@ -191,7 +191,7 @@ const ViewGroup = memo(({
 
         removeAdminMutation.mutate(adminId);
     }, [adminIds.length, removeAdminMutation]);
-   
+
     const updateGroupMutation = useMutation({
         mutationFn: async ({
             file,
@@ -343,7 +343,20 @@ const ViewGroup = memo(({
             </div>
 
             <div className="mt-3 flex justify-between items-center">
+                <Popconfirm
+                    title="Exit the group?"
+                    onConfirm={() => handleDelete(userId)}
+                >
+                    <Button
+                        type="primary"
+                        className="bg-red-200! text-red-500!"
+                        // onClick={() => handleDelete(userId)}
+                    >
+                        Exit
 
+
+                    </Button>
+                </Popconfirm>
                 {isCurrentUserAdmin && (
                     <Button
                         type="primary"
@@ -353,6 +366,7 @@ const ViewGroup = memo(({
                         Add Member
                     </Button>
                 )}
+
             </div>
             {openAddMember && (
                 <AddMember group={group} onClose={() => setOpenMember(false)} />

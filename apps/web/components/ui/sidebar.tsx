@@ -7,7 +7,7 @@ import { logout } from "@/lib/store/features/authThunk"
 import { persistor } from "@/lib/store/store"
 import { setActiveRole } from "@/lib/store/features/auth";
 import { useEffect, useState } from "react"
-import { House, UsersRound, NotebookText, LayoutGrid, PenLine, MessageCircleMore ,ChartNoAxesCombined } from "lucide-react"
+import { House, UsersRound, NotebookText, LayoutGrid, PenLine, MessageCircleMore ,ChartNoAxesCombined , LogOutIcon } from "lucide-react"
 interface SidebarProps {
     mobile?: boolean
     open?: boolean
@@ -140,10 +140,10 @@ export default function Sidebar({
             </div>
 
             <button
-                className="w-11/12 bg-red-500 text-white px-3 py-2 rounded"
+                className="w-11/12 bg-red-200 border border-red-500  text-red-500 px-3 py-2 rounded flex justify-center items-center gap-2"
                 onClick={handleLogout}
             >
-                Logout
+                Logout <LogOutIcon size={15} />
             </button>
         </div>
     )
@@ -156,7 +156,7 @@ export default function Sidebar({
     }
 
     return (
-        <div className="w-64 bg-white fixed left-0 top-16 h-[calc(100vh-64px)] border-r border-gray-200">
+        <div className="w-64 bg-white fixed left-0 top-16 h-[calc(100vh-64px)] border-r border-gray-200 ">
             <div className="p-4 h-full">{SidebarContent}</div>
         </div>
     )

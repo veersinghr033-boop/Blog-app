@@ -53,7 +53,7 @@ export const createReport = async (req: Request, res: Response) => {
 export const getReports = async (req: Request, res: Response) => {
     try {
         const before = req.query.before as string | undefined;
-        const limit = Number(req.query.limit) || 10;
+        const limit = Math.min(Number(req.query.limit) || 10, 50);
 
         const query: any = {};
 
@@ -62,25 +62,28 @@ export const getReports = async (req: Request, res: Response) => {
                 $lt: new Date(before),
             };
         }
+
         const reports = await Report.find(query)
             .sort({ createdAt: -1 })
-            .limit(limit)
+            .limit(limit + 1)
             .populate({
                 path: "blogId",
-                select: "title content author",
+                select: "_id title content author createdAt",
                 populate: {
                     path: "author",
-                    select: "userName role",
+                    select: "_id userName role",
                 },
             })
-
             .populate({
                 path: "userId",
-                select: "userName role",
-            }).lean();
+                select: "_id userName role",
+            })
+            .lean();
 
+        const hasMore = reports.length > limit;
+        const pageReports = hasMore ? reports.slice(0, limit) : reports;
 
-        const frontendReadyReports = reports.map((report: Reports) => ({
+        const frontendReadyReports = pageReports.map((report: Reports) => ({
             _id: report._id,
             reason: report.reason,
             createdAt: report.createdAt,
@@ -100,11 +103,10 @@ export const getReports = async (req: Request, res: Response) => {
 
         res.status(200).json({
             reports: frontendReadyReports,
+            hasMore,
             nextCursor:
                 frontendReadyReports.length > 0
-                    ? frontendReadyReports[
-                        frontendReadyReports.length - 1
-                    ].createdAt
+                    ? frontendReadyReports[frontendReadyReports.length - 1].createdAt
                     : null,
             message: "Reports fetched successfully",
         });

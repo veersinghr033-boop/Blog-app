@@ -162,7 +162,7 @@ function ReaderBlog({ type }: BlogProps) {
         <div>
             <VirtuosoGrid
                 style={{
-                    height: "calc(100vh - 150px)"
+                    height: "calc(100vh - 200px)"
                 }}
                 totalCount={blogs.length}
                 endReached={() => {

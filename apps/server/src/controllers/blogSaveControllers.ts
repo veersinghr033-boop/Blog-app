@@ -50,9 +50,13 @@ export const getSavedBlogs = async (req: Request, res: Response) => {
   const userId = (req as Request & { user?: { id: string } }).user?.id;
   try {
     const before = req.query.before as string || undefined;
-    const limit = 10;
-
-    const savedBlogs = await BlogSave.find({ user: userId })
+    const limit = 6;
+    const query: any = {};
+    if (before) {
+      query.createdAt = { $lt: new Date(before) };
+    }
+    query.user = userId;
+    const savedBlogs = await BlogSave.find( query)
       .sort({ createdAt: -1 })
       .limit(limit + 1)
       .populate({
@@ -120,6 +124,7 @@ export const getSavedBlogs = async (req: Request, res: Response) => {
               _id: blog._id,
               title: blog.title,
               preview,
+              image: blog.image,
 
               author,
 
