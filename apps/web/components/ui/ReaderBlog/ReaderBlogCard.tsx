@@ -1,6 +1,6 @@
 import { memo, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ThumbsUp, MessageCircle, Save } from "lucide-react";
+import { ThumbsUp, MessageCircle, Save, FileText} from "lucide-react";
 import Image from "next/image";
 
 interface ReaderBlogCardProps {
@@ -83,7 +83,7 @@ function ReaderBlogCard({
         <div className="h-full rounded-lg border bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow border-gray-200 shadow-sm">
             <div className="flex h-full flex-col gap-4">
                 <div>
-                    {post.image && (
+                    {post.image ? (
                         <div className="relative w-full h-48 mb-6">
                             <Image
                                 src={post.image}
@@ -98,7 +98,17 @@ function ReaderBlogCard({
 "                                className="object-cover rounded-lg"
                             />
                         </div>
-                    )}
+                    ) : <div className="w-full h-48 rounded-xl border border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center">
+                        <div className="w-16 h-16 rounded-full border border-gray-300 bg-white flex items-center justify-center text-2xl text-gray-500">
+                            <FileText />
+                        </div>
+
+                        <h3 className="mt-4 text-base font-medium text-gray-700 line-clamp-1 text-center px-5">
+                            {post.title}
+                        </h3>
+
+                        <p className="mt-2 text-sm text-gray-400">Article Preview</p>
+                    </div>}
                     <h2 className="font-normal text-2xl mb-2 line-clamp-2">
                         {post.title}
                     </h2>

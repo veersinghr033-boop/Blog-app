@@ -91,7 +91,7 @@ function ReadBlog({ blog }: ReadBlogProps) {
                     </h3>
 
                     {blog.title && (
-                        <div className="text-gray-600 text-6xl">
+                        <div className="text-gray-600 text-4xl">
                             {blog.title}
                         </div>
                     )}
@@ -106,7 +106,7 @@ function ReadBlog({ blog }: ReadBlogProps) {
                 </button>
             </div>
 
-            <div className="flex flex-col gap-4 ">
+            <div className="flex flex-col gap-4  ">
                 <BlogHeader blog={blog} />
 
                 <BlogActions

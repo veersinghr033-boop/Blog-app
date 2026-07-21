@@ -11,6 +11,13 @@ interface Payload {
   user1: string;
   user2: string;
 }
+
+interface GetUsersPayload {
+  page?: number;
+  limit?: number;
+  userId?: string;
+}
+
 const buildRoomName = (...parts: Array<unknown>) => {
   return parts
     .filter((part): part is string | number | { toString(): string } => part !== undefined && part !== null)
@@ -53,7 +60,7 @@ export const initSocket = (server: any) => {
         status: "online",
       });
 
-      await emitSortedUsers(io, userId);
+      // await emitSortedUsers(io, userId);
     });
 
     socket.on("userAway", (userId: string) => {
@@ -77,7 +84,21 @@ export const initSocket = (server: any) => {
 
       socket.join(room);
     });
-
+    socket.on(
+      "getUsers",
+      async ({
+        page = 1,
+        limit = 10,
+        userId,
+      }: GetUsersPayload) => {
+        await emitSortedUsers(
+          io,
+          userId,
+          page,
+          limit
+        );
+      }
+    );
     socket.on("leaveRoom", (payload: Payload | string) => {
       const room =
         typeof payload === "string"

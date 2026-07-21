@@ -8,6 +8,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { toast } from "sonner";
 import Image from "next/image";
+import { FileText } from "lucide-react";
 interface BlogCardProps {
   post: any;
   userId?: string;
@@ -54,7 +55,7 @@ function BlogCard({ post, role, userId, index }: BlogCardProps) {
 
   return (
     <div className="w-full flex gap-2 bg-white p-5 rounded-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow">
-      <div className="relative w-full max-w-md h-48">
+      {/* <div className="relative w-full max-w-md h-48">
 
 
         <Image
@@ -66,7 +67,30 @@ function BlogCard({ post, role, userId, index }: BlogCardProps) {
           sizes="(max-width:768px)100vw,(max-width:1200px)50vw,33vw"
           className="rounded-lg object-cover"
         />
-      </div>
+      </div> */}
+      {post.image ? (
+        <div className="relative w-full max-w-md h-50 mb-6">
+          <Image
+            src={post.image}
+            alt={post.title}
+            fill
+            priority={index === 0}
+            fetchPriority={index === 0 ? "high" : undefined}
+            sizes="(max-width:768px)100vw,(max-width:1200px)50vw,33vw"
+            className="rounded-lg object-cover"
+          />
+        </div>
+      ) : <div className="w-full h-50 rounded-xl border border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center">
+        <div className="w-16 h-16 rounded-full border border-gray-300 bg-white flex items-center justify-center text-2xl text-gray-500">
+          <FileText />
+        </div>
+
+        <h3 className="mt-4 text-base font-medium text-gray-700 line-clamp-1 text-center px-5">
+          {post.title}
+        </h3>
+
+        <p className="mt-2 text-sm text-gray-400">Article Preview</p>
+      </div>}
       <div>
 
         <BlogContent

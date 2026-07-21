@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { io } from "socket.io-client";
+import { Virtuoso } from "react-virtuoso"; 
 import { useAppSelector } from "@/lib/store/hooks";
 import AddGroup from "./addGroup";
 import Image from "next/image";
@@ -22,10 +22,15 @@ export default function UserSidebar({
 }: any) {
   const [search, setSearch] = useState("");
   const socketRef = useRef<any>(null);
-  const [sortedUsers, setSortedUsers] = useState<UserType[]>([]);
-  const [openAddGroup, setOpenAddGroup] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+    const [openAddGroup, setOpenAddGroup] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] =
+    useState(true);
 
+  const [sortedUsers, setSortedUsers] =
+    useState<any[]>([]);
   const userName = useAppSelector((state) => state.auth.user?.userName);
 
   useEffect(() => {
@@ -41,12 +46,27 @@ export default function UserSidebar({
     socketRef.current = socket;
 
     const handleConnect = () => {
-      // console.log("Connected:", socket.id);
-      socket.emit("userOnline", userId);
+      socket.emit(
+        "userOnline",
+        userId
+      );
+
+      socket.emit("getUsers", {
+        userId,
+        page: 1,
+        limit: 10,
+      });
     };
 
-    const handleSortedUsers = (users: any) => {
-      setSortedUsers(users);
+    const handleSortedUsers = (data: any) => {
+      setLoadingMore(false);
+      setHasMore(data.hasMore);
+
+      if (data.page === 1) {
+        setSortedUsers(data.users);
+      } else {
+        setSortedUsers((prev) => [...prev, ...data.users]);
+      }
     };
 
     const handleDisconnect = (reason: string) => {
@@ -102,60 +122,86 @@ export default function UserSidebar({
         />
       </div>
 
-      <div className="z-1 flex-1 h-[82%] overflow-y-auto">
-        {filteredUsers.map((item: any) => {
-          const isGroup = item.type === "group";
-          const chatKey = item.id || item._id;
-          const status = !isGroup ? statuses[item.id] || "offline" : null;
-          const isSelected = selectedUser?.id == item.id || selectedUser?.id === item._id;
+      <div className="flex-1 h-[82%]">
+        <Virtuoso
+          style={{ height: "100%" }}
+          data={filteredUsers}
+          endReached={() => {
+            if (!hasMore || loadingMore) return;
 
-          return (
-            <button
-              key={chatKey}
-              onClick={() => setSelectedUser(item)}
-              className={`w-full px-4 py-4 flex items-center gap-3 border-y border-gray-200 hover:bg-slate-50 ${isSelected ? "bg-slate-100" : ""}`}
-            >
-              <div className="relative">
-                <div className="relative h-12 w-12 rounded-full bg-black text-white flex items-center justify-center capitalize font-semibold overflow-hidden">
-                  {item.img ? (
-                  //   <
-                  //     src = {item.img}
-                  // alt={item.name}
-                  // className="h-full w-full object-cover"
-                  //   />
-                  <Image
-                    src={item.img} 
-                    alt={item.name}
-                    fill
-                    sizes="48px"
-                    className="rounded-full object-cover"
-                  />
-                  
-                  ) : (
-                  item.name?.charAt(0)
+            setLoadingMore(true);
+
+            socketRef.current?.emit("getUsers", {
+              userId,
+              page: page + 1,
+              limit: 10,
+            });
+          }}
+          itemContent={(index, item: any) => {
+            const isGroup = item.type === "group";
+            const chatKey = item.id || item._id;
+            const status = !isGroup
+              ? statuses[item.id] || "offline"
+              : null;
+
+            const isSelected =
+              selectedUser?.id == item.id ||
+              selectedUser?.id === item._id;
+
+            return (
+              <button
+                key={chatKey}
+                onClick={() => setSelectedUser(item)}
+                className={`w-full px-4 py-4 flex items-center gap-3 border-y border-gray-200 hover:bg-slate-50 ${isSelected ? "bg-slate-100" : ""
+                  }`}
+              >
+                <div className="relative">
+                  <div className="relative h-12 w-12 rounded-full bg-black text-white flex items-center justify-center capitalize font-semibold overflow-hidden">
+                    {item.img ? (
+                      <Image
+                        src={item.img}
+                        alt={item.name}
+                        fill
+                        sizes="48px"
+                        className="rounded-full object-cover"
+                      />
+                    ) : (
+                      item.name?.charAt(0)
+                    )}
+                  </div>
+
+                  {item.unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                      {item.unreadCount > 99 ? "99+" : item.unreadCount}
+                    </span>
+                  )}
+
+                  {!isGroup && (
+                    <span
+                      className={`absolute bottom-0 right-0 w-3 h-3 rounded-full ${status === "online"
+                          ? "bg-green-500"
+                          : status === "away"
+                            ? "bg-yellow-400"
+                            : "bg-red-500"
+                        }`}
+                    />
                   )}
                 </div>
-                {item.unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">{item.unreadCount > 99 ? '99+' : item.unreadCount}</span>
-                )}
 
-                {!isGroup && (
-                  <span
-                    className={`absolute bottom-0 right-0 w-3 h-3 rounded-full ${status === "online" ? "bg-green-500" : status === "away" ? "bg-yellow-400" : "bg-red-500"}`}
-                  />
-                )}
-              </div>
+                <div className="text-left">
+                  <div className="font-medium capitalize">
+                    {item.name}
+                  </div>
 
-              <div className="text-left">
-                <div className="font-medium capitalize">{item.name}</div>
-
-                <div className="text-sm text-gray-500">{isGroup ? `Group` : "User"}</div>
-              </div>
-            </button>
-          );
-        })}
+                  <div className="text-sm text-gray-500">
+                    {isGroup ? "Group" : "User"}
+                  </div>
+                </div>
+              </button>
+            );
+          }}
+        />
       </div>
-
       <AddGroup open={openAddGroup} onClose={() => setOpenAddGroup(false)} />
     </div>
   );

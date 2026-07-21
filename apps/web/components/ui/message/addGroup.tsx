@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { toast } from "sonner";
-import  Upload from "antd/es/upload";
-import type  UploadFile  from "antd/es/upload/interface";
+import Upload from "antd/es/upload";
+import type UploadFile from "antd/es/upload/interface";
 import Image from "next/image";
 import { Plus as PlusOutlined } from "lucide-react";
 
@@ -88,6 +88,9 @@ function AddGroup({
 
             queryClient.invalidateQueries({
                 queryKey: ["groups"],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["users"],
             });
 
             toast.success("Group created successfully");

@@ -88,8 +88,11 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
                 queryKey: ["saved"],
             });
             queryClient.invalidateQueries({
-                queryKey: ["blog"],
+                queryKey: ["all"],
             });
+            queryClient.invalidateQueries({
+                queryKey: ["trending"]
+            })
 
         },
     });

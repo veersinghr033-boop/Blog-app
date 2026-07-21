@@ -30,7 +30,15 @@ function ReaderBlog({ type }: BlogProps) {
     } = useInfiniteQuery({
         queryKey: [type],
 
-        queryFn: async ({ pageParam }) => {
+        queryFn: async ({ pageParam = 0 }) => {
+            if (type === "trending") {
+                const response = await api.get(
+                    `/blogs/trending`
+                );
+
+                return response.data;
+            }
+
             const before = pageParam
                 ? `?before=${encodeURIComponent(String(pageParam))}`
                 : "";
@@ -38,16 +46,13 @@ function ReaderBlog({ type }: BlogProps) {
             const response = await api.get(
                 type === "saved"
                     ? `/blogsave/get${before}`
-                    : type === "trending"
-                        ? `/blogs/trending${before}`
-                        : `/blogs/all${before}`
+                    : `/blogs/all${before}`
             );
 
             return response.data;
         },
 
-        initialPageParam: null,
-
+        initialPageParam: 0,
         getNextPageParam: (lastPage) =>
             lastPage?.hasMore ? lastPage.nextCursor : undefined,
 
@@ -69,9 +74,9 @@ function ReaderBlog({ type }: BlogProps) {
         gcTime: 10 * 60_000,
         refetchOnWindowFocus: false,
     });
-
+   
     const blogs = useMemo(() => {
-        return (
+        const allBlogs =
             data?.pages.flatMap((page) => {
                 const items = Array.isArray(page?.blogs)
                     ? page.blogs
@@ -80,10 +85,17 @@ function ReaderBlog({ type }: BlogProps) {
                 return type === "saved"
                     ? items.map((item: any) => item.blogDetails)
                     : items;
-            }) ?? []
+            }) ?? [];
+
+        return Array.from(
+            new Map(
+                allBlogs.map((blog: any) => [
+                    blog._id,
+                    blog,
+                ])
+            ).values()
         );
     }, [data, type]);
-
     const savedIds = useMemo(
         () => new Set(savedBlogs.map((b: any) => b.blogDetails?._id)),
         [savedBlogs]
@@ -156,15 +168,22 @@ function ReaderBlog({ type }: BlogProps) {
         mutationFn: async (blogId: string) => {
             return api.post(`/views/${blogId}`);
         },
+        onSuccess: ()=>{
+            queryClient.invalidateQueries({
+                queryKey: [type],
+            });
+        }
+        
     });
-    // console.log(blogs)
-    return (
-        <div>
+        return (
+        <div className="h-[78vh] overflow-auto">
+
+
             <VirtuosoGrid
-                style={{
-                    height: "calc(100vh - 200px)"
-                }}
+                style={{ height: "100%" }}
+
                 totalCount={blogs.length}
+                computeItemKey={(index) => blogs[index]?._id}
                 endReached={() => {
                     if (hasNextPage && !isFetchingNextPage) {
                         fetchNextPage();
@@ -173,8 +192,12 @@ function ReaderBlog({ type }: BlogProps) {
                 listClassName="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 itemContent={(index) => {
                     const blog = blogs[index];
+
+                    if (!blog) return null;
+
                     return (
                         <ReaderBlogCard
+                            key={blog._id}
                             index={index}
                             post={blog}
                             isSaved={savedIds.has(blog._id)}
@@ -198,12 +221,13 @@ function ReaderBlog({ type }: BlogProps) {
                     );
                 }}
             />
-
             {isFetchingNextPage && (
                 <div className="py-4 text-center text-sm text-gray-500">
                     Loading more blogs...
                 </div>
             )}
+
+
         </div>
     );
 }

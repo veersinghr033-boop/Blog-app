@@ -77,11 +77,14 @@ function Blogs() {
         isFetchingNextPage={isFetchingNextPage}
         fetchNextPage={fetchNextPage}
       /> */}
-      <Blog
-        type="admin"
-        userId={userId}
-        role={role}
-      />
+      <div className="h-[88vh] mt-3 overflow-auto ">
+
+        <Blog
+          type="admin"
+          userId={userId}
+          role={role}
+        />
+      </div>
     </div>
   );
 }

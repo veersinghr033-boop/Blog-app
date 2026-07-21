@@ -130,9 +130,14 @@ export const getAllBlogs = async (req: Request, res: Response) => {
         updatedAt: blog.updatedAt,
       };
     });
-    console.timeEnd("format");
-
-    console.time("json");
+    console.log("before:", before);
+    console.log("returned:", formattedBlogs.length);
+    console.log(
+      "nextCursor:",
+      hasMore
+        ? formattedBlogs[formattedBlogs.length - 1].createdAt
+        : null
+    );
 
     res.status(200).json({
       blogs: formattedBlogs,
@@ -161,7 +166,8 @@ export const getBlogById = async (req: Request, res: Response) => {
 
     const before = req.query.before as string | undefined;
     const limit = 5;
-
+    console.log("before:", before);
+    console.log("limit:", limit);
     const query: any = {
       author: id,
     };
@@ -463,38 +469,22 @@ export const findByBlogId = async (req: Request, res: Response) => {
     });
   }
 };
-export const findtrendingBlogs = async (req: Request, res: Response) => {
+export const findtrendingBlogs = async (
+  req: Request,
+  res: Response
+) => {
   try {
-    const userId = (req as Request & { user?: { id: string } }).user?.id;
-    const before = req.query.before as string | undefined;
-    const limit = 6;
+    const userId = (req as Request & {
+      user?: { id: string };
+    }).user?.id;
 
-    const query: any = {};
-
-    if (before) {
-      const cursorDate = new Date(before);
-      if (!Number.isNaN(cursorDate.getTime())) {
-        query.createdAt = {
-          $lt: cursorDate,
-        };
-      }
-    }
-
-    const blogs = await Blog.find(query)
-      // .sort({ createdAt: -1 })
-      .limit(limit + 1)
+    const blogs = await Blog.find()
       .populate("author", "userName profileImage")
       .populate("Likes", "user")
       .populate("Comments", "user")
       .populate("views")
       .lean();
 
-    const hasMore = blogs.length > limit;
-
-    const selectedBlogs = hasMore
-      ? blogs.slice(0, limit)
-      : blogs;
-console.log(blogs.length)
     const getTextFromLexical = (content: any): string => {
       if (!content?.root?.children) return "";
 
@@ -511,58 +501,63 @@ console.log(blogs.length)
       return extract(content.root.children);
     };
 
-    const formatted = selectedBlogs
-      .map((blog: any) => {
-        const preview = getTextFromLexical(blog.content).slice(0, 300);
+    const trendingBlogs = blogs
+      .map((blog: any) => ({
+        _id: blog._id,
+        title: blog.title,
+        image: blog.image,
+        preview: getTextFromLexical(blog.content).slice(0, 300),
+        author: {
+          id: blog.author?._id,
+          userName: blog.author?.userName,
+          profileImage: blog.author?.profileImage,
+        },
+        likes: {
+          count: blog.Likes?.length || 0,
+        },
+        isLiked:
+          blog.Likes?.some(
+            (like: any) => like.user?.toString() === userId
+          ) || false,
+        comments: {
+          count: blog.Comments?.length || 0,
+        },
+        isCommented:
+          blog.Comments?.some(
+            (comment: any) =>
+              comment.user?.toString() === userId
+          ) || false,
+        views: {
+          count: blog.views?.length || 0,
+        },
+        createdAt: blog.createdAt,
+        updatedAt: blog.updatedAt,
+      }))
+      .sort((a, b) => {
+        if (b.views.count !== a.views.count)
+          return b.views.count - a.views.count;
 
-        return {
-          _id: blog._id,
-          title: blog.title,
-          image: blog.image,
-          preview,
-          author: {
-            id: (blog.author as any)?._id,
-            userName: (blog.author as any)?.userName,
-            profileImage: (blog.author as any)?.profileImage,
-          },
-          likes: {
-            count: blog.Likes?.length || 0,
-          },
-          isLiked:
-            blog.Likes?.some(
-              (like: any) => like.user?.toString() === userId
-            ) || false,
-          comments: {
-            count: blog.Comments?.length || 0,
-          },
-          isCommented:
-            blog.Comments?.some(
-              (comment: any) => comment.user?.toString() === userId
-            ) || false,
-          views: {
-            count: blog.views?.length || 0,
-          },
-          createdAt: blog.createdAt,
-          updatedAt: blog.updatedAt,
-        };
+        if (b.likes.count !== a.likes.count)
+          return b.likes.count - a.likes.count;
+
+        if (b.comments.count !== a.comments.count)
+          return b.comments.count - a.comments.count;
+
+        return (
+          new Date(b.createdAt).getTime() -
+          new Date(a.createdAt).getTime()
+        );
       })
-      .sort((a: any, b: any) => {
-        if (b.views.count !== a.views.count) return b.views.count - a.views.count;
-        if (b.likes.count !== a.likes.count) return b.likes.count - a.likes.count;
-        if (b.comments.count !== a.comments.count) return b.comments.count - a.comments.count;
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      });
-
-    // const hasMore = formatted.length > limit;
-    // const pageBlogs = hasMore ? formatted.slice(0, limit) : formatted;
+      .slice(0, 10);
 
     res.status(200).json({
-      blogs: formatted,
-      hasMore,
-      nextCursor: hasMore ? formatted[formatted.length - 1]?.createdAt : null,
+      blogs: trendingBlogs,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Failed to retrieve trending blogs" });
+
+    res.status(500).json({
+      message: "Failed to retrieve trending blogs",
+    });
   }
 };

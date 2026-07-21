@@ -200,7 +200,12 @@ export const deleteUser = async (req: Request, res: Response) => {
     }
 };
 
-export async function emitSortedUsers(io: any, currentUserId?: string) {
+export async function emitSortedUsers(
+    io: any,
+    currentUserId?: string,
+    page = 1,
+    limit = 10
+) {
     if (!currentUserId) {
         return [];
     }
@@ -311,9 +316,26 @@ export async function emitSortedUsers(io: any, currentUserId?: string) {
 
         return a.name.localeCompare(b.name);
     });
-    io.to(currentUserId.toString()).emit("sortedUsers", result);
+    const start = (page - 1) * limit;
+    const end = start + limit;
+
+    const paginatedUsers = result.slice(
+        start,
+        end
+    );
+
+    io.to(currentUserId.toString()).emit(
+        "sortedUsers",
+        {
+            users: paginatedUsers,
+            page,
+            limit,
+            total: result.length,
+            hasMore: end < result.length,
+        }
+    );
     // console.log(result)
-    return result;
+    return paginatedUsers;
 };
 export const getUsersSorted = async (req: Request, res: Response) => {
     try {

@@ -43,7 +43,9 @@ function CreateBlog() {
         const data = new FormData();
         data.append("title", values.title);
         data.append("content", JSON.stringify(values.content));
-        data.append("image", image);
+        if (image) {
+          data.append("image", image);
+        }
 
         const response = await api.post("/blogs/create", data, {
           headers: {

@@ -28,20 +28,21 @@ function Blog({ type, userId, role }: BlogProps) {
         : ["blogData", userId],
 
     queryFn: async ({ pageParam }) => {
-      const before = pageParam
-        ? `? before = ${pageParam} `
-        : "";
-
-      const res = await api.get(
+      const endpoint =
         type === "admin"
-          ? `/blogs/all${before} `
-          : `/ blogs / ${userId}${before} `
-      );
+          ? "/blogs/all"
+          : `/blogs/${userId}`;
+
+      const res = await api.get(endpoint, {
+        params: {
+          before: pageParam || undefined,
+        },
+      });
 
       return res.data;
     },
 
-    initialPageParam: null,
+    initialPageParam: undefined,
 
     getNextPageParam: (lastPage) =>
       lastPage?.hasMore
@@ -74,12 +75,12 @@ function Blog({ type, userId, role }: BlogProps) {
       searchText
         ? blogs.filter((blog: any) => {
           const search = searchText.toLowerCase();
-          return (blog.title?.toLowerCase() || "").includes(search) || (blog.preview?.toLowerCase() || "").includes(search);
+          return (blog.title?.toLowerCase() || "").includes(search);
         })
         : blogs,
     [blogs, searchText]
   );
-
+  
   return (
     <div className="flex flex-col gap-4 pt-4">
       <div>
@@ -102,7 +103,7 @@ function Blog({ type, userId, role }: BlogProps) {
       ) : (
         <>
           <Virtuoso
-            style={{ height: "67vh" }}
+            style={{ height: type === "admin" ? "70vh" : "60vh" }}
             data={filteredBlogs}
             endReached={() => {
               if (

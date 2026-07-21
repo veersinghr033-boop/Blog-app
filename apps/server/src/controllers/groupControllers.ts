@@ -3,6 +3,7 @@ import Chat from "../models/chatModel";
 import Message from "../models/message";
 import { Request, Response } from "express";
 import { uploadImage } from "../utils/uploadImage";
+import { emitSortedUsers } from "./userConlrollers";
 export const createGroup = async (req: Request, res: Response) => {
     try {
         const userId = (req as Request & {
@@ -54,6 +55,13 @@ export const createGroup = async (req: Request, res: Response) => {
             chatId: chat._id,
         });
 
+        const io = req.app.get("io");
+        const participantIds = [...new Set(participants.map((participant) => participant.toString()))];
+
+        await Promise.all(
+            participantIds.map((participantId) => emitSortedUsers(io, participantId))
+        );
+
         return res.status(201).json({
             message: "Group created successfully",
             group,
@@ -101,7 +109,7 @@ export const deleteById = async (req: Request, res: Response) => {
         const userId = req.params.userId
         const { Groups } = req.body;
         const group = await Group.findById(Groups);
-console.log(currentUserId, userId,Groups , group)
+        console.log(currentUserId, userId, Groups, group)
         if (!group) {
             return res.status(404).json({
                 message: "Group not found",
@@ -147,13 +155,28 @@ export const groupDelete = async (req: Request, res: Response) => {
     try {
         const { groupId } = req.params as { groupId: string };
 
-        const group = await Group.findByIdAndDelete(groupId);
+        const group = await Group.findById(groupId);
 
-        const chat = await Chat.findByIdAndDelete(group?.chatId);
+        if (!group) {
+            return res.status(404).json({
+                message: "Group not found",
+            });
+        }
 
-        const message = await Message.deleteMany({
+        const chat = await Chat.findById(group.chatId);
+        const participantIds = (chat?.participants ?? []).map((participant) => participant.toString());
+
+        await Group.findByIdAndDelete(groupId);
+        await Chat.findByIdAndDelete(group.chatId);
+        await Message.deleteMany({
             chatId: chat?._id,
         });
+
+        const io = req.app.get("io");
+        await Promise.all(
+            participantIds.map((participantId) => emitSortedUsers(io, participantId))
+        );
+
         return res.status(200).json({
             message: "group deleted successfully",
         });
@@ -247,7 +270,7 @@ export const removeAdmin = async (req: Request, res: Response) => {
         return res.status(200).json({
             message: "Group admin removed successfully",
         });
-     } catch (error) {
+    } catch (error) {
         console.error(error);
 
         return res.status(500).json({
