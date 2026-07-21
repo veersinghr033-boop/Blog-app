@@ -370,7 +370,7 @@ export default function ChatMessages({
     <>
       <div className="min-h-0 flex-1 overflow-hidden">
         <Virtuoso
-          style={{ height: "70vh" }}
+          style={{ height: "72vh" }}
           ref={virtuosoRef}
           data={messages}
           firstItemIndex={firstItemIndex.current}
@@ -384,18 +384,20 @@ export default function ChatMessages({
           components={{
             Header: () =>
               isFetchingPreviousPage ? (
-                <div className="text-center py-2">
+                <div className="text-center py-2 text-gray-500 dark:text-gray-400">
                   Loading older messages...
                 </div>
               ) : null,
           }}
           itemContent={(_, item) => {
             const isMine = item.senderId?._id === userId;
+
             const isReadByReceiver = item.readBy.some(
-              (user) => user._id !== userId,
+              (user) => user._id !== userId
             );
+
             const groupReadUsers = item.readBy.filter(
-              (user) => user._id !== item.senderId?._id,
+              (user) => user._id !== item.senderId?._id
             );
 
             return (
@@ -403,12 +405,13 @@ export default function ChatMessages({
                 className={`flex flex-col gap-1 mx-2 py-1.5 sm:mx-4 ${isMine ? "items-end" : "items-start"
                   }`}
               >
-                <div className="px-1 text-xs text-gray-400">
-                  {isMine ? null : item.senderId?.userName}{" "}
+                <div className="px-1 text-xs text-gray-400 dark:text-gray-500">
+                  {!isMine && item.senderId?.userName}{" "}
                   {new Date(item.timestamp).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
+
                   {isMine && (
                     <MessageMenu
                       onDelete={() => deleteMessageById(item._id)}
@@ -418,21 +421,35 @@ export default function ChatMessages({
                 </div>
 
                 <div
-                  className={`h-full max-w-[85%] wrap-break-word rounded-2xl px-4 py-2 sm:max-w-[70%] sm:px-5 ${isMine ? "bg-blue-500 text-white" : "bg-gray-100 text-black"
+                  className={`h-full max-w-[85%] break-words rounded-2xl px-4 py-2 sm:max-w-[70%] sm:px-5 ${isMine
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 dark:bg-zinc-800 text-black dark:text-white"
                     }`}
                 >
                   <LexicalViewer value={item.message} />
                 </div>
 
                 {isMine && selectedUser.type !== "group" && (
-                  <div className="text-[11px] text-gray-400" title={isReadByReceiver ? "Seen" : "Send"}>
-                    {isReadByReceiver ? '✓✓' : '✓'}
+                  <div
+                    className="text-[11px] text-gray-400 dark:text-gray-500"
+                    title={isReadByReceiver ? "Seen" : "Sent"}
+                  >
+                    {isReadByReceiver ? "✓✓" : "✓"}
                   </div>
                 )}
 
                 {isMine && selectedUser.type === "group" && (
-                  <div className="text-[11px] text-gray-400" title={groupReadUsers.length ? `Seen by: ${groupReadUsers.map(u => u.userName).join(', ')}` : 'Send'}>
-                    {groupReadUsers.length ? '✓✓' : '✓'}
+                  <div
+                    className="text-[11px] text-gray-400 dark:text-gray-500"
+                    title={
+                      groupReadUsers.length
+                        ? `Seen by: ${groupReadUsers
+                          .map((u) => u.userName)
+                          .join(", ")}`
+                        : "Sent"
+                    }
+                  >
+                    {groupReadUsers.length ? "✓✓" : "✓"}
                   </div>
                 )}
               </div>

@@ -53,32 +53,20 @@ function Blogs() {
   // }, [blogs, searchText, statusFilter]);
 
   return (
-    <div className="min-h-screen ">
-      <header className="w-full border-b border-gray-200 px-4 py-4">
+    <div className="min-h-screen">
+      <header className="w-full border-b border-gray-200 dark:border-zinc-800 px-4 py-4">
         <div>
-          <h2 className="text-2xl font-semibold">Blogs Management</h2>
+          <h2 className="text-2xl font-semibold text-black dark:text-white">
+            Blogs Management
+          </h2>
 
-          <p className="text-gray-500">Manage platform blogs and content</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            Manage platform blogs and content
+          </p>
         </div>
-
-        {/* <input
-          className="w-full p-2 border border-gray-300 outline-0 mt-2 rounded"
-          placeholder="Search blogs..."
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-        /> */}
       </header>
 
-      {/* <Blog
-        data={filteredBlogs}
-        userId={userId}
-        role={role}
-        hasNextPage={hasNextPage}
-        isFetchingNextPage={isFetchingNextPage}
-        fetchNextPage={fetchNextPage}
-      /> */}
-      <div className="h-[88vh] mt-3 overflow-auto ">
-
+      <div className="h-[88vh] mt-3 overflow-auto">
         <Blog
           type="admin"
           userId={userId}

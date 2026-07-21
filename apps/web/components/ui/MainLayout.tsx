@@ -7,10 +7,10 @@ function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen  bg-stone-100 dark:bg-zinc-950">
       <NavbarWrapper />
 
-      <div className="flex bg-stone-100">
+      <div className="flex  bg-stone-100 dark:bg-zinc-950">
         <div className="hidden md:block">
           <Sidebar />
         </div>
@@ -18,8 +18,8 @@ function MainLayout({
         <div
           className="
             fixed left-0 top-16 h-[calc(100vh-64px)]
-            bg-stone-100
-            p-2
+          bg-stone-100 dark:bg-zinc-950
+             p-2
             md:py-3
             md:px-6
             md:ml-62.5

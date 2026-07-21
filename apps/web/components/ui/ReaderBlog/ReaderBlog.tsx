@@ -175,13 +175,10 @@ function ReaderBlog({ type }: BlogProps) {
         }
         
     });
-        return (
-        <div className="h-[78vh] overflow-auto">
-
-
+    return (
+        <div className="h-[78vh] overflow-auto bg-transparent">
             <VirtuosoGrid
                 style={{ height: "100%" }}
-
                 totalCount={blogs.length}
                 computeItemKey={(index) => blogs[index]?._id}
                 endReached={() => {
@@ -221,13 +218,14 @@ function ReaderBlog({ type }: BlogProps) {
                     );
                 }}
             />
+
             {isFetchingNextPage && (
-                <div className="py-4 text-center text-sm text-gray-500">
-                    Loading more blogs...
+                <div className="py-4 text-center">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                        Loading more blogs...
+                    </span>
                 </div>
             )}
-
-
         </div>
     );
 }

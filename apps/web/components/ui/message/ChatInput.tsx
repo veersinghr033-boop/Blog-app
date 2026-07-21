@@ -119,7 +119,7 @@ export default function ChatInput({
     return (
         <form
             onSubmit={handleSend}
-            className="border-t border-gray-300 bg-white p-3 sm:px-4 sm:py-3.5"
+            className="border-t border-gray-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3 sm:px-4 sm:py-3.5"
         >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
                 <ChatEditor
@@ -133,13 +133,17 @@ export default function ChatInput({
                             : "Type a message..."
                     }
                 />
+
                 <button
                     type="submit"
-                    disabled={!hasContent(messageText) || sendMutation.isPending}
-                    className="bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center shrink-0"
+                    disabled={
+                        !hasContent(messageText) ||
+                        sendMutation.isPending
+                    }
+                    className="bg-gray-700 dark:bg-white hover:bg-gray-600 dark:hover:bg-gray-200 text-white dark:text-black p-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center shrink-0"
                 >
                     {sendMutation.isPending ? (
-                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <div className="w-6 h-6 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
                     ) : (
                         <Send size={22} />
                     )}

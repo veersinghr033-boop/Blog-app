@@ -94,16 +94,20 @@ function Users() {
   };
 
   return (
-    <div className="min-h-screen ">
-      <header className="flex flex-col gap-4 border-b border-gray-200 px-6 py-4">
+    <div className="min-h-screen">
+      <header className="flex flex-col gap-4 border-b border-gray-200 dark:border-zinc-800 px-2 py-4">
         <div>
-          <h2 className="text-2xl font-semibold">Users Management</h2>
+          <h2 className="text-2xl font-semibold text-black dark:text-white">
+            Users Management
+          </h2>
 
-          <p className="text-gray-500">Manage platform users and permissions</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            Manage platform users and permissions
+          </p>
         </div>
 
         <input
-          className="w-full sm:flex-1 p-2 bg-white mt-2 rounded-lg "
+          className="w-full sm:flex-1 p-2 mt-2 rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white outline-none"
           placeholder="Search users..."
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
@@ -111,7 +115,7 @@ function Users() {
       </header>
 
       <Table
-        className="p-6"
+        className="p-2"
         loading={isLoading}
         dataSource={filteredUsers}
         rowKey="_id"
@@ -121,7 +125,11 @@ function Users() {
           onChange: (page) => {
             const totalLoadedPages = data?.pages.length ?? 0;
 
-            if (page > totalLoadedPages && hasNextPage && !isFetchingNextPage) {
+            if (
+              page > totalLoadedPages &&
+              hasNextPage &&
+              !isFetchingNextPage
+            ) {
               fetchNextPage();
             }
           },
@@ -142,12 +150,12 @@ function Users() {
             dataIndex: "role",
             key: "role",
           },
-
           {
             title: "Joined At",
             dataIndex: "createdAt",
             key: "createdAt",
-            render: (value: Date) => joinAt({ createdAt: value } as UserType),
+            render: (value: Date) =>
+              joinAt({ createdAt: value } as UserType),
           },
           {
             title: "Actions",
@@ -160,7 +168,7 @@ function Users() {
                   okText="Yes"
                   cancelText="No"
                 >
-                  <button className="bg-red-500 text-white px-3 py-1 rounded">
+                  <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
                     Delete
                   </button>
                 </Popconfirm>

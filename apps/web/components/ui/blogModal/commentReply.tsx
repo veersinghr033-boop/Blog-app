@@ -62,79 +62,97 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
         },
     });
     return (
-        <div  >
-            <div className="flex items-center gap-4 pl-8 ">
-                <p className="text-xs cursor-pointer hover:underline"
-                    onClick={() => setOpenReply(
-                        openReply === comment._id ? null : comment._id
-                    )}>
-                    reply
+        <div>
+            <div className="flex items-center gap-4 pl-8">
+                <p
+                    className="text-xs cursor-pointer hover:underline text-gray-600 dark:text-gray-400"
+                    onClick={() =>
+                        setOpenReply(
+                            openReply === comment._id ? null : comment._id
+                        )
+                    }
+                >
+                    Reply
                 </p>
 
-                <p className="text-xs cursor-pointer hover:underline" onClick={() => setOpenReplyData(
-                    openReplyData === comment._id ? null : comment._id
-                )}>
+                <p
+                    className="text-xs cursor-pointer hover:underline text-gray-600 dark:text-gray-400"
+                    onClick={() =>
+                        setOpenReplyData(
+                            openReplyData === comment._id ? null : comment._id
+                        )
+                    }
+                >
                     {comment.replies?.length || 0} replies
                 </p>
             </div>
-            {openReply === comment._id && (
-                <form className="pl-8 mt-3 flex gap-2" onSubmit={(e) => {
-                    e.preventDefault();
-                    if (!replyText[comment._id]?.trim()) {
-                        toast.warning("Reply cannot be empty");
-                        return;
-                    }
 
-                    replyMutation.mutate({
-                        commentId: comment._id,
-                        text: replyText[comment._id],
-                    });
-                }}>
+            {openReply === comment._id && (
+                <form
+                    className="pl-8 mt-3 flex gap-2"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+
+                        if (!replyText[comment._id]?.trim()) {
+                            toast.warning("Reply cannot be empty");
+                            return;
+                        }
+
+                        replyMutation.mutate({
+                            commentId: comment._id,
+                            text: replyText[comment._id],
+                        });
+                    }}
+                >
                     <input
                         placeholder="Write a reply..."
                         value={replyText[comment._id] || ""}
                         onChange={(e: any) =>
                             setReplyText((prev) => ({
-                                ...prev, [comment._id]: e.target.value
+                                ...prev,
+                                [comment._id]: e.target.value,
                             }))
                         }
-                        className="border p-2 rounded flex-1"
+                        className="flex-1 border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white p-2 rounded"
                     />
 
                     <button
                         type="submit"
-                        className="bg-black text-white px-3 py-1 rounded"
                         disabled={replyMutation.isPending}
+                        className="bg-black dark:bg-white text-white dark:text-black px-3 py-1 rounded hover:bg-gray-800 dark:hover:bg-gray-200"
                     >
                         Send
                     </button>
                 </form>
             )}
+
             {openReplyData === comment._id && (
                 <div className="pl-8 mt-3 flex flex-col gap-2">
                     {replies.length ? (
                         replies.map((reply: any) => (
                             <div
                                 key={reply._id}
-                                className="border border-gray-200 rounded-lg p-3 "
+                                className="border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg p-3"
                             >
-                                <div className="flex items-start justify-between gap-4 ">
+                                <div className="flex items-start justify-between gap-4">
                                     <div className="flex flex-col gap-1 text-start">
-                                        <div className="flex items-center  gap-2 ">
-                                            <div className="bg-gray-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs uppercase">
+                                        <div className="flex items-center gap-2">
+                                            <div className="bg-gray-700 dark:bg-zinc-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs uppercase">
                                                 {reply.userId?.userName?.charAt(0)}
                                             </div>
-                                            <p >
+
+                                            <p className="text-black dark:text-white">
                                                 {reply.userId?.userName}
                                             </p>
-                                            <p >
+
+                                            <p className="text-gray-500 dark:text-gray-400 text-sm">
                                                 {new Date(
                                                     reply.createdAt
                                                 ).toLocaleDateString()}
                                             </p>
                                         </div>
 
-                                        <p className="text-gray-700! pl-8">
+                                        <p className="pl-8 text-gray-700 dark:text-gray-300">
                                             {reply.text}
                                         </p>
                                     </div>
@@ -142,15 +160,14 @@ function CommentReply({ comment, blogId }: { comment: any; blogId: string }) {
                             </div>
                         ))
                     ) : (
-                        <p className="pl-8">
+                        <p className="pl-8 text-gray-500 dark:text-gray-400">
                             No replies yet
                         </p>
                     )}
                 </div>
             )}
-
         </div>
-    )
+    );
 }
 
 export default CommentReply

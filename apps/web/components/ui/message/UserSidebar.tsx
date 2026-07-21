@@ -103,14 +103,22 @@ export default function UserSidebar({
   return (
     <div
       style={{ width: mobile ? "100%" : 250 }}
-      className={`flex h-full min-h-0 flex-col bg-white shadow-sm border border-gray-200 border-r-0 ${mobile ? "rounded-none" : ""}`}
+      className={`flex h-full min-h-0 flex-col bg-white dark:bg-zinc-900 shadow-sm border border-gray-200 dark:border-zinc-800 border-r-0 ${mobile ? "rounded-none" : ""
+        }`}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-gray-300 px-4 py-3">
-        <div className="overflow-x-auto text-base font-semibold capitalize w-1/2">
-          {hydrated ? `Welcome to, ${userName || "User"}` : "Welcome to, User"}
+      <div className="flex items-center justify-between gap-2 border-b border-gray-300 dark:border-zinc-800 px-4 py-3">
+        <div className="overflow-x-auto text-base font-semibold capitalize w-1/2 text-black dark:text-white">
+          {hydrated
+            ? `Welcome to, ${userName || "User"}`
+            : "Welcome to, User"}
         </div>
 
-        <button className="bg-black text-white px-2.5 py-1 rounded" onClick={() => setOpenAddGroup(true)}>Add Group</button>
+        <button
+          className="bg-black dark:bg-white text-white dark:text-black px-2.5 py-1 rounded hover:bg-gray-800 dark:hover:bg-gray-200"
+          onClick={() => setOpenAddGroup(true)}
+        >
+          Add Group
+        </button>
       </div>
 
       <div className="p-4">
@@ -118,7 +126,7 @@ export default function UserSidebar({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search..."
-          className="w-full rounded border border-gray-200 px-3 py-2"
+          className="w-full rounded border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white px-3 py-2"
         />
       </div>
 
@@ -152,11 +160,13 @@ export default function UserSidebar({
               <button
                 key={chatKey}
                 onClick={() => setSelectedUser(item)}
-                className={`w-full px-4 py-4 flex items-center gap-3 border-y border-gray-200 hover:bg-slate-50 ${isSelected ? "bg-slate-100" : ""
+                className={`w-full px-4 py-4 flex items-center gap-3 border-y border-gray-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 ${isSelected
+                    ? "bg-slate-100 dark:bg-zinc-800"
+                    : ""
                   }`}
               >
                 <div className="relative">
-                  <div className="relative h-12 w-12 rounded-full bg-black text-white flex items-center justify-center capitalize font-semibold overflow-hidden">
+                  <div className="relative h-12 w-12 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center capitalize font-semibold overflow-hidden">
                     {item.img ? (
                       <Image
                         src={item.img}
@@ -172,7 +182,9 @@ export default function UserSidebar({
 
                   {item.unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-                      {item.unreadCount > 99 ? "99+" : item.unreadCount}
+                      {item.unreadCount > 99
+                        ? "99+"
+                        : item.unreadCount}
                     </span>
                   )}
 
@@ -189,11 +201,11 @@ export default function UserSidebar({
                 </div>
 
                 <div className="text-left">
-                  <div className="font-medium capitalize">
+                  <div className="font-medium capitalize text-black dark:text-white">
                     {item.name}
                   </div>
 
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
                     {isGroup ? "Group" : "User"}
                   </div>
                 </div>
@@ -202,7 +214,11 @@ export default function UserSidebar({
           }}
         />
       </div>
-      <AddGroup open={openAddGroup} onClose={() => setOpenAddGroup(false)} />
+
+      <AddGroup
+        open={openAddGroup}
+        onClose={() => setOpenAddGroup(false)}
+      />
     </div>
   );
 }

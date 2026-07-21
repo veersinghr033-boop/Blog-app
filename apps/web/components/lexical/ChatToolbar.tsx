@@ -90,14 +90,14 @@ export default function ChatToolbar({ isVisible }: Props) {
         );
     };
     const buttonClass =
-        "p-2 rounded hover:bg-gray-700 transition-colors border border-gray-500 bg-gray-600 text-white hover:bg-gray-700 text-sm flex items-center justify-center";
+        "p-2 rounded border border-gray-500 dark:border-zinc-700 bg-gray-600 dark:bg-zinc-800 text-white hover:bg-gray-700 dark:hover:bg-zinc-700 transition-colors text-sm flex items-center justify-center";
 
     if (!isVisible) return null;
 
     return (
         <div
             ref={toolbarRef}
-            className="fixed z-50 flex items-center gap-1 p-2 bg-gray-200 border border-gray-400 rounded-lg shadow-lg"
+            className="fixed z-50 flex items-center gap-1 p-2 bg-gray-200 dark:bg-zinc-900 border border-gray-400 dark:border-zinc-700 rounded-lg shadow-lg"
             style={{
                 top: `${position.top}px`,
                 left: `${position.left}px`,
@@ -137,14 +137,14 @@ export default function ChatToolbar({ isVisible }: Props) {
                     e.preventDefault();
                     handleFormat("underline");
                 }}
+                title="Underline"
                 className={`${buttonClass} ${formats.underline ? "bg-blue-500! border-blue-500!" : ""
                     }`}
-                title="Underline"
             >
                 <Underline size={16} />
             </button>
 
-            <div className="w-px h-5 bg-gray-600"></div>
+            <div className="w-px h-5 bg-gray-600 dark:bg-zinc-600"></div>
 
             <button
                 type="button"

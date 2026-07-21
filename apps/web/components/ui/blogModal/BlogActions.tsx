@@ -106,34 +106,49 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
     return (
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-                <p>
-                    {blog?.createdAt && new Date(blog.createdAt).toLocaleDateString()}
-                </p>
-                <p
-                    className={`flex items-center gap-1 text-sm cursor-pointer hover:text-blue-500  ${isLiked ? "text-blue-500" : "text-gray-500"
-                        }`}
-                    onClick={() => handleLike(blog._id)}
-                >
-                    <ThumbsUp size={15} />  {blog.likes?.count || 0}
+                <p className="text-gray-600 dark:text-gray-400">
+                    {blog?.createdAt &&
+                        new Date(blog.createdAt).toLocaleDateString()}
                 </p>
 
                 <p
-                    className={`flex items-center gap-1 text-sm cursor-pointer hover:text-green-500 ${isCommented ? "text-green-500" : "text-gray-500"
+                    className={`flex items-center gap-1 text-sm cursor-pointer hover:text-blue-500 ${isLiked
+                            ? "text-blue-500"
+                            : "text-gray-500 dark:text-gray-400"
+                        }`}
+                    onClick={() => handleLike(blog._id)}
+                >
+                    <ThumbsUp size={15} />
+                    {blog.likes?.count || 0}
+                </p>
+
+                <p
+                    className={`flex items-center gap-1 text-sm cursor-pointer hover:text-green-500 ${isCommented
+                            ? "text-green-500"
+                            : "text-gray-500 dark:text-gray-400"
                         }`}
                     onClick={() => onOpen(blog)}
                 >
-                    <MessageCircle size={15} /> {blog.comments?.count || 0}
+                    <MessageCircle size={15} />
+                    {blog.comments?.count || 0}
                 </p>
-                <span className="text-sm cursor-pointer hover:text-blue-500 text-gray-500">
+
+                <span className="text-sm cursor-pointer hover:text-blue-500 text-gray-500 dark:text-gray-400">
                     {blog?.views?.count || 0} Views
                 </span>
             </div>
 
             {isAuthor ? (
-                <button onClick={handleDelete} disabled={deleteMutation.isPending} className="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
+                <button
+                    onClick={handleDelete}
+                    disabled={deleteMutation.isPending}
+                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded disabled:opacity-50"
+                >
+                    Delete
+                </button>
             ) : (
                 <button
-                    className="bg-red-600 text-white px-3 py-1 rounded"
+                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded disabled:opacity-50"
                     onClick={() => onReport()}
                     disabled={alreadyReported}
                     title={

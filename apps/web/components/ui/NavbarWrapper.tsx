@@ -4,12 +4,9 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import Navbar from "./navbar";
 
-const Sidebar = dynamic(
-    () => import("./sidebar"),
-    {
-        ssr: false,
-    }
-);
+const Sidebar = dynamic(() => import("./sidebar"), {
+    ssr: false,
+});
 
 export default function NavbarWrapper() {
     const [open, setOpen] = useState(false);
@@ -25,9 +22,9 @@ export default function NavbarWrapper() {
                         onClick={() => setOpen(false)}
                     />
 
-                    <div className="absolute left-0 top-16 h-full w-64 bg-white p-4 pt-10">
+                    <div className="absolute left-0 top-16 h-full w-64 bg-white dark:bg-zinc-900 border-r border-gray-200 dark:border-zinc-800 p-4 pt-10">
                         <button
-                            className="absolute right-3 top-3 text-gray-600"
+                            className="absolute right-3 top-3 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
                             onClick={() => setOpen(false)}
                         >
                             Close

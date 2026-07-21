@@ -29,15 +29,17 @@ function BlogContent({ post, onOpen }: any) {
   const showReadMore = post.preview?.length > 150;
   return (
     <>
-      <h2 className="font-normal text-2xl mb-2">{post.title}</h2>
+      <h2 className="font-normal text-2xl mb-2 text-black dark:text-white">
+        {post.title}
+      </h2>
 
-      <p className="line-clamp-3">
+      <p className="line-clamp-3 text-gray-700 dark:text-gray-300">
         {post.preview}
       </p>
 
       {showReadMore && (
         <button
-          className="text-blue-500 cursor-pointer"
+          className="text-blue-500 hover:text-blue-400 cursor-pointer"
           onClick={() => onOpen(post._id)}
         >
           Read more

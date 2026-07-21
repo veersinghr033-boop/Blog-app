@@ -44,9 +44,25 @@ export default function AddCommentForm({ blogId }: { blogId: string }) {
     };
 
     return (
-        <form onSubmit={handleCommentSubmit} className="flex gap-2 items-start">
-            <input name="comment" placeholder="Write your comment..." className="flex-1 border p-2 rounded" />
-            <button type="submit" disabled={commentMutation.isPending} className="bg-black text-white px-3 py-2 rounded">Add Comment</button>
+        <form
+            onSubmit={handleCommentSubmit}
+            className="flex gap-2 items-start"
+        >
+            <input
+                name="comment"
+                placeholder="Write your comment..."
+                className="flex-1 border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white p-2 rounded outline-none"
+            />
+
+            <button
+                type="submit"
+                disabled={commentMutation.isPending}
+                className="bg-black dark:bg-white text-white dark:text-black px-3 py-2 rounded hover:bg-gray-800 dark:hover:bg-gray-200 disabled:opacity-50"
+            >
+                {commentMutation.isPending
+                    ? "Adding..."
+                    : "Add Comment"}
+            </button>
         </form>
-    )
+    );
 }

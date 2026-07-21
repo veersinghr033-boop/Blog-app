@@ -34,21 +34,28 @@ function BlogActions({ post, onOpen, userId }: any) {
   return (
     <>
       <span
-        className={`flex items-center gap-1 text-sm cursor-pointer hover:text-blue-500 ${isLiked ? "text-blue-500" : "text-gray-500"
+        className={`flex items-center gap-1 text-sm cursor-pointer hover:text-blue-500 ${isLiked
+            ? "text-blue-500"
+            : "text-gray-500 dark:text-gray-400"
           }`}
         onClick={() => handleLike(post._id)}
       >
-        <ThumbsUp size={15} /> {post.likes?.count || 0}
+        <ThumbsUp size={15} />
+        {post.likes?.count || 0}
       </span>
 
       <span
-        className={`flex items-center gap-1 text-sm cursor-pointer hover:text-green-500 ${isCommented ? "text-green-500" : "text-gray-500"
+        className={`flex items-center gap-1 text-sm cursor-pointer hover:text-green-500 ${isCommented
+            ? "text-green-500"
+            : "text-gray-500 dark:text-gray-400"
           }`}
         onClick={() => onOpen(post._id)}
       >
-        <MessageCircle size={15} />{post.comments?.count || 0}
+        <MessageCircle size={15} />
+        {post.comments?.count || 0}
       </span>
-      <span className="text-sm cursor-pointer hover:text-blue-500 text-gray-500">
+
+      <span className="text-sm cursor-pointer hover:text-blue-500 text-gray-500 dark:text-gray-400">
         {post.views?.count || 0} Views
       </span>
     </>

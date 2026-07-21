@@ -259,12 +259,16 @@ Topic: ${title}
   };
 
   return (
-    <div className="min-h-screen ">
-      <header className="flex flex-col w-full gap-4 border-b border-gray-200">
+    <div className="min-h-screen text-black dark:text-white">
+      <header className="flex flex-col w-full gap-4 border-b border-gray-200 dark:border-zinc-800 pb-4">
         <div>
-          <h2 className="text-2xl font-semibold">Create Blog</h2>
+          <h2 className="text-2xl font-semibold text-black dark:text-white">
+            Create Blog
+          </h2>
 
-          <p className="text-gray-500">Write and publish your blog posts</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            Write and publish your blog posts
+          </p>
         </div>
       </header>
 
@@ -272,10 +276,11 @@ Topic: ${title}
         <div className="mb-4">
           <label
             htmlFor="title"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             Title
           </label>
+
           <input
             type="text"
             id="title"
@@ -283,13 +288,15 @@ Topic: ${title}
             value={formData.title}
             onChange={handleChange}
             placeholder="Enter blog title"
-            className="mt-1 p-2 outline-0 block w-full rounded-md bg-white border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="mt-1 p-2 block w-full rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white outline-none shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             required
           />
         </div>
-        <div className="mb-4">
-          <label className="block mb-2">Blog Image</label>
 
+        <div className="mb-4">
+          <label className="block mb-2 text-black dark:text-white">
+            Blog Image
+          </label>
 
           <Upload
             accept="image/*"
@@ -311,14 +318,18 @@ Topic: ${title}
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div>
-                <Plus size={18} />                <div style={{ marginTop: 8 }}>Upload</div>
+              <div className="text-black dark:text-white">
+                <Plus size={18} />
+                <div style={{ marginTop: 8 }}>Upload</div>
               </div>
             )}
           </Upload>
         </div>
+
         <div className="mb-4">
-          <label className="block mb-2">Content</label>
+          <label className="block mb-2 text-black dark:text-white">
+            Content
+          </label>
 
           <Editor
             key={editorKey}
@@ -337,7 +348,7 @@ Topic: ${title}
             type="button"
             disabled={aiMutation.isPending}
             onClick={() => aiMutation.mutate()}
-            className="bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 disabled:opacity-50"
+            className="bg-gray-200 dark:bg-zinc-800 text-gray-800 dark:text-white py-2 px-4 rounded-md hover:bg-gray-300 dark:hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50"
           >
             Generate AI Content
           </button>
@@ -345,7 +356,7 @@ Topic: ${title}
           <button
             type="submit"
             disabled={publishMutation.isPending}
-            className="bg-gray-800 text-white py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-black focus:ring-opacity-50 disabled:opacity-50"
+            className="bg-gray-800 dark:bg-white text-white dark:text-black py-2 px-4 rounded-md hover:bg-gray-700 dark:hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-black disabled:opacity-50"
           >
             Publish
           </button>

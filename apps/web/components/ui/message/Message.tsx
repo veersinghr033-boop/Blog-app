@@ -79,7 +79,7 @@ export default function Message() {
     };
   }, []);
   return (
-    <div className="flex h-[calc(100dvh-100px)] min-h-0 w-full overflow-hidden md:gap-0">
+    <div className="flex h-[calc(100dvh-100px)] min-h-0 w-full overflow-hidden bg-white dark:bg-zinc-950 md:gap-0">
       <div className="hidden h-full md:block md:w-62.5 md:shrink-0">
         <UserSidebar
           selectedUser={selectedUser}
@@ -91,7 +91,10 @@ export default function Message() {
       </div>
 
       {isMobile && (
-        <MobileDrawer open={sidebarOpen} onClose={() => setSidebarOpen(false)}>
+        <MobileDrawer
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        >
           <UserSidebar
             selectedUser={selectedUser}
             setSelectedUser={handleSelectUser}
@@ -102,7 +105,7 @@ export default function Message() {
         </MobileDrawer>
       )}
 
-      <div className="flex min-w-0 flex-1">
+      <div className="flex min-w-0 flex-1 bg-white dark:bg-zinc-950">
         <MessageChat
           selectedUser={selectedUser}
           setSelectedUser={handleSelectUser}

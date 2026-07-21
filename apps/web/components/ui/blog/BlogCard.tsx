@@ -39,7 +39,7 @@ function BlogCard({ post, role, userId, index }: BlogCardProps) {
         toast.error("Login required");
       } else {
       }
-      toast.error(error?.response?.data?.message || "Something went wrong");
+      console.error(error?.response?.data?.message || "Something went wrong");
     },
   });
   const openBlog = useCallback(
@@ -54,22 +54,9 @@ function BlogCard({ post, role, userId, index }: BlogCardProps) {
   );
 
   return (
-    <div className="w-full flex gap-2 bg-white p-5 rounded-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow">
-      {/* <div className="relative w-full max-w-md h-48">
-
-
-        <Image
-          src={post.image}
-          alt={post.title}
-          fill
-          priority={index === 0}
-          // fetchPriority={index === 0 ? "high" : undefined}
-          sizes="(max-width:768px)100vw,(max-width:1200px)50vw,33vw"
-          className="rounded-lg object-cover"
-        />
-      </div> */}
+    <div className="w-full flex gap-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-5 rounded-lg shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow">
       {post.image ? (
-        <div className="relative w-full max-w-md h-50 mb-6">
+        <div className="relative w-1/3 max-w-md h-50 mb-6">
           <Image
             src={post.image}
             alt={post.title}
@@ -80,19 +67,23 @@ function BlogCard({ post, role, userId, index }: BlogCardProps) {
             className="rounded-lg object-cover"
           />
         </div>
-      ) : <div className="w-full h-50 rounded-xl border border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center">
-        <div className="w-16 h-16 rounded-full border border-gray-300 bg-white flex items-center justify-center text-2xl text-gray-500">
-          <FileText />
+      ) : (
+        <div className="w-1/3 h-50 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 flex flex-col items-center justify-center">
+          <div className="w-16 h-16 rounded-full border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 flex items-center justify-center text-2xl text-gray-500 dark:text-gray-400">
+            <FileText />
+          </div>
+
+          <h3 className="mt-4 text-base font-medium text-gray-700 dark:text-gray-200 line-clamp-1 text-center px-5">
+            {post.title}
+          </h3>
+
+          <p className="mt-2 text-sm text-gray-400 dark:text-gray-500">
+            Article Preview
+          </p>
         </div>
+      )}
 
-        <h3 className="mt-4 text-base font-medium text-gray-700 line-clamp-1 text-center px-5">
-          {post.title}
-        </h3>
-
-        <p className="mt-2 text-sm text-gray-400">Article Preview</p>
-      </div>}
-      <div>
-
+      <div className="flex-1">
         <BlogContent
           post={post}
           onOpen={openBlog}

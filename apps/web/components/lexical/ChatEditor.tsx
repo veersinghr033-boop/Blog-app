@@ -52,28 +52,28 @@ export default function ChatEditor({
 
     return (
         <LexicalComposer initialConfig={initialConfig}>
-            <div className="border border-gray-400 rounded-lg  relative overflow-hidden max-h-15 flex-1">
+            <div className="relative flex-1 max-h-15 overflow-hidden rounded-lg border border-gray-400 dark:border-zinc-700 bg-white dark:bg-zinc-900">
                 <ChatToolbar isVisible={showToolbar} />
 
-                <div className="px-4 py-2">
+                <div className="px-4 py-2 bg-white dark:bg-zinc-900">
                     <RichTextPlugin
                         contentEditable={
-                            <ContentEditable className="outline-none overflow-y-auto resize-none " />
+                            <ContentEditable className="outline-none overflow-y-auto resize-none text-black dark:text-white" />
                         }
                         placeholder={
-                            <div className="text-gray-500 absolute top-2 left-4 pointer-events-none text-sm">
+                            <div className="absolute top-2 left-4 pointer-events-none text-sm text-gray-500 dark:text-gray-400">
                                 {placeholder}
                             </div>
                         }
                         ErrorBoundary={() => null}
                     />
+
                     <HistoryPlugin />
                     <ListPlugin />
 
                     <OnChangePlugin onChange={onChange} />
                     {onEnter && <KeyboardPlugin onEnter={onEnter} />}
                     <SelectionPlugin onSelectionChange={setShowToolbar} />
-
                 </div>
             </div>
         </LexicalComposer>

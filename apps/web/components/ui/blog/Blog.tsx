@@ -85,25 +85,25 @@ function Blog({ type, userId, role }: BlogProps) {
     <div className="flex flex-col gap-4 pt-4">
       <div>
         <input
-          className="w-full p-2 border border-gray-300 outline-0 rounded"
+          className="w-full p-2 border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white outline-none rounded"
           placeholder="Search blogs..."
           value={searchText}
-          onChange={(e) =>
-            setSearchText(e.target.value)
-          }
+          onChange={(e) => setSearchText(e.target.value)}
         />
       </div>
 
       {!filteredBlogs.length ? (
         <div className="text-center py-4">
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-gray-400">
             No blogs found
           </p>
         </div>
       ) : (
         <>
           <Virtuoso
-            style={{ height: type === "admin" ? "70vh" : "60vh" }}
+            style={{
+              height: type === "admin" ? "70vh" : "60vh",
+            }}
             data={filteredBlogs}
             endReached={() => {
               if (
@@ -120,7 +120,6 @@ function Blog({ type, userId, role }: BlogProps) {
                   userId={userId}
                   role={role}
                   index={index}
-
                 />
               </div>
             )}
@@ -132,7 +131,7 @@ function Blog({ type, userId, role }: BlogProps) {
           />
 
           {isFetchingNextPage && (
-            <div className="col-span-full text-center py-4 text-sm text-gray-500">
+            <div className="col-span-full text-center py-4 text-sm text-gray-500 dark:text-gray-400">
               Loading more blogs...
             </div>
           )}

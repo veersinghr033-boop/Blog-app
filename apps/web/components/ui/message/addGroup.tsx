@@ -130,15 +130,15 @@ function AddGroup({
                 onClick={onClose}
             />
 
-            <div className="relative m-auto w-full max-w-md bg-white rounded-lg shadow-lg p-6">
+            <div className="relative m-auto w-full max-w-md bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg shadow-lg p-6">
                 <div className="flex justify-between items-center mb-5">
-                    <h3 className="text-lg font-semibold">
+                    <h3 className="text-lg font-semibold text-black dark:text-white">
                         Create New Group
                     </h3>
 
                     <button
                         onClick={onClose}
-                        className="text-gray-500 hover:text-gray-700"
+                        className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white"
                     >
                         Close
                     </button>
@@ -166,7 +166,7 @@ function AddGroup({
                                     className="rounded-full object-cover"
                                 />
                             ) : (
-                                <div>
+                                <div className="text-black dark:text-white">
                                     <PlusOutlined />
                                     <div style={{ marginTop: 5 }}>
                                         Upload
@@ -174,8 +174,9 @@ function AddGroup({
                                 </div>
                             )}
                         </Upload>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+
+                        <div className="mb-4 flex-1">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Group Name
                             </label>
 
@@ -186,18 +187,17 @@ function AddGroup({
                                     setGroupName(e.target.value)
                                 }
                                 placeholder="Enter group name"
-                                className="w-full border rounded-md px-3 py-2 outline-none focus:ring-1 focus:ring-blue-500"
+                                className="w-full border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white rounded-md px-3 py-2 outline-none focus:ring-1 focus:ring-blue-500"
                             />
                         </div>
                     </div>
 
-
                     <div className="mb-5">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Select Members
                         </label>
 
-                        <div className="border rounded-md p-3 max-h-48 overflow-y-auto space-y-2">
+                        <div className="border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-md p-3 max-h-48 overflow-y-auto space-y-2">
                             {users.map((user) => (
                                 <div
                                     key={user.id}
@@ -214,9 +214,7 @@ function AddGroup({
                                                 e.target.checked
                                                     ? [...prev, user.id]
                                                     : prev.filter(
-                                                        (id) =>
-                                                            id !==
-                                                            user.id
+                                                        (id) => id !== user.id
                                                     )
                                             )
                                         }
@@ -224,7 +222,7 @@ function AddGroup({
 
                                     <label
                                         htmlFor={user.id}
-                                        className="ml-2 text-sm"
+                                        className="ml-2 text-sm text-black dark:text-white"
                                     >
                                         {user.name}
                                     </label>
@@ -232,7 +230,7 @@ function AddGroup({
                             ))}
 
                             {users.length === 0 && (
-                                <div className="text-center text-gray-500">
+                                <div className="text-center text-gray-500 dark:text-gray-400">
                                     No users available
                                 </div>
                             )}
@@ -242,7 +240,7 @@ function AddGroup({
                     <button
                         type="submit"
                         disabled={createGroupMutation.isPending}
-                        className="w-full bg-gray-900 text-white py-2 rounded-md hover:bg-gray-800 disabled:opacity-50"
+                        className="w-full bg-gray-900 dark:bg-white text-white dark:text-black py-2 rounded-md hover:bg-gray-800 dark:hover:bg-gray-200 disabled:opacity-50"
                     >
                         {createGroupMutation.isPending
                             ? "Creating..."

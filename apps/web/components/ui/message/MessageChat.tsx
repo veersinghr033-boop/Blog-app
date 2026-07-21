@@ -36,8 +36,8 @@ export default function MessageChat({
   }, []);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden border border-gray-200 bg-white shadow-lg ">
-      <div className="flex min-h-0 flex-1 flex-col bg-white">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-lg">
+      <div className="flex min-h-0 flex-1 flex-col bg-white dark:bg-zinc-900">
         <MessageHeader
           selectedUser={selectedUser}
           userStatuses={userStatuses}
@@ -45,6 +45,7 @@ export default function MessageChat({
           mobile={mobile}
           onOpenSidebar={onOpenSidebar}
         />
+
         <section className="flex min-h-0 flex-1 flex-col justify-between">
           {selectedUser ? (
             <div className="flex min-h-0 flex-1 flex-col">
@@ -54,13 +55,24 @@ export default function MessageChat({
                 clearNotification={clearNotification}
               />
 
-              <ChatInput selectedUser={selectedUser} socketRef={socketRef} />
+              <ChatInput
+                selectedUser={selectedUser}
+                socketRef={socketRef}
+              />
             </div>
           ) : (
-            <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6 text-center text-gray-500">
-              <div>Select a user or group to start chatting.</div>
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6 text-center text-gray-500 dark:text-gray-400">
+              <div>
+                Select a user or group to start chatting.
+              </div>
+
               {mobile && onOpenSidebar ? (
-                <button className="bg-black text-white px-3 py-1 rounded" onClick={onOpenSidebar}>Open chats</button>
+                <button
+                  className="bg-black dark:bg-white text-white dark:text-black px-3 py-1 rounded hover:bg-gray-800 dark:hover:bg-gray-200"
+                  onClick={onOpenSidebar}
+                >
+                  Open chats
+                </button>
               ) : null}
             </div>
           )}

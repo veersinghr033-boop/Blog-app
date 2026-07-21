@@ -80,25 +80,22 @@ function ReadBlog({ blog }: ReadBlogProps) {
     if (!blog) return null;
 
     return (
-        <div
-            className="bg-white rounded shadow-xl border border-gray-200 p-6 max-w-full mx-auto overflow-y-auto  max-h-[90vh] "
-            // style={{ maxHeight: "100vh" }}
-        >
+        <div className="bg-white dark:bg-zinc-900 rounded shadow-xl border border-gray-200 dark:border-zinc-800 p-6 max-w-full mx-auto overflow-y-auto max-h-[91vh]">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
                 <div>
-                    <h3 className="text-lg font-semibold">
+                    <h3 className="text-lg font-semibold text-black dark:text-white">
                         Blog Details
                     </h3>
 
                     {blog.title && (
-                        <div className="text-gray-600 text-4xl">
+                        <div className="text-gray-700 dark:text-gray-300 text-4xl">
                             {blog.title}
                         </div>
                     )}
                 </div>
 
                 <button
-                    className="text-gray-600 px-2 py-1 cursor-pointer"
+                    className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white px-2 py-1 cursor-pointer"
                     onClick={() => router.back()}
                     aria-label="close"
                 >
@@ -106,7 +103,7 @@ function ReadBlog({ blog }: ReadBlogProps) {
                 </button>
             </div>
 
-            <div className="flex flex-col gap-4  ">
+            <div className="flex flex-col gap-4">
                 <BlogHeader blog={blog} />
 
                 <BlogActions
@@ -115,10 +112,10 @@ function ReadBlog({ blog }: ReadBlogProps) {
                     onOpen={commentOpen}
                 />
 
-                <div className="border-t border-t-gray-200 pt-5">
+                <div className="border-t border-gray-200 dark:border-zinc-800 pt-5">
                     {commentAdded ? (
                         <>
-                            <h4 className="font-semibold mb-3">
+                            <h4 className="font-semibold mb-3 text-black dark:text-white">
                                 Comments ({blog.comments?.count || 0})
                             </h4>
 

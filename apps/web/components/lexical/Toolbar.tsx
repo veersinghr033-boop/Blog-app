@@ -139,13 +139,13 @@ export default function Toolbar() {
     };
 
     const buttonClass =
-        "py-2 px-3 rounded-lg hover:bg-gray-700 transition-colors border border-gray-500 bg-gray-600 text-white hover:bg-gray-700 text-sm flex items-center justify-center";
+        "py-2 px-3 rounded-lg border border-gray-500 dark:border-zinc-700 bg-gray-600 dark:bg-zinc-800 text-white hover:bg-gray-700 dark:hover:bg-zinc-700 transition-colors text-sm flex items-center justify-center";
 
     return (
-        <div className="flex items-center gap-2 p-2 border-b bg-gray-200 border-gray-400">
+        <div className="flex items-center gap-2 p-2 border-b border-gray-400 dark:border-zinc-700 bg-gray-200 dark:bg-zinc-900">
             <select
                 value={blockType}
-                className="border rounded px-3 py-2 border-gray-400"
+                className="border border-gray-400 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white rounded px-3 py-2"
                 onChange={(e) => changeBlockType(e.target.value)}
             >
                 <option value="paragraph">Paragraph</option>
@@ -155,9 +155,9 @@ export default function Toolbar() {
             </select>
 
             <select
-                className="border rounded px-3 py-2 border-gray-400"
                 value={fontSize}
                 onChange={(e) => applyFontSize(e.target.value)}
+                className="border border-gray-400 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white rounded px-3 py-2"
             >
                 <option>Font Size</option>
                 <option value="12px">12</option>
@@ -180,11 +180,13 @@ export default function Toolbar() {
                 }
                 title="Bold"
                 className={`${buttonClass} ${formats.bold
-                    ? "bg-blue-500! border-blue-500!"
-                    : ""
-                    }`}            >
+                        ? "bg-blue-500! border-blue-500!"
+                        : ""
+                    }`}
+            >
                 <Bold size={16} />
             </button>
+
             <button
                 type="button"
                 onClick={() =>
@@ -195,12 +197,13 @@ export default function Toolbar() {
                 }
                 title="Italic"
                 className={`${buttonClass} ${formats.italic
-                    ? "bg-blue-500! border-blue-500!"
-                    : ""
-                    } `}
+                        ? "bg-blue-500! border-blue-500!"
+                        : ""
+                    }`}
             >
                 <Italic size={16} />
             </button>
+
             <button
                 type="button"
                 onClick={() =>
@@ -211,12 +214,13 @@ export default function Toolbar() {
                 }
                 title="Underline"
                 className={`${buttonClass} ${formats.underline
-                    ? "bg-blue-500! border-blue-500!"
-                    : ""
+                        ? "bg-blue-500! border-blue-500!"
+                        : ""
                     }`}
             >
                 <Underline size={16} />
             </button>
+
             <button
                 type="button"
                 onMouseDown={(e) => {
@@ -240,9 +244,6 @@ export default function Toolbar() {
             >
                 <ListOrdered size={16} />
             </button>
-
-
-
         </div>
     );
 }

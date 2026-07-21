@@ -7,7 +7,8 @@ import {
   deleteBlog,
   findByBlogId,
   findtrendingBlogs,
-  getAllBlogsData
+  getAllBlogsData,
+  getDataUserBlogs
 } from "../controllers/blogControllers";
 import { upload } from "../middleware/multer";
 import { verifyToken, authorizeRoles } from "../middleware/authMiddleware";
@@ -27,6 +28,7 @@ router.get(
   },
   getAllBlogs
 ); router.get("/all-data", verifyToken, getAllBlogsData);
+router.get("/user-blogs", verifyToken, getDataUserBlogs);
 router.get("/trending", verifyToken, findtrendingBlogs);
 // router.post("/create", verifyToken, authorizeRoles("user"), createBlog);
 router.post(

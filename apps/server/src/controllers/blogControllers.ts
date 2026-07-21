@@ -40,6 +40,42 @@ export const getAllBlogsData = async (req: Request, res: Response) => {
     });
   }
 }
+export const getDataUserBlogs = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as Request & { user?: { id: string } }).user?.id;
+
+    const blogs = await Blog.find({ author: userId }).populate("author", "userName");
+    console.log(blogs , userId)
+    const totalBlogs = blogs.length;
+    const totalLikes = blogs.reduce(
+      (sum, blog) => sum + (blog.Likes?.length || 0),
+      0,
+    );
+    const totalComments = blogs.reduce(
+      (sum, blog) => sum + (blog.Comments?.length || 0),
+      0,
+    );
+    const totalViews = blogs.reduce(
+      (sum, blog) => sum + (blog.views?.length || 0),
+      0,
+    );
+    const stats = {
+      totalBlogs,
+      totalComments,
+      totalLikes,
+      totalViews,
+    };
+    res.status(200).json({
+      stats,
+    });
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Failed to retrieve blogs",
+    });
+  }
+}
 
 export const getAllBlogs = async (req: Request, res: Response) => {
   try {

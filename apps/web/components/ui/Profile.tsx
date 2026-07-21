@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react"; 
 import dynamic from "next/dynamic";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { changePassword, updateProfile } from "@/lib/store/features/authThunk";
 
 import type { UploadProps } from "antd/es/upload/interface";
 import { toast } from "sonner";
-
+import ImageUpload from "./ImageUpload";
 const Upload = dynamic(() => import("antd/es/upload/Upload"), { ssr: false });
 
 
@@ -38,7 +38,12 @@ function Profile() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState("");
   const [removeProfileImage, setRemoveProfileImage] = useState(false);
+  // const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  // const [avatarPreview, setAvatarPreview] = useState("");
+  // const [removeProfileImage, setRemoveProfileImage] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     setUserName(initialValues.userName);
     setEmail(initialValues.email);
@@ -72,6 +77,20 @@ function Profile() {
     setAvatarFile(null);
     setAvatarPreview("");
     setRemoveProfileImage(true);
+    setIsModalOpen(false);
+  };
+
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+      setRemoveProfileImage(false);
+      setIsModalOpen(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -128,117 +147,126 @@ function Profile() {
       toast.error(resultAction.payload as string);
     }
   };
-
+  
 
   return (
-    <div className="min-h-screen  ">
+    <div className="min-h-screen text-black dark:text-white">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold">My Profile</h1>
+        <h1 className="text-3xl font-bold text-black dark:text-white">
+          My Profile
+        </h1>
 
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-400">
           Manage your profile information and settings.
         </p>
       </header>
       <div className="md:flex md:flex-row flex-col flex justify-between gap-6">
-        <div className="mx-auto w-full md:max-w-1/2 bg-white p-4 rounded-lg">
+        <div className="mx-auto w-full md:max-w-1/2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-4 rounded-lg">
           <h2 className="text-xl ">Profile Information</h2>
 
           <div className="flex items-center gap-4 mt-4">
-            <Upload
-              accept="image/*"
-              maxCount={1}
-              showUploadList={false}
-              beforeUpload={(file: FileType) => {
-                setAvatarFile(file as File);
-                setAvatarPreview(URL.createObjectURL(file as File));
-                setRemoveProfileImage(false);
-                return false;
-              }}
+            <div
+              className="cursor-pointer"
+              onClick={() => setIsModalOpen(true)}
             >
-              {(avatarPreview || (!removeProfileImage && user?.profileImage)) ? (
-                <>
-                  <img
-                    src={avatarPreview || user?.profileImage}
-                    alt="avatar"
-                    className="w-20 h-20 rounded-full object-cover relative"
-                  />
-                  <button
-                    type="button"
-                    className="text-xs text-red-600 hover:text-red-800  top-0 right-0 mt-1 mr-1 "
-                    onClick={handleRemoveProfileImage}
-                  >
-                    Remove image
-                  </button>
-                </>
+              {(avatarPreview ||
+                (!removeProfileImage && user?.profileImage)) ? (
+                <img
+                  src={avatarPreview || user?.profileImage}
+                  alt="avatar"
+                  className="w-20 h-20 rounded-full object-cover border"
+                />
               ) : (
                 <div className="bg-gray-700 text-white rounded-full w-20 h-20 flex items-center justify-center text-lg uppercase">
                   {userInitial}
                 </div>
               )}
-            </Upload>
-
-
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
             <div>
-              <h2 className="font-semibold">{userName}</h2>
+              <h2 className="font-semibold">
+                {userName}
+              </h2>
 
-              <p>{email}</p>
+              <p className="text-gray-500">
+                {email}
+              </p>
 
-              <p>{bio}</p>
+              <p className="text-gray-500">
+                {bio}
+              </p>
             </div>
           </div>
 
           <form className="mt-6" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">userName</label>
-              <input value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="Enter your full name" required className="mt-1 block w-full border p-2 rounded" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">userName</label>
+              <input value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="Enter your full name" required className="mt-1 block w-full border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white p-2 rounded" />
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" disabled className="mt-1 block w-full border p-2 rounded bg-gray-50" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" disabled className="mt-1 block w-full border border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 text-black dark:text-white p-2 rounded" />
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Bio</label>
-              <textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Enter your bio" rows={2} required className="mt-1 block w-full border p-2 rounded" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label>
+              <textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Enter your bio" rows={2} required className="mt-1 block w-full border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white p-2 rounded" />
             </div>
 
             <div className="flex gap-4">
               <button
                 type="submit"
-                className="bg-black text-white px-4 py-2 rounded disabled:opacity-50"
+                className="bg-black dark:bg-gray-400 dark:text-gray-700 text-white px-4 py-2 rounded disabled:opacity-50"
                 disabled={loading}
               >
                 {loading ? "Updating..." : "Update Profile"}
               </button>
 
-              <button type="button" onClick={handleCancel} className="px-4 py-2 border rounded">Cancel</button>
+              <button type="button" onClick={handleCancel} className="px-4 py-2 border border-gray-300 dark:border-zinc-700 rounded text-black dark:text-white hover:bg-gray-100 dark:hover:bg-zinc-800">Cancel</button>
             </div>
           </form>
         </div>
-        <div className="mx-auto w-full md:max-w-1/2 bg-white p-4 rounded-lg">
-          <h2 className="text-xl font-semibold">Password Change</h2>
+        <div className="mx-auto w-full md:max-w-1/2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-4 rounded-lg">
+          <h2 className="text-xl ">Password Change</h2>
 
           <form className="mt-6" onSubmit={(e) => { e.preventDefault(); handlePasswordSubmit(); }}>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Current Password</label>
-              <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Enter current password" className="mt-1 block w-full border p-2 rounded" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label>
+              <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Enter current password" className="mt-1 block w-full border border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 text-black dark:text-white p-2 rounded" />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">New Password</label>
-              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Enter new password" className="mt-1 block w-full border p-2 rounded" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label>
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Enter new password" className="mt-1 block w-full border border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 text-black dark:text-white p-2 rounded" />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Confirm New Password</label>
-              <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password" className="mt-1 block w-full border p-2 rounded" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm New Password</label>
+              <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password" className="mt-1 block w-full border border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 text-black dark:text-white p-2 rounded" />
             </div>
             <div className="flex gap-4">
-              <button type="submit" className="bg-black text-white px-4 py-2 rounded" disabled={loading}>Change Password</button>
-              <button type="button" onClick={handleCancel} className="px-4 py-2 border rounded">Cancel</button>
+              <button type="submit" className="bg-black dark:bg-gray-400 dark:text-gray-700 text-white px-4 py-2 rounded disabled:opacity-50"
+                disabled={loading}>Change Password</button>
+              <button type="button" onClick={handleCancel} className="px-4 py-2 border border-gray-300 dark:border-zinc-700 rounded text-black dark:text-white hover:bg-gray-100 dark:hover:bg-zinc-800">Cancel</button>
             </div>
           </form>
         </div>
       </div>
+      <ImageUpload
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        avatarPreview={avatarPreview}
+        user={user}
+        fileInputRef={fileInputRef}
+        handleRemoveProfileImage={handleRemoveProfileImage}
+        removeProfileImage={removeProfileImage}
+
+      />
     </div >
   );
 }

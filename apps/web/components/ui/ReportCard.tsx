@@ -38,7 +38,7 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
             queryClient.invalidateQueries({
                 queryKey: ["reports"],
             });
-        
+
         },
 
         onError: (error) => {
@@ -71,22 +71,22 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
 
         return extract(content.root.children);
     };
-   
+
     return (
-        <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 p-4 md:p-0">
-            <div className="mb-6 rounded-lg bg-white p-6 shadow-sm border border-gray-200">
+        <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 dark:from-zinc-950 dark:to-zinc-900 p-4 md:p-0">
+            <div className="mb-6 rounded-lg bg-white dark:bg-zinc-900 p-6 shadow-sm border border-gray-200 dark:border-zinc-800">
                 <div className=" flex items-center justify-between flex-wrap gap-4">
                     <div>
-                        <h2 className="mb-1! text-lg! md:text-2xl! font-semibold text-gray-800!">
+                        <h2 className="mb-1! text-lg! md:text-2xl! font-semibold text-gray-800 dark:text-white">
                             Reports Management
                         </h2>
 
-                        <p className="mb-0! text-gray-500">
+                        <p className="mb-0! text-gray-500 dark:text-gray-400">
                             Manage all reported blogs and review user complaints.
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-2 rounded-2xl bg-red-50 px-4 py-3">
+                    <div className="flex items-center gap-2 rounded-2xl bg-red-50 dark:bg-red-950 px-4 py-3">
                         <TriangleAlert size={20} className="text-red-500 text-xl" />
 
                         <div>
@@ -94,7 +94,7 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
                                 Total Reports
                             </p>
 
-                            <p  className="text-lg text-red-500">
+                            <p className="text-lg text-red-500">
                                 {data?.length || 0}
                             </p>
                         </div>
@@ -103,9 +103,8 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
             </div>
 
             {data?.length === 0 ? (
-                <div className="flex max-h-[60vh] items-center justify-center rounded-3xl bg-white shadow-sm">
-
-                    <span className="text-gray-500">
+                <div className="flex max-h-[60vh] items-center justify-center rounded-3xl bg-white dark:bg-zinc-900 shadow-sm">
+                    <span className="text-gray-500 dark:text-gray-400">
                         No reports found
                     </span>
 
@@ -113,7 +112,7 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
             ) : (
                 <div className="grid grid-cols-1 gap-6">
                     <Virtuoso
-                        style={{ height: "71vh", borderRadius:"10px"}}
+                        style={{ height: "71vh", borderRadius: "10px" }}
                         data={data}
                         endReached={() => {
                             if (hasNextPage && !isFetchingNextPage) {
@@ -134,17 +133,17 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
                             return (
                                 <div
                                     key={report._id}
-                                    className="group overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow p-5"
+                                    className="group overflow-hidden rounded-lg border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow p-5"
                                 >
                                     <div className="mb-5 flex items-start justify-between">
                                         <h2
-                                            
-                                            className="rounded-lg border-0 px-4 py-1 text-sm font-medium bg-red-100 text-red-600"
+
+                                            className="rounded-lg border-0 px-4 py-1 text-sm font-medium bg-red-50 dark:bg-red-950 text-red-600"
                                         >
                                             Reported
                                         </h2>
 
-                                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 transition-all duration-300 group-hover:bg-red-100">
+                                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950 transition-all duration-300 group-hover:bg-red-100">
                                             <TriangleAlert size={20} className="text-lg text-red-500" />
                                         </div>
                                     </div>
@@ -156,8 +155,7 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
                                             </p>
 
                                             <h2
-                                                className="mt-2 mb-0 line-clamp-2 text-2xl text-gray-800"
-                                            >
+                                                className="mt-2 mb-0 line-clamp-2 text-2xl text-gray-800 dark:text-white">
                                                 {report.blogDetails?.title || "No Title"}
                                             </h2>
                                         </div>
@@ -172,16 +170,13 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
                                             </p>
 
 
-                                            <h2
-                                                className="mt-2 mb-0 line-clamp-2 text-2xl text-gray-800"
-                                            >
+                                            <h2 className="mt-2 mb-0 line-clamp-2 text-2xl text-gray-800 dark:text-white">
                                                 {report.reason || "No reason provided"}
                                             </h2>
                                         </div>
 
                                     </div>
-                                    <div className="bg-gray-100 rounded-lg p-4 mb-6">
-
+                                    <div className="bg-gray-100 dark:bg-zinc-800 rounded-lg p-4 mb-6">
                                         <p className="line-clamp-3">
                                             {textContent.slice(0, 400)}
                                         </p>
@@ -203,8 +198,8 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
 
                                     </div>
                                     <div className="mb-4 flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-gray-600">
-                                            <UserRound size={15}/>
+                                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                                            <UserRound size={15} />
 
                                             <span>
                                                 {report.userDetails?.userName || "Unknown User"}
@@ -217,8 +212,8 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
                                     </div>
 
 
-                                    <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-                                        <p className="text-xs text-gray-400">
+                                    <div className="flex items-center justify-between border-t border-gray-100 dark:border-zinc-800 pt-4">
+                                        <p className="text-xs text-gray-400 dark:text-gray-500">
                                             #{report._id}
                                         </p>
 
@@ -229,9 +224,7 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
                                             cancelText="No"
                                             onConfirm={() => handleDelete(report._id)}
                                         >
-                                            <button
-                                                className="bg-red-500 text-white px-3 py-2 rounded-xl flex items-center gap-2"
-                                            >
+                                            <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-xl flex items-center gap-2 transition-colors">
                                                 <Trash2 size={15} />
                                                 Delete
                                             </button>

@@ -49,20 +49,19 @@ export default function Editor({
 
     return (
         <LexicalComposer initialConfig={initialConfig}>
-            <div className="border rounded-lg overflow-hidden bg-white border-gray-300">
+            <div className="border border-gray-300 dark:border-zinc-700 rounded-lg overflow-hidden bg-white dark:bg-zinc-900">
                 <Toolbar />
 
-                <div className="p-4 max-h-86 overflow-y-auto">
+                <div className="p-4 max-h-86 overflow-y-auto bg-white dark:bg-zinc-900">
                     <RichTextPlugin
                         contentEditable={
-                            <ContentEditable className="outline-none min-h-60 " />
+                            <ContentEditable className="outline-none min-h-60 text-black dark:text-white" />
                         }
                         placeholder={
-                            <div className="text-gray-400">
+                            <div className="text-gray-400 dark:text-gray-500">
                                 Write your blog...
                             </div>
                         }
-                        
                         ErrorBoundary={() => null}
                     />
 

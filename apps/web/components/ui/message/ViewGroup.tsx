@@ -248,7 +248,12 @@ const ViewGroup = memo(({
         }
     }, [group]);
     return (
-        <Modal title="View Group" open={open} onCancel={onClose} footer={null}>
+        <Modal
+            title="View Group"
+            open={open}
+            onCancel={onClose}
+            footer={null}
+        >
             <Upload
                 disabled={!isEditing}
                 showUploadList={false}
@@ -266,22 +271,25 @@ const ViewGroup = memo(({
                 <div className="cursor-pointer">
                     <img
                         src={group?.groupImage}
-                        className={`h-16 w-16 rounded-full object-cover ${isEditing ? "cursor-pointer border-2 border-blue-500" : ""
-                            }`}
                         alt="group"
+                        className={`h-16 w-16 rounded-full object-cover ${isEditing
+                                ? "cursor-pointer border-2 border-blue-500"
+                                : ""
+                            }`}
                     />
                 </div>
             </Upload>
-            <div className="p-2 border-b border-gray-200 mt-1 flex justify-between items-center">
+
+            <div className="p-2 border-b border-gray-200 dark:border-zinc-800 mt-1 flex justify-between items-center">
                 <div className="flex items-center gap-2 flex-1">
                     {isEditing ? (
                         <input
                             value={groupName}
                             onChange={(e) => setGroupName(e.target.value)}
-                            className="border rounded px-2 py-1 w-full"
+                            className="border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white rounded px-2 py-1 w-full"
                         />
                     ) : (
-                        <h2 className="text-base font-semibold capitalize">
+                        <h2 className="text-base font-semibold capitalize text-black dark:text-white">
                             {group?.name}
                         </h2>
                     )}
@@ -311,23 +319,29 @@ const ViewGroup = memo(({
                             )}
                         </>
                     )}
-                </div>                {isCurrentUserAdmin && (
+                </div>
+
+                {isCurrentUserAdmin && (
                     <Popconfirm
                         title="Delete the Group"
                         onConfirm={() => handleGroupDelete(Groups)}
                     >
-                        <Button danger type="text" icon={<Trash2 size={15} />} />
+                        <Button
+                            danger
+                            type="text"
+                            icon={<Trash2 size={15} />}
+                        />
                     </Popconfirm>
                 )}
             </div>
 
+            <h2 className="text-xl font-semibold mt-3 mb-2 text-black dark:text-white">
+                Members
+            </h2>
 
-            <h2 className="text-xl font-semibold mt-3 mb-2">Members</h2>
-
-
-            <div className="mt-3   items-center max-h-100 overflow-y-auto">
-                {group?.chatId?.participants?.map((user) => {
-                    return <GroupMember
+            <div className="mt-3 max-h-100 overflow-y-auto">
+                {group?.chatId?.participants?.map((user) => (
+                    <GroupMember
                         key={user._id}
                         user={user}
                         currentUserId={userId}
@@ -339,7 +353,7 @@ const ViewGroup = memo(({
                         onDeleteMember={handleDelete}
                         isChangingAdmin={changeAdminMutation.isPending}
                     />
-                })}
+                ))}
             </div>
 
             <div className="mt-3 flex justify-between items-center">
@@ -350,26 +364,29 @@ const ViewGroup = memo(({
                     <Button
                         type="primary"
                         className="bg-red-200! text-red-500!"
-                        // onClick={() => handleDelete(userId)}
                     >
                         Exit
-
-
                     </Button>
                 </Popconfirm>
+
                 {isCurrentUserAdmin && (
                     <Button
                         type="primary"
                         className="bg-blue-200! text-blue-500!"
-                        onClick={() => setOpenMember(!openAddMember ? true : false)}
+                        onClick={() =>
+                            setOpenMember(!openAddMember ? true : false)
+                        }
                     >
                         Add Member
                     </Button>
                 )}
-
             </div>
+
             {openAddMember && (
-                <AddMember group={group} onClose={() => setOpenMember(false)} />
+                <AddMember
+                    group={group}
+                    onClose={() => setOpenMember(false)}
+                />
             )}
         </Modal>
     )
@@ -399,10 +416,10 @@ const GroupMember = memo(({
     const isAdmin = isUserAdmin(user._id);
     return (
         <div
-            className="p-2 border border-gray-200 rounded bg-slate-100 mt-1 flex justify-between items-center"
+            className="p-2 border border-gray-200 dark:border-zinc-800 rounded bg-slate-100 dark:bg-zinc-800 mt-1 flex justify-between items-center"
         >
             <div className="flex items-center gap-4">
-                <div className="relative h-10 w-10 rounded-full bg-black text-white flex items-center justify-center capitalize font-semibold">
+                <div className="relative h-10 w-10 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center capitalize font-semibold">
                     {user.profileImage ? (
                         <img
                             src={user.profileImage}
@@ -414,8 +431,7 @@ const GroupMember = memo(({
                     )}
 
                     <span
-                        className={`absolute bottom-0 right-0 w-3 h-3 rounded-full
-                            ${status === "online"
+                        className={`absolute bottom-0 right-0 w-3 h-3 rounded-full ${status === "online"
                                 ? "bg-green-500"
                                 : status === "away"
                                     ? "bg-yellow-400"
@@ -423,37 +439,46 @@ const GroupMember = memo(({
                             }`}
                     />
                 </div>
-                <div className="font-semibold capitalize">{user._id === currentUserId ? "You" : user.userName}</div>
+
+                <div className="font-semibold capitalize text-black dark:text-white">
+                    {user._id === currentUserId ? "You" : user.userName}
+                </div>
             </div>
 
             <div className="flex items-center gap-2">
                 {isAdmin && (
                     <>
-                        <span className="bg-blue-200 px-2 rounded">
+                        <span className="bg-blue-200 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 rounded">
                             admin
                         </span>
 
-                        {isCurrentUserAdmin && user._id !== currentUserId && (
-                            <Popconfirm
-                                title="Remove admin privileges?"
-                                onConfirm={() => onRemoveAdmin(user._id)}
-                            >
-                                <Button
-                                    size="small"
-                                    danger
-                                    type="text"
-                                    icon={<LogOut size={15} />}
-                                    title="Remove from admin role"
-                                />
-                            </Popconfirm>
-                        )}
+                        {isCurrentUserAdmin &&
+                            user._id !== currentUserId && (
+                                <Popconfirm
+                                    title="Remove admin privileges?"
+                                    onConfirm={() =>
+                                        onRemoveAdmin(user._id)
+                                    }
+                                >
+                                    <Button
+                                        size="small"
+                                        danger
+                                        type="text"
+                                        icon={<LogOut size={15} />}
+                                        title="Remove from admin role"
+                                    />
+                                </Popconfirm>
+                            )}
                     </>
                 )}
+
                 {!isAdmin && isCurrentUserAdmin && (
                     <>
                         <Popconfirm
                             title="Make this member the new admin?"
-                            onConfirm={() => onChangeAdmin(user._id)}
+                            onConfirm={() =>
+                                onChangeAdmin(user._id)
+                            }
                         >
                             <Button
                                 size="small"
@@ -463,11 +488,18 @@ const GroupMember = memo(({
                                 icon={<Ellipsis size={15} />}
                             />
                         </Popconfirm>
+
                         <Popconfirm
                             title="Remove member?"
-                            onConfirm={() => onDeleteMember(user._id)}
+                            onConfirm={() =>
+                                onDeleteMember(user._id)
+                            }
                         >
-                            <Button danger type="text" icon={<Trash2 size={15} />} />
+                            <Button
+                                danger
+                                type="text"
+                                icon={<Trash2 size={15} />}
+                            />
                         </Popconfirm>
                     </>
                 )}

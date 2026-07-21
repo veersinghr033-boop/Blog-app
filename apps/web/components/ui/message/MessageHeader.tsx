@@ -31,49 +31,53 @@ export default function MessageHeader({
   };
   return (
     <>
-      <header className="flex items-center gap-2 border-b border-gray-300 bg-white px-3 py-4 sm:px-6">
+      <header className="flex items-center gap-2 border-b border-gray-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-4 sm:px-6">
         {mobile && onOpenSidebar ? (
-          <button className="shrink-0 md:hidden p-2" onClick={onOpenSidebar} aria-label="Open menu">☰</button>
+          <button
+            className="shrink-0 md:hidden p-2 text-black dark:text-white"
+            onClick={onOpenSidebar}
+            aria-label="Open menu"
+          >
+            ☰
+          </button>
         ) : null}
 
-        <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4 cursor-pointer" onClick={handleView}>
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-black text-white font-semibold uppercase relative">
+        <div
+          className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4 cursor-pointer"
+          onClick={handleView}
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-black dark:bg-white text-white dark:text-black font-semibold uppercase relative">
             {selectedUser?.img ? (
               <Image
                 src={selectedUser.img}
                 alt={selectedUser.name}
-
                 fill
                 className="object-cover rounded-full"
               />
-            ) : (
-              selectedUser?.name?.charAt(0)
-            ) ? (
-              selectedUser?.name?.charAt(0)
+            ) : selectedUser?.name?.charAt(0) ? (
+              selectedUser.name.charAt(0)
             ) : (
               "U"
             )}
 
-
-
             {selectedUser?.type !== "group" && (
               <span
                 className={`w-3 h-3 rounded-full absolute bottom-0 right-0 ${userStatuses[selectedUser?.id || ""] === "online"
-                  ? "bg-green-500"
-                  : userStatuses[selectedUser?.id || ""] === "away"
-                    ? "bg-yellow-400"
-                    : "bg-red-400"
+                    ? "bg-green-500"
+                    : userStatuses[selectedUser?.id || ""] === "away"
+                      ? "bg-yellow-400"
+                      : "bg-red-400"
                   }`}
               />
             )}
           </div>
 
           <div className="min-w-0">
-            <div className="truncate text-base font-semibold capitalize">
+            <div className="truncate text-base font-semibold capitalize text-black dark:text-white">
               {selectedUser?.name || "Open a chat"}
             </div>
 
-            <div className="truncate text-xs text-gray-500">
+            <div className="truncate text-xs text-gray-500 dark:text-gray-400">
               {selectedUser?.type === "group"
                 ? "Group Chat"
                 : userStatuses[selectedUser?.id || ""] || "offline"}
@@ -81,6 +85,7 @@ export default function MessageHeader({
           </div>
         </div>
       </header>
+
       <ViewGroup
         open={open}
         onClose={() => setOpen(false)}
