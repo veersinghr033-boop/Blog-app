@@ -175,6 +175,8 @@ function ReaderBlog({ type }: BlogProps) {
         }
         
     });
+    console.log(blogs)
+
     return (
         <div className="h-[78vh] overflow-auto bg-transparent">
             <VirtuosoGrid

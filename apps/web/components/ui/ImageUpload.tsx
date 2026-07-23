@@ -37,7 +37,7 @@ function ImageUpload({
                     />
                 ) : (
                     <div className="w-36 h-36 rounded-full bg-gray-700 text-white flex items-center justify-center text-3xl">
-                        ?
+                        {user?.userName?.charAt(0).toUpperCase() || "U"}
                     </div>
                 )}
 

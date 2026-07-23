@@ -1,8 +1,9 @@
 // "use client";
 import LexicalViewer from "@/hooks/lexicalViewer";
 import Image from "next/image";
+import { memo } from "react";
 
-export default function BlogHeader({ blog }: { blog: any }) {
+const BlogHeader = memo(({ blog }: { blog: any }) => {
     return (
         <>
             <div className="max-h-135 overflow-auto whitespace-pre-line text-black dark:text-white">
@@ -33,4 +34,6 @@ export default function BlogHeader({ blog }: { blog: any }) {
             </div>
         </>
     );
-}
+});
+
+export default memo(BlogHeader);

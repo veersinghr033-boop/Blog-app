@@ -1,14 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react"; import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { toast } from "sonner";
-import Upload from "antd/es/upload";
-import type UploadFile from "antd/es/upload/interface";
 import Image from "next/image";
 import { Plus as PlusOutlined } from "lucide-react";
-
+import ImageUpload from "../ImageUpload";
 interface User {
     id: string;
     name: string;
@@ -25,7 +22,10 @@ function AddGroup({
     const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
     const [groupImage, setGroupImage] = useState<File | null>(null);
     const [preview, setPreview] = useState("");
-
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [avatarPreview, setAvatarPreview] = useState("");
+    const [removeProfileImage, setRemoveProfileImage] = useState(false);
     const queryClient = useQueryClient();
 
     const {
@@ -52,7 +52,29 @@ function AddGroup({
             toast.error("Failed to fetch users");
         }
     }, [isError, error]);
+    const handleFileChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const file = e.target.files?.[0];
 
+        if (file) {
+            setGroupImage(file);
+            const url = URL.createObjectURL(file);
+
+            setPreview(url);
+            setAvatarPreview(url);
+            setRemoveProfileImage(false);
+            setIsModalOpen(false);
+        }
+    };
+
+    const handleRemoveProfileImage = () => {
+        setGroupImage(null);
+        setPreview("");
+        setAvatarPreview("");
+        setRemoveProfileImage(true);
+        setIsModalOpen(false);
+    };
     const createGroupMutation = useMutation({
         mutationFn: async () => {
             const formData = new FormData();
@@ -146,7 +168,7 @@ function AddGroup({
 
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4 flex gap-4 items-center">
-                        <Upload
+                        {/* <Upload
                             listType="picture-circle"
                             maxCount={1}
                             showUploadList={false}
@@ -173,7 +195,26 @@ function AddGroup({
                                     </div>
                                 </div>
                             )}
-                        </Upload>
+                        </Upload> */}
+                        <div
+                            className="w-20 h-20 rounded-full border border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800cursor-pointer overflow-hidden flex items-center justify-center"
+                            onClick={() => setIsModalOpen(true)}
+                        >
+                            {preview ? (
+                                <Image
+                                    src={preview}
+                                    alt="group"
+                                    width={80}
+                                    height={80}
+                                    className="w-full h-full rounded-full object-cover"
+                                />
+                            ) : (
+                                <div className="text-center">
+                                    <PlusOutlined size={18} />
+                                    <p className="text-xs mt-1">Upload</p>
+                                </div>
+                            )}
+                        </div>
 
                         <div className="mb-4 flex-1">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -248,6 +289,23 @@ function AddGroup({
                     </button>
                 </form>
             </div>
+            <ImageUpload
+                isModalOpen={isModalOpen}
+                setIsModalOpen={setIsModalOpen}
+                avatarPreview={avatarPreview}
+                user={{ profileImage: preview }}
+                fileInputRef={fileInputRef}
+                handleRemoveProfileImage={handleRemoveProfileImage}
+                removeProfileImage={removeProfileImage}
+            />
+
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+            />
         </div>
     );
 }

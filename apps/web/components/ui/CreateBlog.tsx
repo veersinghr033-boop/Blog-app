@@ -2,13 +2,13 @@
 import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState,useRef } from "react";
 import dynamic from "next/dynamic";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
+import ImageUpload from "./ImageUpload";
 
-const Upload = dynamic(() => import("antd/es/upload/Upload"), { ssr: false });
 const Editor = dynamic(
   () => import("@/components/lexical/Editor"),
   {
@@ -32,6 +32,32 @@ function CreateBlog() {
   const [editorContent, setEditorContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [removeProfileImage, setRemoveProfileImage] = useState(false);
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      setImage(file);
+      const url = URL.createObjectURL(file);
+      setPreview(url);
+      setAvatarPreview(url);
+      setRemoveProfileImage(false);
+      setIsModalOpen(false);
+    }
+  };
+
+  const handleRemoveProfileImage = () => {
+    setImage(null);
+    setPreview("");
+    setAvatarPreview("");
+    setRemoveProfileImage(true);
+    setIsModalOpen(false);
+  };
   const publishMutation = useMutation({
     mutationFn: async (values: { title: string; content: any }) => {
       const payload: Record<string, any> = {
@@ -39,7 +65,6 @@ function CreateBlog() {
         content: values.content,
       };
 
-      // if (image) {
         const data = new FormData();
         data.append("title", values.title);
         data.append("content", JSON.stringify(values.content));
@@ -272,7 +297,7 @@ Topic: ${title}
         </div>
       </header>
 
-      <form onSubmit={handleSubmit} className="p-6">
+      <form onSubmit={handleSubmit} className="mt-4">
         <div className="mb-4">
           <label
             htmlFor="title"
@@ -298,16 +323,10 @@ Topic: ${title}
             Blog Image
           </label>
 
-          <Upload
-            accept="image/*"
-            maxCount={1}
-            listType="picture-card"
-            showUploadList={false}
-            beforeUpload={(file) => {
-              setImage(file);
-              setPreview(URL.createObjectURL(file));
-              return false;
-            }}
+        
+          <div
+            className="cursor-pointer w-35 h-35  border border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 rounded-lg flex items-center justify-center overflow-hidden"
+            onClick={() => setIsModalOpen(true)}
           >
             {preview ? (
               <Image
@@ -315,17 +334,25 @@ Topic: ${title}
                 alt="preview"
                 width={200}
                 height={200}
-                className="h-full w-full object-cover"
+                className="w-full h-full object-cover"
               />
             ) : (
-              <div className="text-black dark:text-white">
-                <Plus size={18} />
-                <div style={{ marginTop: 8 }}>Upload</div>
+              <div className="flex flex-col items-center">
+                <Plus size={22} />
+                <span>Upload Image</span>
               </div>
             )}
-          </Upload>
-        </div>
+          </div>
 
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </div>
+       
         <div className="mb-4">
           <label className="block mb-2 text-black dark:text-white">
             Content
@@ -362,6 +389,23 @@ Topic: ${title}
           </button>
         </div>
       </form>
+      <ImageUpload
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        avatarPreview={avatarPreview}
+        user={{ profileImage: preview }}
+        fileInputRef={fileInputRef}
+        handleRemoveProfileImage={handleRemoveProfileImage}
+        removeProfileImage={removeProfileImage}
+      />
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileChange}
+      />
     </div>
   );
 }

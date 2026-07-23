@@ -39,7 +39,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
 
 
     return (
-        <header className="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-50 px-2 py-3 md:px-6 flex items-center justify-between">
+        <header className="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-50 px-2 py-4 md:px-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
                 <button
                     className="md:hidden text-xl"

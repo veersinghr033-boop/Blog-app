@@ -8,10 +8,7 @@ import { changePassword, updateProfile } from "@/lib/store/features/authThunk";
 import type { UploadProps } from "antd/es/upload/interface";
 import { toast } from "sonner";
 import ImageUpload from "./ImageUpload";
-const Upload = dynamic(() => import("antd/es/upload/Upload"), { ssr: false });
 
-
-type FileType = Parameters<NonNullable<UploadProps["beforeUpload"]>>[0];
 
 function Profile() {
   const dispatch = useAppDispatch() as any;
@@ -38,9 +35,7 @@ function Profile() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState("");
   const [removeProfileImage, setRemoveProfileImage] = useState(false);
-  // const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  // const [avatarPreview, setAvatarPreview] = useState("");
-  // const [removeProfileImage, setRemoveProfileImage] = useState(false);
+ 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);

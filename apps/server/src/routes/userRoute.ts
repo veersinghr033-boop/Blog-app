@@ -7,7 +7,8 @@ import {
   saveFcmToken,
   updateUserProfile,
   changeUserPassword,
-  getAllUsersData
+  getAllUsersData,
+  getUserDetails
 } from "../controllers/userConlrollers";
 import { verifyToken, authorizeRoles } from "../middleware/authMiddleware";
 import { upload } from "../middleware/multer";
@@ -18,6 +19,7 @@ router.get("/", verifyToken, getAllUsers);
 router.get("/all-data", verifyToken, getAllUsersData);
 router.get("/users/sorted", verifyToken, getUsersSorted);
 router.post("/save-fcm-token", verifyToken, saveFcmToken);
+router.get("/details/:id", verifyToken, getUserDetails);
 router.put(
   "/profile",
   verifyToken,

@@ -3,6 +3,7 @@ import User from "../models/UsersModel";
 import Chat from "../models/chatModel";
 import Group from "../models/GroupModel";
 import Message from "../models/message";
+import Blog from "../models/BlogModel";
 import { Request, Response } from "express";
 import { uploadImage } from "../utils/uploadImage";
 export const getAllUsersData = async (req: Request, res: Response) => {
@@ -371,3 +372,52 @@ export const saveFcmToken = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const getUserDetails = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        console.log("Id", id)
+        const user = await User.findById(id).select("-password -fcmToken -role -roles");
+        console.log("user", user)
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+            });
+        }
+
+        const blogs = await Blog.find({ author: user._id }).populate("author", "userName");
+        console.log(blogs, user._id)
+        const totalBlogs = blogs.length;
+        const totalLikes = blogs.reduce(
+            (sum, blog) => sum + (blog.Likes?.length || 0),
+            0,
+        );
+        const totalComments = blogs.reduce(
+            (sum, blog) => sum + (blog.Comments?.length || 0),
+            0,
+        );
+        const totalViews = blogs.reduce(
+            (sum, blog) => sum + (blog.views?.length || 0),
+            0,
+        );
+        const stats = {
+            totalBlogs,
+            totalComments,
+            totalLikes,
+            totalViews,
+        };
+
+        return res.status(200).json({
+            user,
+            stats,
+            message: "User details fetched successfully",
+        })
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Failed to get user details",
+        });
+    }
+}

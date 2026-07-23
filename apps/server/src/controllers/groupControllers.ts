@@ -284,7 +284,7 @@ export const updateGroup = async (
 ) => {
     try {
         const { groupId } = req.params;
-        const { name } = req.body;
+        const { name, removeImage } = req.body;
 
         const group = await Group.findById(groupId);
 
@@ -305,10 +305,16 @@ export const updateGroup = async (
             updateData.groupImage = result.secure_url;
         }
 
+        if (removeImage === "true") {
+            updateData.groupImage = "";
+        }
+
         const updatedGroup = await Group.findByIdAndUpdate(
             groupId,
             updateData,
-            { new: true }
+            {
+                new: true,
+            }
         );
 
         return res.status(200).json({

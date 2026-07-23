@@ -1,6 +1,6 @@
 // "use client";
 import React from "react";
-import { toast } from "sonner"; 
+import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { ThumbsUp, MessageCircle } from "lucide-react";
@@ -29,35 +29,38 @@ function BlogActions({ post, onOpen, userId }: any) {
   });
 
   const handleLike = (blogId: string) => {
-      LikeMutation.mutate(blogId);
+    LikeMutation.mutate(blogId);
   };
   return (
     <>
-      <span
-        className={`flex items-center gap-1 text-sm cursor-pointer hover:text-blue-500 ${isLiked
+      <div className="flex items-center gap-2 mt-2">
+        <span
+          className={`flex items-center gap-1 text-sm cursor-pointer hover:text-blue-500 ${isLiked
             ? "text-blue-500"
             : "text-gray-500 dark:text-gray-400"
-          }`}
-        onClick={() => handleLike(post._id)}
-      >
-        <ThumbsUp size={15} />
-        {post.likes?.count || 0}
-      </span>
+            }`}
+          onClick={() => handleLike(post._id)}
+        >
+          <ThumbsUp size={15} />
+          {post.likes?.count || 0}
+        </span>
 
-      <span
-        className={`flex items-center gap-1 text-sm cursor-pointer hover:text-green-500 ${isCommented
+        <span
+          className={`flex items-center gap-1 text-sm cursor-pointer hover:text-green-500 ${isCommented
             ? "text-green-500"
             : "text-gray-500 dark:text-gray-400"
-          }`}
-        onClick={() => onOpen(post._id)}
-      >
-        <MessageCircle size={15} />
-        {post.comments?.count || 0}
-      </span>
+            }`}
+          onClick={() => onOpen(post._id)}
+        >
+          <MessageCircle size={15} />
+          {post.comments?.count || 0}
+        </span>
 
-      <span className="text-sm cursor-pointer hover:text-blue-500 text-gray-500 dark:text-gray-400">
-        {post.views?.count || 0} Views
-      </span>
+        <span className="text-sm cursor-pointer hover:text-blue-500 text-gray-500 dark:text-gray-400">
+          {post.views?.count || 0} Views
+        </span>
+
+      </div>
     </>
   );
 }

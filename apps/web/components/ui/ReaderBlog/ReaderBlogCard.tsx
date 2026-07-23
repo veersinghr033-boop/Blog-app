@@ -2,7 +2,8 @@ import { memo, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ThumbsUp, MessageCircle, Save, FileText} from "lucide-react";
 import Image from "next/image";
-
+import { useState } from "react";
+import ViewProfile from "../ViewProfile";
 interface ReaderBlogCardProps {
     index: number;
     post: any;
@@ -26,6 +27,7 @@ function ReaderBlogCard({
     const isLiked = post.isLiked;
     const isCommented = post.isCommented;
     const blogId = post._id;
+  const [isOpen, setIsOpen] = useState(false);
 
     const openBlogModal = useCallback(
         (e: React.MouseEvent) => {
@@ -135,7 +137,7 @@ function ReaderBlogCard({
 
                 <div className="mt-auto flex flex-col gap-4">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setIsOpen(true)}>
                             {post.author?.profileImage ? (
                                 <div className="relative h-12 w-12">
                                     <Image
@@ -209,6 +211,13 @@ function ReaderBlogCard({
                     </div>
                 </div>
             </div>
+            {isOpen && (
+                <ViewProfile
+                    userId={post.author?.id}
+                    isOpen={isOpen}
+                    setIsOpen={setIsOpen}
+                />
+            )}
         </div>
     );
 }

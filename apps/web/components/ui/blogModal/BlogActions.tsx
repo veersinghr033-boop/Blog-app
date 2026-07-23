@@ -1,11 +1,17 @@
 // "use client";
-import { useAppSelector } from "@/lib/store/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import api from "@/utills/axios";
+
+import { memo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ThumbsUp, MessageCircle } from "lucide-react";
+import {
+    useMutation,
+    useQuery,
+    useQueryClient,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { useAppSelector } from "@/lib/store/hooks";
+import api from "@/utills/axios";
 
 interface Props {
     blog: any;
@@ -13,12 +19,20 @@ interface Props {
     onOpen: (blog: any) => void;
 }
 
-export default function BlogActions({ blog, onReport, onOpen }: Props) {
-    const queryClient = useQueryClient();
+function BlogActions({ blog, onReport, onOpen }: Props) {
     const router = useRouter();
-    const userId = useAppSelector((state) => state.auth.user?._id);
+    const queryClient = useQueryClient();
+
+    const userId = useAppSelector(
+        (state) => state.auth.user?._id
+    );
 
     const isAuthor = blog.author?.id === userId;
+    const isLiked = blog.isLiked;
+    const isCommented = blog.isCommented;
+
+    // -------------------- Report Query --------------------
+
     const { data: report = [] } = useQuery({
         queryKey: ["reportUser", blog?._id],
         enabled: !!blog?._id,
@@ -28,18 +42,18 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
         },
     });
 
-    const alreadyReported =
-        report &&
-        report.some(
-            (r: any) => r.userId._id === userId && r.blogId._id === blog._id,
-        );
+    const alreadyReported = report.some(
+        (r: any) =>
+            r.userId._id === userId &&
+            r.blogId._id === blog._id
+    );
 
-    const isLiked = blog.isLiked;
-    const isCommented = blog.isCommented;
-    const LikeMutation = useMutation({
-        mutationFn: async (blogId: string) => {
-            const res = await api.post(`/likes/${blogId}`, {
-                userId: userId,
+    // -------------------- Like Mutation --------------------
+
+    const likeMutation = useMutation({
+        mutationFn: async () => {
+            const res = await api.post(`/likes/${blog._id}`, {
+                userId,
             });
 
             return res.data;
@@ -53,9 +67,11 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
             queryClient.invalidateQueries({
                 queryKey: ["blogData", userId],
             });
+
             queryClient.invalidateQueries({
                 queryKey: ["saved"],
             });
+
             queryClient.invalidateQueries({
                 queryKey: ["blog"],
             });
@@ -66,13 +82,11 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
         },
     });
 
-    const handleLike = (blogId: string) => {
-        LikeMutation.mutate(blogId);
-    };
+    // -------------------- Delete Mutation --------------------
 
     const deleteMutation = useMutation({
-        mutationFn: async (blogId: string) => {
-            await api.delete(`/blogs/delete/${blogId}`);
+        mutationFn: async () => {
+            await api.delete(`/blogs/delete/${blog._id}`);
         },
 
         onSuccess: () => {
@@ -81,27 +95,45 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
             queryClient.invalidateQueries({
                 queryKey: ["blogs"],
             });
+
             queryClient.invalidateQueries({
                 queryKey: ["blogData", userId],
             });
+
             queryClient.invalidateQueries({
                 queryKey: ["saved"],
             });
+
             queryClient.invalidateQueries({
                 queryKey: ["all"],
             });
-            queryClient.invalidateQueries({
-                queryKey: ["trending"]
-            })
 
+            queryClient.invalidateQueries({
+                queryKey: ["trending"],
+            });
+
+            router.back();
         },
     });
 
-    const handleDelete = () => {
-        deleteMutation.mutate(blog._id);
 
-        router.back();
-    };
+    const handleLikeClick = useCallback(() => {
+        likeMutation.mutate();
+    }, [likeMutation]);
+
+    const handleOpen = useCallback(() => {
+        onOpen(blog);
+    }, [blog, onOpen]);
+
+    const handleReport = useCallback(() => {
+        onReport();
+    }, [onReport]);
+
+    const handleDelete = useCallback(() => {
+        deleteMutation.mutate();
+    }, [deleteMutation]);
+
+    // -------------------- UI --------------------
 
     return (
         <div className="flex items-center justify-between">
@@ -116,7 +148,7 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
                             ? "text-blue-500"
                             : "text-gray-500 dark:text-gray-400"
                         }`}
-                    onClick={() => handleLike(blog._id)}
+                    onClick={handleLikeClick}
                 >
                     <ThumbsUp size={15} />
                     {blog.likes?.count || 0}
@@ -127,7 +159,7 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
                             ? "text-green-500"
                             : "text-gray-500 dark:text-gray-400"
                         }`}
-                    onClick={() => onOpen(blog)}
+                    onClick={handleOpen}
                 >
                     <MessageCircle size={15} />
                     {blog.comments?.count || 0}
@@ -148,9 +180,9 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
                 </button>
             ) : (
                 <button
-                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded disabled:opacity-50"
-                    onClick={() => onReport()}
+                    onClick={handleReport}
                     disabled={alreadyReported}
+                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded disabled:opacity-50"
                     title={
                         alreadyReported
                             ? "You have already reported this blog"
@@ -163,3 +195,5 @@ export default function BlogActions({ blog, onReport, onOpen }: Props) {
         </div>
     );
 }
+
+export default memo(BlogActions);

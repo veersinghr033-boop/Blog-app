@@ -5,11 +5,11 @@ import Button from "antd/es/button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utills/axios";
 import { useAppSelector } from "@/lib/store/hooks";
-import { useState, useMemo, useCallback, memo, useEffect } from "react";
+import { useState, useMemo, useCallback, memo, useEffect, useRef } from "react";
 import AddMember from "./AddMember";
 import useUserStatus from "./useUserStatus";
 import { Ellipsis, Trash2, LogOut, User } from "lucide-react";
-import Upload from "antd/es/upload";
+import ImageUpload from "../ImageUpload";
 interface Participant {
     _id: string;
     userName: string;
@@ -45,6 +45,12 @@ const ViewGroup = memo(({
     const { statuses: userStatuses } = useUserStatus(userId);
     const [groupName, setGroupName] = useState("");
     const [isEditing, setIsEditing] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [groupFile, setGroupFile] = useState<File | null>(null);
+    const [avatarPreview, setAvatarPreview] = useState("");
+    const [removeProfileImage, setRemoveProfileImage] = useState(false);
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const { data: group } = useQuery<GroupData>({
         enabled: !!Groups,
         queryKey: ["group", Groups],
@@ -60,7 +66,28 @@ const ViewGroup = memo(({
             ? group.admin.map((id) => id?.toString())
             : [group.admin.toString()];
     }, [group?.admin]);
+    const handleFileChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const file = e.target.files?.[0];
 
+        if (!file) return;
+
+        setGroupFile(file);
+        setAvatarPreview(URL.createObjectURL(file));
+        setRemoveProfileImage(false);
+
+        setIsModalOpen(false);
+
+    };
+    const handleRemoveProfileImage = () => {
+        setGroupFile(null);
+        setAvatarPreview("");
+        setRemoveProfileImage(true);
+
+        // Close the modal only
+        setIsModalOpen(false);
+    };
     const isCurrentUserAdmin = useMemo(() => adminIds.includes(userId?.toString() || ""), [adminIds, userId]);
 
     const deleteMemberMutation = useMutation({
@@ -196,9 +223,11 @@ const ViewGroup = memo(({
         mutationFn: async ({
             file,
             name,
+            removeImage,
         }: {
             file?: File;
             name?: string;
+            removeImage?: boolean;
         }) => {
             const formData = new FormData();
 
@@ -210,17 +239,15 @@ const ViewGroup = memo(({
                 formData.append("name", name);
             }
 
-            const response = await api.put(
-                `/groups/${Groups}`,
-                formData,
-                {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                }
-            );
+            if (removeImage) {
+                formData.append("removeImage", "true");
+            }
 
-            return response.data;
+            return api.put(`/groups/${Groups}`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
         },
         onMutate: () => {
             updateGroupMutation.isPending = true;
@@ -235,12 +262,15 @@ const ViewGroup = memo(({
                 queryKey: ["group", Groups],
             });
 
-            toast.success("Group updated");
             toast.dismiss();
-            setIsEditing(false);
-            SelectedUser(null);
+            toast.success("Group updated");
 
-        },
+            setAvatarPreview("");
+            setRemoveProfileImage(false);
+
+            setIsEditing(false);
+            setIsModalOpen(false);
+        }
     });
     useEffect(() => {
         if (group?.name) {
@@ -248,147 +278,164 @@ const ViewGroup = memo(({
         }
     }, [group]);
     return (
-        <Modal
-            title="View Group"
-            open={open}
-            onCancel={onClose}
-            footer={null}
-        >
-            <Upload
-                disabled={!isEditing}
-                showUploadList={false}
-                beforeUpload={(file) => {
-                    if (!isEditing) return false;
-
-                    updateGroupMutation.mutate({
-                        file,
-                        name: groupName,
-                    });
-
-                    return false;
-                }}
+        <>
+            <Modal
+                title="View Group"
+                open={open}
+                onCancel={onClose}
+                footer={null}
             >
-                <div className="cursor-pointer">
-                    <img
-                        src={group?.groupImage}
-                        alt="group"
-                        className={`h-16 w-16 rounded-full object-cover ${isEditing
-                                ? "cursor-pointer border-2 border-blue-500"
-                                : ""
-                            }`}
-                    />
-                </div>
-            </Upload>
 
-            <div className="p-2 border-b border-gray-200 dark:border-zinc-800 mt-1 flex justify-between items-center">
-                <div className="flex items-center gap-2 flex-1">
-                    {isEditing ? (
-                        <input
-                            value={groupName}
-                            onChange={(e) => setGroupName(e.target.value)}
-                            className="border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white rounded px-2 py-1 w-full"
+                <div
+                    className="cursor-pointer"
+                    onClick={() => isEditing && setIsModalOpen(true)}
+                >
+                    {(avatarPreview ||
+                        (!removeProfileImage && group?.groupImage)) ? (
+                        <img
+                            src={avatarPreview || group?.groupImage}
+                            alt="group"
+                            className={`h-16 w-16 rounded-full object-cover ${isEditing ? "border-2 border-blue-500" : ""
+                                }`}
                         />
                     ) : (
-                        <h2 className="text-base font-semibold capitalize text-black dark:text-white">
-                            {group?.name}
-                        </h2>
+                        <div className="h-16 w-16 rounded-full bg-gray-700 text-white flex items-center justify-center text-2xl">
+                            {group?.name?.charAt(0).toUpperCase() || "G"}
+                        </div>
                     )}
+                </div>
+         
+                <div className="p-2 border-b border-gray-200 dark:border-zinc-800 mt-1 flex justify-between items-center">
+                    <div className="flex items-center gap-2 flex-1">
+                        {isEditing ? (
+                            <input
+                                value={groupName}
+                                onChange={(e) => setGroupName(e.target.value)}
+                                className="border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white rounded px-2 py-1 w-full"
+                            />
+                        ) : (
+                            <h2 className="text-base font-semibold capitalize text-black dark:text-white">
+                                {group?.name}
+                            </h2>
+                        )}
+
+                        {isCurrentUserAdmin && (
+                            <>
+                                {isEditing ? (
+                                    <Button
+                                        size="small"
+                                        type="primary"
+                                        loading={updateGroupMutation.isPending}
+                                        onClick={() => {
+                                            updateGroupMutation.mutate({
+                                                name: groupName,
+                                                file: groupFile ?? undefined,
+                                                removeImage: removeProfileImage,
+                                            });
+                                        }}
+                                    >
+                                        Update
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        size="small"
+                                        onClick={() => setIsEditing(true)}
+                                    >
+                                        Edit
+                                    </Button>
+                                )}
+                            </>
+                        )}
+                    </div>
 
                     {isCurrentUserAdmin && (
-                        <>
-                            {isEditing ? (
-                                <Button
-                                    size="small"
-                                    type="primary"
-                                    loading={updateGroupMutation.isPending}
-                                    onClick={() => {
-                                        updateGroupMutation.mutate({
-                                            name: groupName,
-                                        });
-                                    }}
-                                >
-                                    Update
-                                </Button>
-                            ) : (
-                                <Button
-                                    size="small"
-                                    onClick={() => setIsEditing(true)}
-                                >
-                                    Edit
-                                </Button>
-                            )}
-                        </>
+                        <Popconfirm
+                            title="Delete the Group"
+                            onConfirm={() => handleGroupDelete(Groups)}
+                        >
+                            <Button
+                                danger
+                                type="text"
+                                icon={<Trash2 size={15} />}
+                            />
+                        </Popconfirm>
                     )}
                 </div>
 
-                {isCurrentUserAdmin && (
+                <h2 className="text-xl font-semibold mt-3 mb-2 text-black dark:text-white">
+                    Members
+                </h2>
+
+                <div className="mt-3 max-h-100 overflow-y-auto">
+                    {group?.chatId?.participants?.map((user) => (
+                        <GroupMember
+                            key={user._id}
+                            user={user}
+                            currentUserId={userId}
+                            status={userStatuses[user._id] || "offline"}
+                            isUserAdmin={isUserAdmin}
+                            isCurrentUserAdmin={isCurrentUserAdmin}
+                            onRemoveAdmin={handleRemoveAdmin}
+                            onChangeAdmin={handleChangeAdmin}
+                            onDeleteMember={handleDelete}
+                            isChangingAdmin={changeAdminMutation.isPending}
+                        />
+                    ))}
+                </div>
+
+                <div className="mt-3 flex justify-between items-center">
                     <Popconfirm
-                        title="Delete the Group"
-                        onConfirm={() => handleGroupDelete(Groups)}
+                        title="Exit the group?"
+                        onConfirm={() => handleDelete(userId)}
                     >
                         <Button
-                            danger
-                            type="text"
-                            icon={<Trash2 size={15} />}
-                        />
+                            type="primary"
+                            className="bg-red-200! text-red-500!"
+                        >
+                            Exit
+                        </Button>
                     </Popconfirm>
-                )}
-            </div>
 
-            <h2 className="text-xl font-semibold mt-3 mb-2 text-black dark:text-white">
-                Members
-            </h2>
+                    {isCurrentUserAdmin && (
+                        <Button
+                            type="primary"
+                            className="bg-blue-200! text-blue-500!"
+                            onClick={() =>
+                                setOpenMember(!openAddMember ? true : false)
+                            }
+                        >
+                            Add Member
+                        </Button>
+                    )}
+                </div>
 
-            <div className="mt-3 max-h-100 overflow-y-auto">
-                {group?.chatId?.participants?.map((user) => (
-                    <GroupMember
-                        key={user._id}
-                        user={user}
-                        currentUserId={userId}
-                        status={userStatuses[user._id] || "offline"}
-                        isUserAdmin={isUserAdmin}
-                        isCurrentUserAdmin={isCurrentUserAdmin}
-                        onRemoveAdmin={handleRemoveAdmin}
-                        onChangeAdmin={handleChangeAdmin}
-                        onDeleteMember={handleDelete}
-                        isChangingAdmin={changeAdminMutation.isPending}
+                {openAddMember && (
+                    <AddMember
+                        group={group}
+                        onClose={() => setOpenMember(false)}
                     />
-                ))}
-            </div>
-
-            <div className="mt-3 flex justify-between items-center">
-                <Popconfirm
-                    title="Exit the group?"
-                    onConfirm={() => handleDelete(userId)}
-                >
-                    <Button
-                        type="primary"
-                        className="bg-red-200! text-red-500!"
-                    >
-                        Exit
-                    </Button>
-                </Popconfirm>
-
-                {isCurrentUserAdmin && (
-                    <Button
-                        type="primary"
-                        className="bg-blue-200! text-blue-500!"
-                        onClick={() =>
-                            setOpenMember(!openAddMember ? true : false)
-                        }
-                    >
-                        Add Member
-                    </Button>
                 )}
-            </div>
+            </Modal>
+            <ImageUpload
+                isModalOpen={isModalOpen}
+                setIsModalOpen={setIsModalOpen}
+                avatarPreview={avatarPreview || group?.groupImage || ""}
+                user={{
+                    profileImage: avatarPreview || group?.groupImage || "",
+                }}
+                fileInputRef={fileInputRef}
+                handleRemoveProfileImage={handleRemoveProfileImage}
+                removeProfileImage={removeProfileImage}
+            />
 
-            {openAddMember && (
-                <AddMember
-                    group={group}
-                    onClose={() => setOpenMember(false)}
-                />
-            )}
-        </Modal>
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={handleFileChange}
+            />
+        </>
     )
 });
 
@@ -432,10 +479,10 @@ const GroupMember = memo(({
 
                     <span
                         className={`absolute bottom-0 right-0 w-3 h-3 rounded-full ${status === "online"
-                                ? "bg-green-500"
-                                : status === "away"
-                                    ? "bg-yellow-400"
-                                    : "bg-red-500"
+                            ? "bg-green-500"
+                            : status === "away"
+                                ? "bg-yellow-400"
+                                : "bg-red-500"
                             }`}
                     />
                 </div>

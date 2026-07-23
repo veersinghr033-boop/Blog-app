@@ -1,11 +1,12 @@
 // "use client";
 
-import { useState } from "react";
+import { useState ,useMemo, memo } from "react";
 import { useRouter } from "next/navigation";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import api from "@/utills/axios";
 import dynamic from "next/dynamic";
+
 
 const CommentList = dynamic(
     () => import("./CommentList"),
@@ -72,11 +73,10 @@ function ReadBlog({ blog }: ReadBlogProps) {
         }
     };
 
-    const comments =
-        data?.pages.flatMap(
-            (page: any) => page.comments
-        ) ?? [];
-
+    const comments = useMemo(
+        () => data?.pages.flatMap(page => page.comments) ?? [],
+        [data]
+    );
     if (!blog) return null;
 
     return (
