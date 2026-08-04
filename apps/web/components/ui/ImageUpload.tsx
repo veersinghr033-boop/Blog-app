@@ -21,7 +21,7 @@ function ImageUpload({
 }: ImageUploadProps) {
     return (
         <Modal
-            title="Update Profile Photo"
+            title="Update Photo"
             open={isModalOpen}
             onCancel={() => setIsModalOpen(false)}
             footer={null}

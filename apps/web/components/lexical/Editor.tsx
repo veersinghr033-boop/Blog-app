@@ -45,7 +45,7 @@ export default function Editor({
     initialContent,
     onChange,
 }: Props) {
-   
+
 
     return (
         <LexicalComposer initialConfig={initialConfig}>
@@ -54,13 +54,13 @@ export default function Editor({
 
                 <div className="p-4 max-h-86 overflow-y-auto bg-white dark:bg-zinc-900">
                     <RichTextPlugin
-                        contentEditable={
-                            <ContentEditable className="outline-none min-h-60 text-black dark:text-white" />
-                        }
                         placeholder={
                             <div className="text-gray-400 dark:text-gray-500">
                                 Write your blog...
                             </div>
+                        }
+                        contentEditable={
+                            <ContentEditable className="outline-none min-h-60 text-black dark:text-white" />
                         }
                         ErrorBoundary={() => null}
                     />

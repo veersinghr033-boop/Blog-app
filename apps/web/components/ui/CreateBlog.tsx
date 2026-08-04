@@ -284,7 +284,7 @@ Topic: ${title}
   };
 
   return (
-    <div className="min-h-screen text-black dark:text-white">
+    <div className="min-h-screen text-black dark:text-white overflow-y-auto">
       <header className="flex flex-col w-full gap-4 border-b border-gray-200 dark:border-zinc-800 pb-4">
         <div>
           <h2 className="text-2xl font-semibold text-black dark:text-white">
