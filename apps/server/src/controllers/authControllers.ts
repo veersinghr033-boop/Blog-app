@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { Request, Response } from "express";
 import User from "../models/UsersModel.js";
-import { getPrimaryRole, normalizeRoles } from "../utils/roles";
+import { getPrimaryRole, normalizeRoles } from "../utils/roles.js";
 
 dotenv.config();
 
