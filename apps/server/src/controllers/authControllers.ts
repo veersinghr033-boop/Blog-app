@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { Request, Response } from "express";
-import User from "../models/UsersModel";
+import User from "../models/UsersModel.js";
 import { getPrimaryRole, normalizeRoles } from "../utils/roles";
 
 dotenv.config();
