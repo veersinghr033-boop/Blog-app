@@ -44,8 +44,11 @@ export default function LoginPage() {
                 if (roles.includes("admin")) {
                     router.push("/admin");
                 } else {
+                    console.log("Before redirect");
+
                     router.push("/user");
-                }
+
+                    console.log("After redirect");                }
             } else {
                 toast.error(resultAction.payload || "Login failed");
             }

@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-export async function proxy(request: NextRequest) {
-
+export async function middleware(request: NextRequest) {
     const token = request.cookies.get("token")?.value;
     const path = request.nextUrl.pathname;
-console.log(token , "kkk" , path)
+
     const isProtected = path.startsWith("/admin") || path.startsWith("/user");
     const isAuthPage = path === "/login" || path === "/signup";
 
@@ -24,7 +23,6 @@ console.log(token , "kkk" , path)
                 : role
                     ? [role]
                     : [];
-
 
             if (path === "/") {
                 if (roles.includes("admin")) {
@@ -55,10 +53,8 @@ console.log(token , "kkk" , path)
             }
         } catch (error) {
             console.error("JWT ERROR:", error);
-
             const response = NextResponse.redirect(new URL("/login", request.url));
             response.cookies.delete("token");
-
             return response;
         }
     }
