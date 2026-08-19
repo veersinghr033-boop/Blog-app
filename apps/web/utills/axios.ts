@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5050/api",
+  baseURL: "https://blog-app-server-drab-chi.vercel.app/api",
   withCredentials: true,
 });
 
