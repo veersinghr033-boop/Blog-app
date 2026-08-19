@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import { connectDB } from "./src/config/db.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import blogRoutes from "./src/routes/blogRoutes.js";
-import likeRoutes from "./src/routes/likeRoute";
+import likeRoutes from "./src/routes/likeRoute.js";
 import commentRoutes from "./src/routes/commentRoutes";
 import openAiRoute from "./src/routes/openAiRoute";
 import blogSaveRoute from "./src/routes/BlogSaveRoute";
