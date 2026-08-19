@@ -30,7 +30,7 @@ const buildRoomName = (...parts: Array<unknown>) => {
 export const initSocket = (server: any) => {
   const io = new Server(server, {
     cors: {
-      origin: "http://localhost:3000",
+      origin: "*",
       credentials: true,
     },
   });
