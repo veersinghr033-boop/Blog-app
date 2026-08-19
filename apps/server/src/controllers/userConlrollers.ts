@@ -28,6 +28,7 @@ export const getAllUsersData = async (req: Request, res: Response) => {
 export const getAllUsers = async (req: Request, res: Response) => {
     const userId = (req as Request & { user?: { id: string } }).user?.id;
     const before = req.query.before as string | undefined;
+    const search = (req.query.search as string) || undefined;
     const limit = 6;
 
     try {
@@ -35,6 +36,12 @@ export const getAllUsers = async (req: Request, res: Response) => {
             _id: { $ne: userId },
         };
 
+        if (search) {
+            query.$or = [
+                { userName: { $regex: search, $options: "i" } },
+                { email: { $regex: search, $options: "i" } },
+            ];
+        }
         if (before) {
             query.createdAt = {
                 $lt: new Date(before),
@@ -205,7 +212,8 @@ export async function emitSortedUsers(
     io: any,
     currentUserId?: string,
     page = 1,
-    limit = 10
+    limit = 10,
+    search?: string,
 ) {
     if (!currentUserId) {
         return [];
@@ -305,6 +313,15 @@ export async function emitSortedUsers(
         }));
 
     result.push(...remainingUsers);
+
+    // If a search term is provided, filter results by name (users/groups)
+    if (search) {
+        const s = search.toLowerCase();
+        result = result.filter((item: any) => {
+            return item.name && item.name.toLowerCase().includes(s);
+        });
+        // console.log("Filtered result based on search:", result);
+    }
 
     result.sort((a, b) => {
         const aTime = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;

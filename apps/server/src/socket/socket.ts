@@ -16,6 +16,7 @@ interface GetUsersPayload {
   page?: number;
   limit?: number;
   userId?: string;
+  search?: string;
 }
 
 const buildRoomName = (...parts: Array<unknown>) => {
@@ -90,12 +91,14 @@ export const initSocket = (server: any) => {
         page = 1,
         limit = 10,
         userId,
+        search,
       }: GetUsersPayload) => {
         await emitSortedUsers(
           io,
           userId,
           page,
-          limit
+          limit,
+          search,
         );
       }
     );

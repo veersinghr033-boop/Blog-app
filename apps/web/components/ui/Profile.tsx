@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react"; 
-import dynamic from "next/dynamic";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { changePassword, updateProfile } from "@/lib/store/features/authThunk";
 
-import type { UploadProps } from "antd/es/upload/interface";
 import { toast } from "sonner";
 import ImageUpload from "./ImageUpload";
 

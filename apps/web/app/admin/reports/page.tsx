@@ -7,6 +7,7 @@ import api from "@/utills/axios";
 export default function Page() {
     const {
         data,
+        isLoading,
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
@@ -27,6 +28,10 @@ export default function Page() {
     });
     const reports =
         data?.pages.flatMap((page) => page.reports) ?? [];
+
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <ReportCard

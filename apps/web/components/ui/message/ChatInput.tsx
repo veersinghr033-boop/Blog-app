@@ -65,11 +65,7 @@ export default function ChatInput({
         if (!hasContent(messageText)) return;
 
         if (!socketRef.current || !selectedUser || !userId) return;
-        // console.log("messageText:", messageText);
-        // console.log(messageText);
-     
 
-        // console.log("Sending:", messageText);
 
         if (selectedUser.type === "group") {
             sendMutation.mutate({

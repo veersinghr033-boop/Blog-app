@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 const Table = dynamic(
   () => import("antd/es/table/Table"),
   { ssr: false }
-); 
+);
 import Popconfirm from "antd/es/popconfirm";
 import { toast } from "sonner";
 
@@ -15,7 +15,7 @@ import {
   useInfiniteQuery,
 } from "@tanstack/react-query";
 import api from "@/utills/axios";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface UserType {
   _id: string;
@@ -35,14 +35,20 @@ interface UserType {
 function Users() {
   const [searchText, setSearchText] = useState("");
   const queryClient = useQueryClient();
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchText), 300);
+    return () => clearTimeout(t);
+  }, [searchText]);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ["users"],
+      queryKey: ["users", debouncedSearch],
       queryFn: async ({ pageParam = null }) => {
         const res = await api.get("/users", {
           params: {
             before: pageParam,
+            search: debouncedSearch || undefined,
           },
         });
 
@@ -57,17 +63,7 @@ function Users() {
   const users = useMemo(() => {
     return data?.pages.flatMap((page) => page.users) ?? [];
   }, [data]);
-  const filteredUsers = useMemo(() => {
-    return users.filter((user) => {
-      const name = user.userName?.toLowerCase() || "";
-      const email = user.email?.toLowerCase() || "";
-
-      return (
-        name.includes(searchText.toLowerCase()) ||
-        email.includes(searchText.toLowerCase())
-      );
-    });
-  }, [users, searchText]);
+  // Backend search is used (debounced); render `users` directly
   const joinAt = (user: UserType) => {
     const date = new Date(user.createdAt);
     return date.toLocaleDateString();
@@ -117,7 +113,7 @@ function Users() {
       <Table
         className="p-2"
         loading={isLoading}
-        dataSource={filteredUsers}
+        dataSource={users}
         rowKey="_id"
         scroll={{ x: 800 }}
         pagination={{

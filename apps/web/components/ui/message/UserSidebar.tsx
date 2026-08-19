@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Virtuoso } from "react-virtuoso"; 
+import { Virtuoso } from "react-virtuoso";
 import { useAppSelector } from "@/lib/store/hooks";
 import AddGroup from "./addGroup";
 import Image from "next/image";
@@ -21,9 +21,10 @@ export default function UserSidebar({
   mobile = false,
 }: any) {
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const socketRef = useRef<any>(null);
   const [loadingMore, setLoadingMore] = useState(false);
-    const [openAddGroup, setOpenAddGroup] = useState(false);
+  const [openAddGroup, setOpenAddGroup] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] =
@@ -37,7 +38,10 @@ export default function UserSidebar({
     setHydrated(true);
   }, []);
   const userId = useAppSelector((state) => state.auth.user?._id);
-
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
 
   useEffect(() => {
     if (!userId) return;
@@ -55,12 +59,17 @@ export default function UserSidebar({
         userId,
         page: 1,
         limit: 10,
+        search: debouncedSearch || undefined,
       });
+      setPage(1);
     };
 
     const handleSortedUsers = (data: any) => {
       setLoadingMore(false);
       setHasMore(data.hasMore);
+
+      // keep track of current page returned by server
+      setPage(data.page || 1);
 
       if (data.page === 1) {
         setSortedUsers(data.users);
@@ -94,11 +103,25 @@ export default function UserSidebar({
       socket.off("connect_error", handleError);
     };
   }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+    setPage(1);
+    setLoadingMore(true);
+    socketRef.current?.emit("getUsers", {
+      userId,
+      page: 1,
+      limit: 10,
+      search: debouncedSearch || undefined,
+    });
+  }, [debouncedSearch, userId]);
   const filteredUsers = sortedUsers
     .filter((user) => user.name.toLowerCase().includes(search.toLowerCase()))
     .map((user) => ({
       ...user,
     }));
+
+    // console.log(filteredUsers)
 
   return (
     <div
@@ -143,6 +166,7 @@ export default function UserSidebar({
               userId,
               page: page + 1,
               limit: 10,
+              search: debouncedSearch || undefined,
             });
           }}
           itemContent={(index, item: any) => {
@@ -161,8 +185,8 @@ export default function UserSidebar({
                 key={chatKey}
                 onClick={() => setSelectedUser(item)}
                 className={`w-full px-4 py-4 flex items-center gap-3 border-y border-gray-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 ${isSelected
-                    ? "bg-slate-100 dark:bg-zinc-800"
-                    : ""
+                  ? "bg-slate-100 dark:bg-zinc-800"
+                  : ""
                   }`}
               >
                 <div className="relative">
@@ -191,10 +215,10 @@ export default function UserSidebar({
                   {!isGroup && (
                     <span
                       className={`absolute bottom-0 right-0 w-3 h-3 rounded-full ${status === "online"
-                          ? "bg-green-500"
-                          : status === "away"
-                            ? "bg-yellow-400"
-                            : "bg-red-500"
+                        ? "bg-green-500"
+                        : status === "away"
+                          ? "bg-yellow-400"
+                          : "bg-red-500"
                         }`}
                     />
                   )}

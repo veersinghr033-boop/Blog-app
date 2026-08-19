@@ -168,34 +168,7 @@ function AddGroup({
 
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4 flex gap-4 items-center">
-                        {/* <Upload
-                            listType="picture-circle"
-                            maxCount={1}
-                            showUploadList={false}
-                            beforeUpload={(file) => {
-                                setGroupImage(file);
-                                setPreview(URL.createObjectURL(file));
-                                return false;
-                            }}
-                            style={{ width: 80, height: 80 }}
-                        >
-                            {preview ? (
-                                <Image
-                                    src={preview}
-                                    alt="group"
-                                    width={100}
-                                    height={100}
-                                    className="rounded-full object-cover"
-                                />
-                            ) : (
-                                <div className="text-black dark:text-white">
-                                    <PlusOutlined />
-                                    <div style={{ marginTop: 5 }}>
-                                        Upload
-                                    </div>
-                                </div>
-                            )}
-                        </Upload> */}
+                   
                         <div
                             className="w-20 h-20 rounded-full border border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800cursor-pointer overflow-hidden flex items-center justify-center"
                             onClick={() => setIsModalOpen(true)}

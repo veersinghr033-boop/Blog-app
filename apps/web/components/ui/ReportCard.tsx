@@ -127,7 +127,6 @@ function ReportCard({ data, hasNextPage, isFetchingNextPage, fetchNextPage }: Re
                             ),
                         }}
                         itemContent={(_, report) => {
-                            // const showReadMore = report.blogDetails?.content?.length > 150;
                             const textContent = getTextFromLexical(report.blogDetails?.content);
                             const showReadMore = textContent.length > 150;
                             return (

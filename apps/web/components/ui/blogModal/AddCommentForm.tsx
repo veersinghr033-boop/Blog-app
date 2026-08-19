@@ -20,7 +20,6 @@ export default function AddCommentForm({ blogId }: { blogId: string }) {
             queryClient.invalidateQueries({
                 queryKey: ["comments", blogId],
             });
-            // Invalidate the specific blog query to update comment counts
             queryClient.invalidateQueries({
                 queryKey: ["blog", blogId],
             });

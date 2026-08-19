@@ -55,22 +55,26 @@ function page() {
     const date = new Date(user.createdAt);
     return date.toLocaleDateString();
   }
+  
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
   const cardData = [
     {
       title: "Total Blogs",
-      value: blogs.totalBlogs,
+      value: blogs?.totalBlogs,
       desc: "Published",
       bg: "bg-blue-100  dark:bg-blue-950",
     },
     {
       title: "Total Views",
-      value: blogs.totalViews,
+      value: blogs?.totalViews,
       desc: "All time",
       bg: "bg-green-100 dark:bg-green-950",
     },
     {
       title: "Engagement",
-      value: blogs.totalComments + blogs.totalLikes,
+      value: blogs?.totalComments + blogs?.totalLikes,
       desc: "Likes and comments",
       bg: "bg-yellow-100 dark:bg-yellow-950",
     },

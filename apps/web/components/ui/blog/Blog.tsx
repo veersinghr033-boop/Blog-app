@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { Virtuoso } from "react-virtuoso";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import api from "@/utills/axios";
@@ -14,7 +14,13 @@ interface BlogProps {
 
 function Blog({ type, userId, role }: BlogProps) {
   const [searchText, setSearchText] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchText), 300);
+    return () => clearTimeout(t);
+  }, [searchText]);
 
   const {
     data,
@@ -24,8 +30,8 @@ function Blog({ type, userId, role }: BlogProps) {
   } = useInfiniteQuery({
     queryKey:
       type === "admin"
-        ? ["blogs"]
-        : ["blogData", userId],
+        ? ["blogs", debouncedSearch]
+        : ["blogData", userId, debouncedSearch],
 
     queryFn: async ({ pageParam }) => {
       const endpoint =
@@ -36,6 +42,7 @@ function Blog({ type, userId, role }: BlogProps) {
       const res = await api.get(endpoint, {
         params: {
           before: pageParam || undefined,
+          search: debouncedSearch || undefined,
         },
       });
 
@@ -70,17 +77,8 @@ function Blog({ type, userId, role }: BlogProps) {
     );
   }, [data, type]);
 
-  const filteredBlogs = useMemo(
-    () =>
-      searchText
-        ? blogs.filter((blog: any) => {
-          const search = searchText.toLowerCase();
-          return (blog.title?.toLowerCase() || "").includes(search);
-        })
-        : blogs,
-    [blogs, searchText]
-  );
-  
+  // Search is performed on the backend; use returned `blogs` directly
+
   return (
     <div className="flex flex-col gap-4 pt-4">
       <div>
@@ -92,7 +90,7 @@ function Blog({ type, userId, role }: BlogProps) {
         />
       </div>
 
-      {!filteredBlogs.length ? (
+      {!blogs.length ? (
         <div className="text-center py-4">
           <p className="text-gray-500 dark:text-gray-400">
             No blogs found
@@ -104,7 +102,7 @@ function Blog({ type, userId, role }: BlogProps) {
             style={{
               height: type === "admin" ? "70vh" : "60vh",
             }}
-            data={filteredBlogs}
+            data={blogs}
             endReached={() => {
               if (
                 hasNextPage &&

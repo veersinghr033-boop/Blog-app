@@ -45,7 +45,7 @@ export const getDataUserBlogs = async (req: Request, res: Response) => {
     const userId = (req as Request & { user?: { id: string } }).user?.id;
 
     const blogs = await Blog.find({ author: userId }).populate("author", "userName");
-    console.log(blogs , userId)
+    console.log(blogs, userId)
     const totalBlogs = blogs.length;
     const totalLikes = blogs.reduce(
       (sum, blog) => sum + (blog.Likes?.length || 0),
@@ -82,10 +82,16 @@ export const getAllBlogs = async (req: Request, res: Response) => {
     const userId = (req as Request & { user?: { id: string } }).user?.id;
 
     const before = req.query.before as string | undefined;
+    const search = (req.query.search as string) || undefined;
     const limit = 6;
     console.time("total");
 
     const query: any = {};
+
+    if (search) {
+      // search by title (case-insensitive)
+      query.title = { $regex: search, $options: "i" };
+    }
 
     if (before) {
       query.createdAt = {
@@ -201,12 +207,17 @@ export const getBlogById = async (req: Request, res: Response) => {
     const userId = (req as Request & { user?: { id: string } }).user?.id;
 
     const before = req.query.before as string | undefined;
+    const search = (req.query.search as string) || undefined;
     const limit = 5;
     console.log("before:", before);
     console.log("limit:", limit);
     const query: any = {
       author: id,
     };
+
+    if (search) {
+      query.title = { $regex: search, $options: "i" };
+    }
 
     if (before) {
       query.createdAt = {

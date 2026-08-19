@@ -85,7 +85,7 @@ const ViewGroup = memo(({
         setAvatarPreview("");
         setRemoveProfileImage(true);
 
-        // Close the modal only
+       
         setIsModalOpen(false);
     };
     const isCurrentUserAdmin = useMemo(() => adminIds.includes(userId?.toString() || ""), [adminIds, userId]);

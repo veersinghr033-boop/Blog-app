@@ -13,14 +13,12 @@ interface NavbarProps {
 }
 
 function Navbar({ onMenuClick }: NavbarProps) {
-    const userName = useAppSelector(
-        (state) => state.auth.user?.userName || "User"
-    )
 
     const user = useAppSelector((state) => state.auth.user);
 
     const roles = user?.roles ?? [];
     const avatar = user?.profileImage || "";
+    const userName = user?.userName || "User";
 
     const [mounted, setMounted] = useState(false)
 
