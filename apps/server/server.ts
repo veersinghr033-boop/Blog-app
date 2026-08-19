@@ -2,7 +2,7 @@ import express from "express";
 import compression from "compression";
 import cors from "cors";
 import dotenv from "dotenv";
-import { connectDB } from "./src/config/db";
+import { connectDB } from "./src/config/db.js";
 import authRoutes from "./src/routes/authRoutes";
 import blogRoutes from "./src/routes/blogRoutes";
 import likeRoutes from "./src/routes/likeRoute";
