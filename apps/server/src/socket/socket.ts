@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { emitSortedUsers } from "../controllers/userConlrollers";
+import { emitSortedUsers } from "../controllers/userConlrollers.js";
 import User from "../models/UsersModel.js";
 import Chat from "../models/chatModel.js";
 import Group from "../models/GroupModel.js";
