@@ -40,7 +40,7 @@ export default function LoginPage() {
                 const roles = resultAction.payload.user?.roles || [
                     resultAction.payload.user?.role,
                 ];
-
+                console.log(roles)
                 if (roles.includes("admin")) {
                     router.push("/admin");
                 } else {
