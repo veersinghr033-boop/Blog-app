@@ -1,5 +1,5 @@
-import Comment from "../models/CommentModel";
-import Blog from "../models/BlogModel";
+import Comment from "../models/CommentModel.js";
+import Blog from "../models/BlogModel.js";
 import mongoose from "mongoose";
 import { Request, Response } from "express";
 

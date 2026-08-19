@@ -9,9 +9,9 @@ import {
   findtrendingBlogs,
   getAllBlogsData,
   getDataUserBlogs
-} from "../controllers/blogControllers";
-import { upload } from "../middleware/multer";
-import { verifyToken, authorizeRoles } from "../middleware/authMiddleware";
+} from "../controllers/blogControllers.js";
+import { upload } from "../middleware/multer.js";
+import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = e.Router();
 

@@ -1,5 +1,5 @@
-import View from "../models/viewModel";
-import Blog from "../models/BlogModel";
+import View from "../models/viewModel.js";
+import Blog from "../models/BlogModel.js";
 import { Request, Response } from "express";
 
 

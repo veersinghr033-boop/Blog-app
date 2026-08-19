@@ -1,4 +1,4 @@
-import groq from "../config/openai";
+import groq from "../config/openai.js";
 import { Request, Response } from "express";
 
 

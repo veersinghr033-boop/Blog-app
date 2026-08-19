@@ -4,8 +4,8 @@ import {
   getMessages,
   getGroupMessages,
   deleteMessage,
-} from "../controllers/chatControllers";
-import { verifyToken, authorizeRoles } from "../middleware/authMiddleware";
+} from "../controllers/chatControllers.js";
+import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = e.Router();
 

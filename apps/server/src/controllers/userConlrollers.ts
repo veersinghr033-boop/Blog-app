@@ -1,11 +1,11 @@
 import bcrypt from "bcrypt";
-import User from "../models/UsersModel";
-import Chat from "../models/chatModel";
-import Group from "../models/GroupModel";
-import Message from "../models/message";
-import Blog from "../models/BlogModel";
+import User from "../models/UsersModel.js";
+import Chat from "../models/chatModel.js";
+import Group from "../models/GroupModel.js";
+import Message from "../models/message.js";
+import Blog from "../models/BlogModel.js";
 import { Request, Response } from "express";
-import { uploadImage } from "../utils/uploadImage";
+import { uploadImage } from "../utils/uploadImage.js";
 export const getAllUsersData = async (req: Request, res: Response) => {
     try {
         const userId = (req as Request & { user?: { id: string } }).user?.id;

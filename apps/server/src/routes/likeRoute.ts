@@ -1,8 +1,8 @@
 import e from "express";
 
-import { likeBlog } from "../controllers/likeControllers";
+import { likeBlog } from "../controllers/likeControllers.js";
 
-import { verifyToken } from "../middleware/authMiddleware";
+import { verifyToken } from "../middleware/authMiddleware.js";
 
 const router = e.Router();
 

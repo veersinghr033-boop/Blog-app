@@ -1,4 +1,4 @@
-import Report from "../models/ReportModel";
+import Report from "../models/ReportModel.js";
 import { Request, Response } from "express";
 
 interface Reports {

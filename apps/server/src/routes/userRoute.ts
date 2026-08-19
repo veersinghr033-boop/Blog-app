@@ -9,9 +9,9 @@ import {
   changeUserPassword,
   getAllUsersData,
   getUserDetails
-} from "../controllers/userConlrollers";
-import { verifyToken, authorizeRoles } from "../middleware/authMiddleware";
-import { upload } from "../middleware/multer";
+} from "../controllers/userConlrollers.js";
+import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
+import { upload } from "../middleware/multer.js";
 
 const router = e.Router();
 

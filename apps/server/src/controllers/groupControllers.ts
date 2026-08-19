@@ -1,9 +1,9 @@
-import Group from "../models/GroupModel";
-import Chat from "../models/chatModel";
-import Message from "../models/message";
+import Group from "../models/GroupModel.js";
+import Chat from "../models/chatModel.js";
+import Message from "../models/message.js";
 import { Request, Response } from "express";
-import { uploadImage } from "../utils/uploadImage";
-import { emitSortedUsers } from "./userConlrollers";
+import { uploadImage } from "../utils/uploadImage.js";
+import { emitSortedUsers } from "./userConlrollers.js";
 export const createGroup = async (req: Request, res: Response) => {
     try {
         const userId = (req as Request & {

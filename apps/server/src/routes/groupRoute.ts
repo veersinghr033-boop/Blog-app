@@ -9,9 +9,9 @@ import {
     removeAdmin,
     // ,updateGroupImage
     updateGroup
-} from "../controllers/groupControllers";
-import { verifyToken } from "../middleware/authMiddleware";
-import { upload } from "../middleware/multer"; 
+} from "../controllers/groupControllers.js";
+import { verifyToken } from "../middleware/authMiddleware.js";
+import { upload } from "../middleware/multer.js"; 
 
 const router = e.Router();
 router.post("/create", upload.single("groupImage"), verifyToken, createGroup);

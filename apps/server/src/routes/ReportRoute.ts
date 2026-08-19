@@ -5,8 +5,8 @@ import {
     getReportById,
     deleteReport,
     getByUserId
-} from "../controllers/ReportControllers";
-import { verifyToken, authorizeRoles } from "../middleware/authMiddleware";
+} from "../controllers/ReportControllers.js";
+import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = e.Router();
 

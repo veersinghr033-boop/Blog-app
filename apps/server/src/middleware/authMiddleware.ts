@@ -1,6 +1,6 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import { normalizeRoles } from "../utils/roles";
+import { normalizeRoles } from "../utils/roles.js";
 
 declare global {
   namespace Express {

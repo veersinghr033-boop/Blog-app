@@ -1,5 +1,5 @@
-import Reply from "../models/replyModel";
-import Comment from "../models/CommentModel";
+import Reply from "../models/replyModel.js";
+import Comment from "../models/CommentModel.js";
 import { Request, Response } from "express";
 
 export const createReply = async (req: Request, res: Response) => {

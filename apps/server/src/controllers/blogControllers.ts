@@ -1,11 +1,11 @@
-import Blog from "../models/BlogModel";
-import Like from "../models/LikeModel";
-import Comment from "../models/CommentModel";
-import Report from "../models/ReportModel";
-import View from "../models/viewModel";
+import Blog from "../models/BlogModel.js";
+import Like from "../models/LikeModel.js";
+import Comment from "../models/CommentModel.js";
+import Report from "../models/ReportModel.js";
+import View from "../models/viewModel.js";
 import mongoose from "mongoose";
 import { Request, Response } from "express";
-import { uploadImage } from "../utils/uploadImage";
+import { uploadImage } from "../utils/uploadImage.js";
 
 export const getAllBlogsData = async (req: Request, res: Response) => {
   try {

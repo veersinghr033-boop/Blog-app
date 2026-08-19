@@ -1,6 +1,6 @@
 import e from "express";
-import { verifyToken } from "../middleware/authMiddleware"
-import { addView } from "../controllers/ViewControllers";
+import { verifyToken } from "../middleware/authMiddleware.js"
+import { addView } from "../controllers/ViewControllers.js";
 
 const router = e.Router();
 
