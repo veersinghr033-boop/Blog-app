@@ -30,7 +30,10 @@ const buildRoomName = (...parts: Array<unknown>) => {
 export const initSocket = (server: any) => {
   const io = new Server(server, {
     cors: {
-      origin: "*",
+      origin: [
+        "http://localhost:3000",
+        "https://blog-app-web-psi-five.vercel.app",
+      ],
       credentials: true,
     },
   });

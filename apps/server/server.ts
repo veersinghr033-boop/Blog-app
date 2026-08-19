@@ -36,7 +36,10 @@ app.use(compression());
 app.use(apiLimiter);
 app.use(
     cors({
-        origin: "*",
+        origin: [
+            "http://localhost:3000",
+            "https://blog-app-web-psi-five.vercel.app",
+        ],
         credentials: true,
     }),
 );
