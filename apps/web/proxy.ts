@@ -86,7 +86,7 @@ export async function proxy(request: NextRequest) {
                 },
             }
         );
-
+console.log(response)
         if (!response.ok) {
             if (path.startsWith("/admin") || path.startsWith("/user")) {
                 return NextResponse.redirect(
