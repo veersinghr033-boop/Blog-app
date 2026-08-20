@@ -5,10 +5,12 @@ export async function proxy(request: NextRequest) {
 
     const token = request.cookies.get("token")?.value;
     const path = request.nextUrl.pathname;
-console.log(token , "kkk" , path)
+    console.log(token, "kkk", path)
     const isProtected = path.startsWith("/admin") || path.startsWith("/user");
     const isAuthPage = path === "/login" || path === "/signup";
-
+    if (path === "/") {
+        return NextResponse.redirect(new URL("/login", request.url));
+    }
     if (!token && isProtected) {
         return NextResponse.redirect(new URL("/login", request.url));
     }
@@ -34,7 +36,7 @@ console.log(token , "kkk" , path)
                 if (roles.includes("user")) {
                     return NextResponse.redirect(new URL("/user", request.url));
                 }
-                else{
+                else {
                     return NextResponse.redirect(new URL("/login", request.url));
                 }
             }
