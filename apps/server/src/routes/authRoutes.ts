@@ -8,4 +8,9 @@ const router = e.Router();
 router.post("/register", authLimiter, registerUser);
 router.post("/login", authLimiter, loginUser);
 router.post("/logout", verifyToken, logoutUser);
+router.get("/auth/me", verifyToken, (req, res) => {
+    res.json({
+        user: req.user,
+    });
+});
 export default router;
