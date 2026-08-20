@@ -34,6 +34,9 @@ console.log(token , "kkk" , path)
                 if (roles.includes("user")) {
                     return NextResponse.redirect(new URL("/user", request.url));
                 }
+                else{
+                    return NextResponse.redirect(new URL("/login", request.url));
+                }
             }
 
             if (isAuthPage) {
