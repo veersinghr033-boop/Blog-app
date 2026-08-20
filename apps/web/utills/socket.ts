@@ -5,7 +5,7 @@ let socket: Socket;
 
 export const getSocket = () => {
   if (!socket) {
-    socket = io("http://localhost:5050", {
+    socket = io("https://blog-app-server-virid.vercel.app", {
       transports: ["websocket"],
       autoConnect: true,
     });
