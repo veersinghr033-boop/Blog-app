@@ -48,13 +48,11 @@ export const registerUser = async (
         expiresIn: "1d",
       },
     );
-
-    const isProduction = process.env.NODE_ENV === "production";
-
+ const isProduction = process.env.NODE_ENV === "production";
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -120,12 +118,10 @@ export const loginUser = async (
       },
     );
 
-    const isProduction = process.env.NODE_ENV === "production";
-
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -158,11 +154,9 @@ export const logoutUser = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const isProduction = process.env.NODE_ENV === "production";
-
     res.clearCookie("token", {
       httpOnly: true,
-      secure: isProduction,
+      secure: false,
       sameSite: "lax",
     });
 
