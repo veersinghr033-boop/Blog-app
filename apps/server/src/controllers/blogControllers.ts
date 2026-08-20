@@ -109,7 +109,6 @@ export const getAllBlogs = async (req: Request, res: Response) => {
       .populate("Comments", "user")
       .populate("views");
 
-    console.timeEnd("db");
 
     const hasMore = blogs.length > limit;
 
@@ -143,9 +142,9 @@ export const getAllBlogs = async (req: Request, res: Response) => {
         image: blog.image,
         preview,
         author: {
-          id: (blog.author as any)._id,
-          userName: (blog.author as any).userName,
-          profileImage: (blog.author as any).profileImage,
+          id: (blog.author as any)?._id,
+          userName: (blog.author as any)?.userName,
+          profileImage: (blog.author as any)?.profileImage,
         },
         likes: {
           count: blog.Likes?.length || 0,

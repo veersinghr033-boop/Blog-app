@@ -13,6 +13,8 @@ export const generateBlog = async (req: Request, res: Response) => {
       });
     }
 
+    const models = await groq.models.list();
+    console.log(models)
     const completion = await groq.chat.completions.create({
       messages: [
         {
@@ -24,10 +26,9 @@ export const generateBlog = async (req: Request, res: Response) => {
           content: prompt,
         },
       ],
-
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-20b",
     });
-
+    console.log("this new", completion)
     return res.status(200).json({
       success: true,
       content: completion.choices[0].message.content,
