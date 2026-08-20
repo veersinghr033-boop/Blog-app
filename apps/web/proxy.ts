@@ -11,9 +11,9 @@ export async function proxy(request: NextRequest) {
     if (path === "/") {
         return NextResponse.redirect(new URL("/login", request.url));
     }
-    if (!token && isProtected) {
-        return NextResponse.redirect(new URL("/login", request.url));
-    }
+    // if (!token && isProtected) {
+    //     return NextResponse.redirect(new URL("/login", request.url));
+    // }
 
     if (token) {
         try {
